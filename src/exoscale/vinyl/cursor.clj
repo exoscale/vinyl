@@ -1,0 +1,76 @@
+(ns exoscale.vinyl.cursor
+  "Utilities to work with `RecordCursor`"
+  (:require [exoscale.vinyl.fn          :as fn])
+  (:import com.apple.foundationdb.async.AsyncUtil
+           com.apple.foundationdb.record.RecordCursor
+           com.apple.foundationdb.record.RecordCursorResult
+           java.util.concurrent.CompletableFuture
+           java.util.function.Supplier))
+
+(defprotocol CursorHolder
+  (as-list     [this] "Transform a cursor or cursor future to a list")
+  (as-iterator [this] "Transform a cursor or cursor future to an iterator"))
+
+(defn apply-reduce
+  "A variant of `RecordCursor::reduce` that honors `reduced?`.
+   Hopefully https://github.com/FoundationDB/fdb-record-layer/pull/1272
+   gets in which will provide a way to do this directly from record layer."
+  [^RecordCursor cursor f init]
+  (let [acc (atom (or init (f)))]
+    (.thenApply
+     (AsyncUtil/whileTrue
+      (reify Supplier
+        (get [_]
+          (-> cursor
+              .onNext
+              (.thenApply
+               (fn/make-fun
+                (fn [^RecordCursorResult result]
+                  (let [next?   (.hasNext result)
+                        new-acc (when next? (swap! acc f (.get result)))]
+                    (and (not (reduced? new-acc)) next?))))))))
+      (.getExecutor cursor))
+     (fn/make-fun (fn [_] (unreduced @acc))))))
+
+(defn apply-transforms
+  "Apply transformations to a record cursor."
+  [^RecordCursor cursor
+   {:exoscale.vinyl.store/keys [list? skip limit transform reduce-init
+                                reducer filter foreach iterator?]}]
+  (let [list?     (if reducer false list?)
+        iterator? (if reducer false iterator?)
+        foreach!  (fn [^RecordCursor c] (.forEach c (fn/make-fun foreach)))]
+    (cond-> cursor
+      (some? filter)
+      (.filter (fn/make-fun filter))
+      (some? skip)
+      (.skip (int skip))
+      (some? limit)
+      (.limitRowsTo (int limit))
+      (some? transform)
+      (.map (fn/make-fun transform))
+      (some? reducer)
+      (apply-reduce reducer reduce-init)
+      (some? foreach)
+      (foreach!)
+      (true? list?)
+      (as-list)
+      (true? iterator?)
+      (as-iterator))))
+
+(deftype ReducibleCursor [cursor]
+  clojure.lang.IReduceInit
+  (reduce [_ f init]
+    @(apply-reduce cursor f init)))
+
+(defn reducible
+  [cursor]
+  (ReducibleCursor. cursor))
+
+(extend-protocol CursorHolder
+  RecordCursor
+  (as-list [this] (.asList this))
+  (as-iterator [this] (.asIterator this))
+  CompletableFuture
+  (as-list [this] (.thenCompose this (fn/make-fun as-list)))
+  (as-iterator [this] (.thenCompose this (fn/make-fun as-iterator))))
