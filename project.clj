@@ -1,4 +1,4 @@
-(defproject com.exoscale/vinyl "0.1.0-SNAPSHOT"
+(defproject com.exoscale/vinyl "0.1.0"
   :description "Clojure facade for the FoundationDB record-layer"
   :url "https://github.com/exoscale/vinyl"
   :license {:name "MIT/ISC"}
