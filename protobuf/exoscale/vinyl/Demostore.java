@@ -3308,6 +3308,795 @@ public final class Demostore {
 
   }
 
+  public interface ObjectOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:exoscale.vinyl.Object)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string bucket = 1;</code>
+     * @return The bucket.
+     */
+    java.lang.String getBucket();
+    /**
+     * <code>string bucket = 1;</code>
+     * @return The bytes for bucket.
+     */
+    com.google.protobuf.ByteString
+        getBucketBytes();
+
+    /**
+     * <code>string path = 2;</code>
+     * @return The path.
+     */
+    java.lang.String getPath();
+    /**
+     * <code>string path = 2;</code>
+     * @return The bytes for path.
+     */
+    com.google.protobuf.ByteString
+        getPathBytes();
+
+    /**
+     * <code>int64 size = 3;</code>
+     * @return The size.
+     */
+    long getSize();
+  }
+  /**
+   * Protobuf type {@code exoscale.vinyl.Object}
+   */
+  public static final class Object extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:exoscale.vinyl.Object)
+      ObjectOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use Object.newBuilder() to construct.
+    private Object(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private Object() {
+      bucket_ = "";
+      path_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new Object();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private Object(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              bucket_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              path_ = s;
+              break;
+            }
+            case 24: {
+
+              size_ = input.readInt64();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_Object_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_Object_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              exoscale.vinyl.Demostore.Object.class, exoscale.vinyl.Demostore.Object.Builder.class);
+    }
+
+    public static final int BUCKET_FIELD_NUMBER = 1;
+    private volatile java.lang.Object bucket_;
+    /**
+     * <code>string bucket = 1;</code>
+     * @return The bucket.
+     */
+    @java.lang.Override
+    public java.lang.String getBucket() {
+      java.lang.Object ref = bucket_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        bucket_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string bucket = 1;</code>
+     * @return The bytes for bucket.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getBucketBytes() {
+      java.lang.Object ref = bucket_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        bucket_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PATH_FIELD_NUMBER = 2;
+    private volatile java.lang.Object path_;
+    /**
+     * <code>string path = 2;</code>
+     * @return The path.
+     */
+    @java.lang.Override
+    public java.lang.String getPath() {
+      java.lang.Object ref = path_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        path_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string path = 2;</code>
+     * @return The bytes for path.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPathBytes() {
+      java.lang.Object ref = path_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        path_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int SIZE_FIELD_NUMBER = 3;
+    private long size_;
+    /**
+     * <code>int64 size = 3;</code>
+     * @return The size.
+     */
+    @java.lang.Override
+    public long getSize() {
+      return size_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getBucketBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, bucket_);
+      }
+      if (!getPathBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, path_);
+      }
+      if (size_ != 0L) {
+        output.writeInt64(3, size_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getBucketBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, bucket_);
+      }
+      if (!getPathBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, path_);
+      }
+      if (size_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, size_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof exoscale.vinyl.Demostore.Object)) {
+        return super.equals(obj);
+      }
+      exoscale.vinyl.Demostore.Object other = (exoscale.vinyl.Demostore.Object) obj;
+
+      if (!getBucket()
+          .equals(other.getBucket())) return false;
+      if (!getPath()
+          .equals(other.getPath())) return false;
+      if (getSize()
+          != other.getSize()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + BUCKET_FIELD_NUMBER;
+      hash = (53 * hash) + getBucket().hashCode();
+      hash = (37 * hash) + PATH_FIELD_NUMBER;
+      hash = (53 * hash) + getPath().hashCode();
+      hash = (37 * hash) + SIZE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getSize());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static exoscale.vinyl.Demostore.Object parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static exoscale.vinyl.Demostore.Object parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.Object parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static exoscale.vinyl.Demostore.Object parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.Object parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static exoscale.vinyl.Demostore.Object parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.Object parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static exoscale.vinyl.Demostore.Object parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.Object parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static exoscale.vinyl.Demostore.Object parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.Object parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static exoscale.vinyl.Demostore.Object parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(exoscale.vinyl.Demostore.Object prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code exoscale.vinyl.Object}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:exoscale.vinyl.Object)
+        exoscale.vinyl.Demostore.ObjectOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_Object_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_Object_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                exoscale.vinyl.Demostore.Object.class, exoscale.vinyl.Demostore.Object.Builder.class);
+      }
+
+      // Construct using exoscale.vinyl.Demostore.Object.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bucket_ = "";
+
+        path_ = "";
+
+        size_ = 0L;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_Object_descriptor;
+      }
+
+      @java.lang.Override
+      public exoscale.vinyl.Demostore.Object getDefaultInstanceForType() {
+        return exoscale.vinyl.Demostore.Object.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public exoscale.vinyl.Demostore.Object build() {
+        exoscale.vinyl.Demostore.Object result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public exoscale.vinyl.Demostore.Object buildPartial() {
+        exoscale.vinyl.Demostore.Object result = new exoscale.vinyl.Demostore.Object(this);
+        result.bucket_ = bucket_;
+        result.path_ = path_;
+        result.size_ = size_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof exoscale.vinyl.Demostore.Object) {
+          return mergeFrom((exoscale.vinyl.Demostore.Object)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(exoscale.vinyl.Demostore.Object other) {
+        if (other == exoscale.vinyl.Demostore.Object.getDefaultInstance()) return this;
+        if (!other.getBucket().isEmpty()) {
+          bucket_ = other.bucket_;
+          onChanged();
+        }
+        if (!other.getPath().isEmpty()) {
+          path_ = other.path_;
+          onChanged();
+        }
+        if (other.getSize() != 0L) {
+          setSize(other.getSize());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        exoscale.vinyl.Demostore.Object parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (exoscale.vinyl.Demostore.Object) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object bucket_ = "";
+      /**
+       * <code>string bucket = 1;</code>
+       * @return The bucket.
+       */
+      public java.lang.String getBucket() {
+        java.lang.Object ref = bucket_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          bucket_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string bucket = 1;</code>
+       * @return The bytes for bucket.
+       */
+      public com.google.protobuf.ByteString
+          getBucketBytes() {
+        java.lang.Object ref = bucket_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          bucket_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string bucket = 1;</code>
+       * @param value The bucket to set.
+       * @return This builder for chaining.
+       */
+      public Builder setBucket(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        bucket_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string bucket = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearBucket() {
+        
+        bucket_ = getDefaultInstance().getBucket();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string bucket = 1;</code>
+       * @param value The bytes for bucket to set.
+       * @return This builder for chaining.
+       */
+      public Builder setBucketBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        bucket_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object path_ = "";
+      /**
+       * <code>string path = 2;</code>
+       * @return The path.
+       */
+      public java.lang.String getPath() {
+        java.lang.Object ref = path_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          path_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string path = 2;</code>
+       * @return The bytes for path.
+       */
+      public com.google.protobuf.ByteString
+          getPathBytes() {
+        java.lang.Object ref = path_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          path_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string path = 2;</code>
+       * @param value The path to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        path_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string path = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPath() {
+        
+        path_ = getDefaultInstance().getPath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string path = 2;</code>
+       * @param value The bytes for path to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        path_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long size_ ;
+      /**
+       * <code>int64 size = 3;</code>
+       * @return The size.
+       */
+      @java.lang.Override
+      public long getSize() {
+        return size_;
+      }
+      /**
+       * <code>int64 size = 3;</code>
+       * @param value The size to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSize(long value) {
+        
+        size_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 size = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSize() {
+        
+        size_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:exoscale.vinyl.Object)
+    }
+
+    // @@protoc_insertion_point(class_scope:exoscale.vinyl.Object)
+    private static final exoscale.vinyl.Demostore.Object DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new exoscale.vinyl.Demostore.Object();
+    }
+
+    public static exoscale.vinyl.Demostore.Object getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<Object>
+        PARSER = new com.google.protobuf.AbstractParser<Object>() {
+      @java.lang.Override
+      public Object parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new Object(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<Object> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Object> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public exoscale.vinyl.Demostore.Object getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface RecordTypeUnionOrBuilder extends
       // @@protoc_insertion_point(interface_extends:exoscale.vinyl.RecordTypeUnion)
       com.google.protobuf.MessageOrBuilder {
@@ -3356,6 +4145,21 @@ public final class Demostore {
      * <code>.exoscale.vinyl.Invoice _Invoice = 3;</code>
      */
     exoscale.vinyl.Demostore.InvoiceOrBuilder getInvoiceOrBuilder();
+
+    /**
+     * <code>.exoscale.vinyl.Object _Object = 4;</code>
+     * @return Whether the object field is set.
+     */
+    boolean hasObject();
+    /**
+     * <code>.exoscale.vinyl.Object _Object = 4;</code>
+     * @return The object.
+     */
+    exoscale.vinyl.Demostore.Object getObject();
+    /**
+     * <code>.exoscale.vinyl.Object _Object = 4;</code>
+     */
+    exoscale.vinyl.Demostore.ObjectOrBuilder getObjectOrBuilder();
   }
   /**
    * Protobuf type {@code exoscale.vinyl.RecordTypeUnion}
@@ -3437,6 +4241,19 @@ public final class Demostore {
               if (subBuilder != null) {
                 subBuilder.mergeFrom(Invoice_);
                 Invoice_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 34: {
+              exoscale.vinyl.Demostore.Object.Builder subBuilder = null;
+              if (Object_ != null) {
+                subBuilder = Object_.toBuilder();
+              }
+              Object_ = input.readMessage(exoscale.vinyl.Demostore.Object.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(Object_);
+                Object_ = subBuilder.buildPartial();
               }
 
               break;
@@ -3551,6 +4368,32 @@ public final class Demostore {
       return getInvoice();
     }
 
+    public static final int _OBJECT_FIELD_NUMBER = 4;
+    private exoscale.vinyl.Demostore.Object Object_;
+    /**
+     * <code>.exoscale.vinyl.Object _Object = 4;</code>
+     * @return Whether the object field is set.
+     */
+    @java.lang.Override
+    public boolean hasObject() {
+      return Object_ != null;
+    }
+    /**
+     * <code>.exoscale.vinyl.Object _Object = 4;</code>
+     * @return The object.
+     */
+    @java.lang.Override
+    public exoscale.vinyl.Demostore.Object getObject() {
+      return Object_ == null ? exoscale.vinyl.Demostore.Object.getDefaultInstance() : Object_;
+    }
+    /**
+     * <code>.exoscale.vinyl.Object _Object = 4;</code>
+     */
+    @java.lang.Override
+    public exoscale.vinyl.Demostore.ObjectOrBuilder getObjectOrBuilder() {
+      return getObject();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -3574,6 +4417,9 @@ public final class Demostore {
       if (Invoice_ != null) {
         output.writeMessage(3, getInvoice());
       }
+      if (Object_ != null) {
+        output.writeMessage(4, getObject());
+      }
       unknownFields.writeTo(output);
     }
 
@@ -3594,6 +4440,10 @@ public final class Demostore {
       if (Invoice_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getInvoice());
+      }
+      if (Object_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getObject());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3625,6 +4475,11 @@ public final class Demostore {
         if (!getInvoice()
             .equals(other.getInvoice())) return false;
       }
+      if (hasObject() != other.hasObject()) return false;
+      if (hasObject()) {
+        if (!getObject()
+            .equals(other.getObject())) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -3647,6 +4502,10 @@ public final class Demostore {
       if (hasInvoice()) {
         hash = (37 * hash) + _INVOICE_FIELD_NUMBER;
         hash = (53 * hash) + getInvoice().hashCode();
+      }
+      if (hasObject()) {
+        hash = (37 * hash) + _OBJECT_FIELD_NUMBER;
+        hash = (53 * hash) + getObject().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -3799,6 +4658,12 @@ public final class Demostore {
           Invoice_ = null;
           InvoiceBuilder_ = null;
         }
+        if (ObjectBuilder_ == null) {
+          Object_ = null;
+        } else {
+          Object_ = null;
+          ObjectBuilder_ = null;
+        }
         return this;
       }
 
@@ -3839,6 +4704,11 @@ public final class Demostore {
           result.Invoice_ = Invoice_;
         } else {
           result.Invoice_ = InvoiceBuilder_.build();
+        }
+        if (ObjectBuilder_ == null) {
+          result.Object_ = Object_;
+        } else {
+          result.Object_ = ObjectBuilder_.build();
         }
         onBuilt();
         return result;
@@ -3896,6 +4766,9 @@ public final class Demostore {
         }
         if (other.hasInvoice()) {
           mergeInvoice(other.getInvoice());
+        }
+        if (other.hasObject()) {
+          mergeObject(other.getObject());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -4282,6 +5155,125 @@ public final class Demostore {
         }
         return InvoiceBuilder_;
       }
+
+      private exoscale.vinyl.Demostore.Object Object_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          exoscale.vinyl.Demostore.Object, exoscale.vinyl.Demostore.Object.Builder, exoscale.vinyl.Demostore.ObjectOrBuilder> ObjectBuilder_;
+      /**
+       * <code>.exoscale.vinyl.Object _Object = 4;</code>
+       * @return Whether the object field is set.
+       */
+      public boolean hasObject() {
+        return ObjectBuilder_ != null || Object_ != null;
+      }
+      /**
+       * <code>.exoscale.vinyl.Object _Object = 4;</code>
+       * @return The object.
+       */
+      public exoscale.vinyl.Demostore.Object getObject() {
+        if (ObjectBuilder_ == null) {
+          return Object_ == null ? exoscale.vinyl.Demostore.Object.getDefaultInstance() : Object_;
+        } else {
+          return ObjectBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.exoscale.vinyl.Object _Object = 4;</code>
+       */
+      public Builder setObject(exoscale.vinyl.Demostore.Object value) {
+        if (ObjectBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          Object_ = value;
+          onChanged();
+        } else {
+          ObjectBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.exoscale.vinyl.Object _Object = 4;</code>
+       */
+      public Builder setObject(
+          exoscale.vinyl.Demostore.Object.Builder builderForValue) {
+        if (ObjectBuilder_ == null) {
+          Object_ = builderForValue.build();
+          onChanged();
+        } else {
+          ObjectBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.exoscale.vinyl.Object _Object = 4;</code>
+       */
+      public Builder mergeObject(exoscale.vinyl.Demostore.Object value) {
+        if (ObjectBuilder_ == null) {
+          if (Object_ != null) {
+            Object_ =
+              exoscale.vinyl.Demostore.Object.newBuilder(Object_).mergeFrom(value).buildPartial();
+          } else {
+            Object_ = value;
+          }
+          onChanged();
+        } else {
+          ObjectBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.exoscale.vinyl.Object _Object = 4;</code>
+       */
+      public Builder clearObject() {
+        if (ObjectBuilder_ == null) {
+          Object_ = null;
+          onChanged();
+        } else {
+          Object_ = null;
+          ObjectBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.exoscale.vinyl.Object _Object = 4;</code>
+       */
+      public exoscale.vinyl.Demostore.Object.Builder getObjectBuilder() {
+        
+        onChanged();
+        return getObjectFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.exoscale.vinyl.Object _Object = 4;</code>
+       */
+      public exoscale.vinyl.Demostore.ObjectOrBuilder getObjectOrBuilder() {
+        if (ObjectBuilder_ != null) {
+          return ObjectBuilder_.getMessageOrBuilder();
+        } else {
+          return Object_ == null ?
+              exoscale.vinyl.Demostore.Object.getDefaultInstance() : Object_;
+        }
+      }
+      /**
+       * <code>.exoscale.vinyl.Object _Object = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          exoscale.vinyl.Demostore.Object, exoscale.vinyl.Demostore.Object.Builder, exoscale.vinyl.Demostore.ObjectOrBuilder> 
+          getObjectFieldBuilder() {
+        if (ObjectBuilder_ == null) {
+          ObjectBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              exoscale.vinyl.Demostore.Object, exoscale.vinyl.Demostore.Object.Builder, exoscale.vinyl.Demostore.ObjectOrBuilder>(
+                  getObject(),
+                  getParentForChildren(),
+                  isClean());
+          Object_ = null;
+        }
+        return ObjectBuilder_;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -4356,6 +5348,11 @@ public final class Demostore {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_exoscale_vinyl_Invoice_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_exoscale_vinyl_Object_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_exoscale_vinyl_Object_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_exoscale_vinyl_RecordTypeUnion_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -4376,11 +5373,14 @@ public final class Demostore {
       "ceLine\022\017\n\007product\030\001 \001(\t\022\020\n\010quantity\030\002 \001(" +
       "\003\"d\n\007Invoice\022\022\n\naccount_id\030\001 \001(\003\022\n\n\002id\030\002" +
       " \001(\003\022\r\n\005total\030\004 \001(\003\022*\n\005lines\030\005 \003(\0132\033.exo" +
-      "scale.vinyl.InvoiceLine\"\214\001\n\017RecordTypeUn" +
-      "ion\022)\n\010_Account\030\001 \001(\0132\027.exoscale.vinyl.A" +
-      "ccount\022#\n\005_User\030\002 \001(\0132\024.exoscale.vinyl.U" +
-      "ser\022)\n\010_Invoice\030\003 \001(\0132\027.exoscale.vinyl.I" +
-      "nvoiceB\013B\tDemostoreb\006proto3"
+      "scale.vinyl.InvoiceLine\"4\n\006Object\022\016\n\006buc" +
+      "ket\030\001 \001(\t\022\014\n\004path\030\002 \001(\t\022\014\n\004size\030\003 \001(\003\"\265\001" +
+      "\n\017RecordTypeUnion\022)\n\010_Account\030\001 \001(\0132\027.ex" +
+      "oscale.vinyl.Account\022#\n\005_User\030\002 \001(\0132\024.ex" +
+      "oscale.vinyl.User\022)\n\010_Invoice\030\003 \001(\0132\027.ex" +
+      "oscale.vinyl.Invoice\022\'\n\007_Object\030\004 \001(\0132\026." +
+      "exoscale.vinyl.ObjectB\013B\tDemostoreb\006prot" +
+      "o3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4410,12 +5410,18 @@ public final class Demostore {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_exoscale_vinyl_Invoice_descriptor,
         new java.lang.String[] { "AccountId", "Id", "Total", "Lines", });
-    internal_static_exoscale_vinyl_RecordTypeUnion_descriptor =
+    internal_static_exoscale_vinyl_Object_descriptor =
       getDescriptor().getMessageTypes().get(4);
+    internal_static_exoscale_vinyl_Object_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_exoscale_vinyl_Object_descriptor,
+        new java.lang.String[] { "Bucket", "Path", "Size", });
+    internal_static_exoscale_vinyl_RecordTypeUnion_descriptor =
+      getDescriptor().getMessageTypes().get(5);
     internal_static_exoscale_vinyl_RecordTypeUnion_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_exoscale_vinyl_RecordTypeUnion_descriptor,
-        new java.lang.String[] { "Account", "User", "Invoice", });
+        new java.lang.String[] { "Account", "User", "Invoice", "Object", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

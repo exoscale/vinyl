@@ -13,7 +13,10 @@
            exoscale.vinyl.Demostore$InvoiceOrBuilder
            exoscale.vinyl.Demostore$Invoice$Builder
            exoscale.vinyl.Demostore$InvoiceLine
-           exoscale.vinyl.Demostore$InvoiceLineOrBuilder))
+           exoscale.vinyl.Demostore$InvoiceLineOrBuilder
+           exoscale.vinyl.Demostore$Object
+           exoscale.vinyl.Demostore$ObjectOrBuilder
+           exoscale.vinyl.Demostore$Object$Builder))
 
 (defprotocol RecordParser (parse-record [this]))
 (defprotocol RecordMerger (merge-from [this other]))
@@ -65,6 +68,16 @@
         (.addAllLines (mapv invoice-line->record (:lines invoice)))
         (.build))))
 
+(defn ^Demostore$Object object->record
+  [object]
+  (let [object (ex/assert-spec-valid ::object object)
+        b      (Demostore$Object/newBuilder)]
+    (-> b
+        (.setSize (:size object))
+        (.setPath (:path object))
+        (.setBucket (:bucket object))
+        (.build))))
+
 (defn ^Message map->record
   ([m]
    (map->record (::record-type m) m))
@@ -73,7 +86,8 @@
      :Account     (account->record m)
      :User        (user->record m)
      :InvoiceLine (invoice-line->record m)
-     :Invoice     (invoice->record m))))
+     :Invoice     (invoice->record m)
+     :Object      (object->record m))))
 
 (defrecord RecordInfo [type record]
   RecordParser
@@ -81,7 +95,8 @@
     (case type
       "Account" (merge-in (Demostore$Account/newBuilder) record)
       "User"    (merge-in (Demostore$User/newBuilder)    record)
-      "Invoice" (merge-in (Demostore$Invoice/newBuilder) record))))
+      "Invoice" (merge-in (Demostore$Invoice/newBuilder) record)
+      "Object"  (merge-in (Demostore$Object/newBuilder)  record))))
 
 (extend-protocol RecordParser
   nil
@@ -119,7 +134,14 @@
        :id         (.getId r)
        :total      (.getTotal r)
        :lines      (mapv parse-record (.getLinesList r))}
-      {::record-type :Invoice})))
+      {::record-type :Invoice}))
+  Demostore$ObjectOrBuilder
+  (parse-record [r]
+    (with-meta
+      {:path   (.getPath r)
+       :size   (.getSize r)
+       :bucket (.getBucket r)}
+      {::record-type :Object})))
 
 (extend-protocol RecordMerger
   Demostore$Account$Builder
@@ -127,6 +149,8 @@
   Demostore$User$Builder
   (merge-from [x y] (.mergeFrom x ^Message y))
   Demostore$Invoice$Builder
+  (merge-from [x y] (.mergeFrom x ^Message y))
+  Demostore$Object$Builder
   (merge-from [x y] (.mergeFrom x ^Message y)))
 
 (s/def ::id         nat-int?)
@@ -142,3 +166,7 @@
 (s/def ::line       (s/keys :req-un [::product ::quantity]))
 (s/def ::lines      (s/coll-of ::line))
 (s/def ::invoice    (s/keys :req-un [::id ::account-id ::total ::lines]))
+(s/def ::size       nat-int?)
+(s/def ::path       string?)
+(s/def ::bucket     string?)
+(s/def ::object     (s/keys :req-un [::bucket ::path ::size]))

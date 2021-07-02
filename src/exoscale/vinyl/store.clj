@@ -26,11 +26,18 @@
    com.apple.foundationdb.record.provider.foundationdb.FDBRecordContext
    com.apple.foundationdb.record.provider.foundationdb.FDBRecordStore
    com.apple.foundationdb.record.provider.foundationdb.FDBRecord
+   com.apple.foundationdb.record.IndexScanType
+   com.apple.foundationdb.record.metadata.Index
    com.apple.foundationdb.record.TupleRange
+   com.apple.foundationdb.record.IsolationLevel
+   com.apple.foundationdb.record.ExecuteProperties
    com.apple.foundationdb.record.ScanProperties
    com.apple.foundationdb.record.query.plan.plans.QueryPlan
    com.apple.foundationdb.record.RecordMetaDataProvider
+   com.apple.foundationdb.record.RecordMetaData
+   com.apple.foundationdb.record.provider.foundationdb.FDBDatabaseRunner
    com.apple.foundationdb.tuple.Tuple
+   java.lang.AutoCloseable
    java.util.concurrent.CompletableFuture
    java.util.concurrent.TimeUnit
    java.util.function.Function))
@@ -45,7 +52,25 @@
     Protocolized so it can be called against the database or
     the store")
   (get-metadata [this]
-    "Return this context's record metadata"))
+    "Return this context's record metadata")
+  (new-runner [this]
+    "Return a runner to handle retryable logic"))
+
+(defn ^FDBDatabaseRunner runner-opts
+  [^FDBDatabaseRunner runner
+   {::keys [max-attempts
+            initial-delay
+            max-delay
+            transaction-timeout]}]
+  (when (some? max-attempts)
+    (.setMaxAttempts runner (int max-attempts)))
+  (when (some? initial-delay)
+    (.setInitialDelayMillis runner (long initial-delay)))
+  (when (some? max-delay)
+    (.setMaxDelayMillis runner (long max-delay)))
+  (when (some? transaction-timeout)
+    (.setTransactionTimeoutMillis runner (long transaction-timeout)))
+  runner)
 
 (def ^KeySpace top-level-keyspace
   "This builds a directory structure of /$environment/$schema"
@@ -125,6 +150,8 @@
   DatabaseContext
   (get-metadata [this]
     (::metadata this))
+  (new-runner [this]
+    (.newRunner ^FDBDatabase (::db this)))
   (run-async [this f]
     (.runAsync
      ^FDBDatabase (::db this)
@@ -137,6 +164,29 @@
           (reify Function
             (apply [_ context]
               (f (store-from-builder (::builder this) context)))))))
+
+(defn wrapped-runner
+  [db opts]
+  (let [runner (-> (new-runner db) (runner-opts opts))]
+    (reify
+      DatabaseContext
+      (get-metadata [_] (get-metadata db))
+      (new-runner [_] runner)
+      (run-async [_ f]
+        (.runAsync
+         runner
+         (reify Function
+           (apply [_ context]
+             (.thenCompose (async-store-from-builder (::builder db) context)
+                           (fn/make-fun f))))))
+      (run-in-context [_ f]
+        (.run
+         runner
+         (reify Function
+           (apply [_ context]
+             (f (store-from-builder (::builder db) context))))))
+      AutoCloseable
+      (close [_] (.close runner)))))
 
 (def start component/start)
 (def stop component/stop)
@@ -161,6 +211,20 @@
   (if (instance? RecordQuery q)
     q
     (apply query/build-query q)))
+
+(def ^:no-doc  ^:private
+  known-scan-types
+  {::by-value       IndexScanType/BY_VALUE
+   ::by-group       IndexScanType/BY_GROUP
+   ::by-rank        IndexScanType/BY_RANK
+   ::by-time-window IndexScanType/BY_TIME_WINDOW
+   ::by-text-token  IndexScanType/BY_TEXT_TOKEN})
+
+(defn ^IndexScanType as-scan-type
+  [t]
+  (if (instance? IndexScanType t)
+    t
+    (get known-scan-types t IndexScanType/BY_VALUE)))
 
 (defn store-query-fn
   [^RecordQuery query {::keys [values intercept-plan-fn log-plan?] :as opts}]
@@ -191,6 +255,12 @@
   (run-in-context txn-context
                   (fn [^FDBRecordStore store]
                     (run! #(.saveRecord store %) batch))))
+
+(defn insert-record-batch
+  [txn-context batch]
+  (run-in-context txn-context
+                  (fn [^FDBRecordStore store]
+                    (run! #(.insertRecord store %) batch))))
 
 (defn delete-record
   ([txn-context ^Tuple k]
@@ -253,39 +323,119 @@
      (let [opts {::foreach  #(delete-record store (record-primary-key %))}]
        (run-async store (store-query-fn (as-query query) opts))))))
 
+(defn ^TupleRange all-of-range
+  [txn-context record-type items]
+  (if (= ::raw record-type)
+    (TupleRange/allOf (tuple/from-seq items))
+    (TupleRange/allOf (key-for* txn-context record-type items))))
+
 (defn ^TupleRange prefix-range
   [txn-context record-type items]
   (let [fixed  (butlast items)
         prefix (last items)
         range   (TupleRange/prefixedBy (str prefix))]
-    (.prepend range (key-for* txn-context record-type fixed))))
+    (if (seq prefix)
+      (.prepend range (if (= record-type ::raw)
+                        (tuple/from-seq fixed)
+                        (key-for* txn-context record-type fixed)))
+      ;; An empty prefix would result in a bad range, we want an
+      ;; all-of range on the leading parts of the tuple in this
+      ;; case.
+      (all-of-range txn-context record-type fixed))))
 
-(defn ^TupleRange all-of-range
-  [txn-context record-type items]
-  (TupleRange/allOf (key-for* txn-context record-type items)))
+(defn inc-prefix
+  "Given an object path, yield the next semantic one."
+  [^String p]
+  (when (seq p)
+    (let [[c & s]  (reverse p)
+          reversed (conj s (-> c int inc char))]
+      (reduce str "" (reverse reversed)))))
+
+(defn ^TupleRange marker-range
+  [txn-context record-type items marker]
+  (if marker
+    (TupleRange/between
+     (key-for* txn-context record-type (conj (vec (butlast items)) marker))
+     (let [prefix (last items)]
+       (if (seq prefix)
+         (key-for* txn-context record-type (conj (vec (butlast items)) (inc-prefix prefix)))
+         (key-for* txn-context record-type (conj (vec (drop-last 2 items)) (inc-prefix (nth items (- (count items) 2))))))))
+    (prefix-range txn-context record-type items)))
 
 (defn ^TupleRange greater-than-range
   [txn-context record-type items]
-  (TupleRange/between (key-for* txn-context record-type items)
+  (TupleRange/between (if (= ::raw record-type)
+                        (tuple/from-seq items)
+                        (key-for* txn-context record-type items))
                       nil))
 
 (defn ^TupleRange between
   [txn-context record-type items start end]
-  (TupleRange/between
-   (key-for* txn-context record-type (conj (vec items) start))
-   (key-for* txn-context record-type (conj (vec items) end))))
+  (if (= ::raw record-type)
+    (TupleRange/between
+     (tuple/from-seq (conj (vec items) start))
+     (tuple/from-seq (conj (vec items) end)))
+    (TupleRange/between
+     (key-for* txn-context record-type (conj (vec items) start))
+     (key-for* txn-context record-type (conj (vec items) end)))))
+
+(defn ^IsolationLevel as-isolation-level
+  [level]
+  (if (= ::snapshot level)
+    IsolationLevel/SNAPSHOT
+    IsolationLevel/SERIALIZABLE))
+
+(defn ^ExecuteProperties execute-properties
+  [{::keys [fail-on-scan-limit-reached?
+            isolation-level
+            skip
+            limit]
+    :as    props}]
+  (if (nil? props)
+    ExecuteProperties/SERIAL_EXECUTE
+    (-> (ExecuteProperties/newBuilder)
+        (.setFailOnScanLimitReached (boolean fail-on-scan-limit-reached?))
+        (.setIsolationLevel (as-isolation-level isolation-level))
+        (cond-> (some? skip) (.setSkip (int skip)))
+        (cond-> (some? limit) (.setReturnedRowLimit (int limit)))
+        (.build))))
+
+(defn ^ScanProperties scan-properties
+  ([{::keys [reverse?] :as props}]
+   (if (nil? props)
+     ScanProperties/FORWARD_SCAN
+     (.asScanProperties (execute-properties props) (boolean reverse?))))
+  ([^ExecuteProperties props reverse?]
+   (.asScanProperties props (boolean reverse?))))
 
 (defn scan-range
   [txn-context ^TupleRange range opts]
-  (run-async
-   txn-context
-   (fn [^FDBRecordStore store]
-     (-> (.scanRecords store range nil ScanProperties/FORWARD_SCAN)
-         (cursor/apply-transforms opts)))))
+  (let [props               (scan-properties opts)
+        ^bytes continuation (::continuation opts)]
+    (run-async
+     txn-context
+     (fn [^FDBRecordStore store]
+       (-> (.scanRecords store range continuation props)
+           (cursor/apply-transforms opts))))))
 
 (defn scan-prefix
   [txn-context record-type items opts]
   (scan-range txn-context (prefix-range txn-context record-type items) opts))
+
+(defn ^Index metadata-index
+  [^RecordMetaData metadata ^String index-name]
+  (.getIndex metadata index-name))
+
+(defn scan-index
+  [txn-context index-name scan-type ^TupleRange range ^bytes continuation opts]
+  (let [props     (scan-properties opts)
+        scan-type (as-scan-type scan-type)
+        index     (-> txn-context get-metadata (metadata-index index-name))]
+    (run-async
+     txn-context
+     (fn [^FDBRecordStore store]
+       (-> (.scanIndex store index scan-type range continuation props)
+           (cursor/apply-transforms opts))))))
 
 (defn delete-by-range
   [txn-context ^TupleRange range]
@@ -302,3 +452,88 @@
    all records for a specific composite key prefix"
   [txn-context record-type items]
   (delete-by-range txn-context (all-of-range txn-context record-type items)))
+
+(def ^:private ^:no-doc runner-params
+  {::max-attempts        Integer/MAX_VALUE
+   ::max-delay           2
+   ::initial-delay       2})
+
+(defn continuation-traversing-reducer
+  "A reducer over large ranges.
+   Results are reduced into an accumulator with the help of the reducing
+   function `f`.
+   The accumulator is initiated to `init`. `clojure.core.reduced` is honored.
+
+   Obviously, this approach does away with any consistency guarantees usually
+   offered by FDB. `continuing-fn` is called at every step
+
+   Results being accumulated in memory, this also means that care must be
+   taken with the accumulator."
+  ;; Some cliff notes to read the code below.
+  ;; The basic idea is that scanning is done while it works, up until
+  ;; the point where an exception will be raised.
+  ;;
+  ;; By default, `run-async` uses a simple exponential back-off algorithm
+  ;; between transaction function retries. In this case we want to avoid that.
+  ;; To that effect, a runner is created with specific parameters (a large
+  ;; `max-attempts` value, as well as minimum viable delays.
+  ;;
+  ;; We then call `apply-reduce` on the returned cursor from our query with a
+  ;; twist: every visited element will get its continuation stored in an atom.
+  ;; When interrupted, the function will be retried, which pops the last seen
+  ;; continuation.
+  ;;
+  [db f val continuing-fn]
+  (let [cont    (atom nil)
+        result  (atom val)
+        runner  (wrapped-runner db runner-params)]
+    (-> (run-async
+         runner
+         (fn [^FDBRecordStore store]
+           (-> (continuing-fn store @cont)
+               (cursor/apply-reduce f result #(reset! cont %)))))
+        (fn/close-on-complete runner))))
+
+(defn long-range-reducer
+  "A reducer over large ranges.
+   Results are reduced into an accumulator with the help of the reducing
+   function `f`.
+   The accumulator is initiated to `init`. `clojure.core.reduced` is honored.
+
+   Obviously, this approach does away with any consistency guarantees usually
+   offered by FDB.
+
+   Results being accumulated in memory, this also means that care must be
+   taken with the accumulator."
+  ([db f val record-type items]
+   (long-range-reducer db f val record-type items {}))
+  ([db f val record-type items {::keys [marker] :as opts}]
+   (let [range (marker-range db record-type items marker)
+         props (scan-properties opts)]
+     (continuation-traversing-reducer
+      db f val
+      (fn [^FDBRecordStore store ^bytes cont]
+        (.scanRecords store range cont props))))))
+
+(defn long-query-reducer
+  "A reducer over large queries. Accepts queries as per `execute-query`. Results
+   are reduced into an accumulator with the help of the reducing function `f`.
+   The accumulator is initiated to `init`. `clojure.core.reduced` is honored.
+
+   Obviously, this approach does away with any consistency guarantees usually
+   offered by FDB.
+
+   Results being accumulated in memory, this also means that care must be
+   taken with the accumulator."
+  ([db f val query]
+   (long-query-reducer db f val query {}))
+  ([db f val query {::keys [values] :as opts}]
+   (let [props   (execute-properties (dissoc opts ::limit))
+         ctx     (if (some? values) (query/bindings values) query/empty-context)
+         q       (as-query query)]
+     (continuation-traversing-reducer
+      db f val
+      (fn [^FDBRecordStore store ^bytes cont]
+        (.execute (.planQuery store q) store ctx cont props)))))
+  ([db f init query opts values]
+   (long-query-reducer db f init query (assoc opts ::values values))))

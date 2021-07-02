@@ -30,3 +30,10 @@
    (get-long t 0))
   ([^Tuple t index]
    (.getLong t (long index))))
+
+(defn ^Tuple decode
+  [^bytes b]
+  (Tuple/fromBytes b))
+
+(def decode-and-expand
+  (comp expand decode))
