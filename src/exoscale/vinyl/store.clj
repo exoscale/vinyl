@@ -26,7 +26,10 @@
    com.apple.foundationdb.record.provider.foundationdb.FDBRecordContext
    com.apple.foundationdb.record.provider.foundationdb.FDBRecordStore
    com.apple.foundationdb.record.provider.foundationdb.FDBRecord
+   com.apple.foundationdb.record.cursors.AutoContinuingCursor
    com.apple.foundationdb.record.TupleRange
+   com.apple.foundationdb.record.IsolationLevel
+   com.apple.foundationdb.record.ExecuteProperties
    com.apple.foundationdb.record.ScanProperties
    com.apple.foundationdb.record.query.plan.plans.QueryPlan
    com.apple.foundationdb.record.RecordMetaDataProvider
@@ -45,7 +48,9 @@
     Protocolized so it can be called against the database or
     the store")
   (get-metadata [this]
-    "Return this context's record metadata"))
+    "Return this context's record metadata")
+  (new-runner [this]
+    "Return a runner to handle retryable logic"))
 
 (def ^KeySpace top-level-keyspace
   "This builds a directory structure of /$environment/$schema"
@@ -125,6 +130,8 @@
   DatabaseContext
   (get-metadata [this]
     (::metadata this))
+  (new-runner [this]
+    (.newRunner ^FDBDatabase (::db this)))
   (run-async [this f]
     (.runAsync
      ^FDBDatabase (::db this)
@@ -275,17 +282,56 @@
    (key-for* txn-context record-type (conj (vec items) start))
    (key-for* txn-context record-type (conj (vec items) end))))
 
+(defn ^IsolationLevel as-isolation-level
+  [level]
+  (if (= ::snapshot level)
+    IsolationLevel/SNAPSHOT
+    IsolationLevel/SERIALIZABLE))
+
+(defn ^ScanProperties scan-properties
+  [{::keys [fail-on-scan-limit-reached? isolation-level skip limit reverse?]
+    :as    props}]
+  (if (nil? props)
+    ScanProperties/FORWARD_SCAN
+    (ScanProperties.
+     (-> (ExecuteProperties/newBuilder)
+         (.setFailOnScanLimitReached (boolean fail-on-scan-limit-reached?))
+         (.setIsolationLevel (as-isolation-level isolation-level))
+         (cond-> (some? skip) (.setSkip (int skip)))
+         (cond-> (some? limit) (.setReturnedRowLimit (int limit)))
+         (.build))
+     (boolean reverse?))))
+
 (defn scan-range
   [txn-context ^TupleRange range opts]
-  (run-async
-   txn-context
-   (fn [^FDBRecordStore store]
-     (-> (.scanRecords store range nil ScanProperties/FORWARD_SCAN)
-         (cursor/apply-transforms opts)))))
+  (let [props               (scan-properties opts)
+        ^bytes continuation (::continuation opts)]
+    (run-async
+     txn-context
+     (fn [^FDBRecordStore store]
+       (.scanRecords store range continuation props)))))
+
+(defn scan-large-range
+  [txn-context ^TupleRange range {::keys [inner-row-limit] :as opts}]
+  (let [props (scan-properties (assoc opts ::limit (or inner-row-limit 50000)))]
+    (run-async
+     txn-context
+     (fn [^FDBRecordStore store]
+       (-> (AutoContinuingCursor.
+            (new-runner txn-context)
+            (fn/make-fun
+             (fn [_ continuation]
+               (.scanRecords store range continuation props))))
+           (cursor/apply-transforms opts))))))
 
 (defn scan-prefix
   [txn-context record-type items opts]
   (scan-range txn-context (prefix-range txn-context record-type items) opts))
+
+(defn scan-large-prefix
+  [txn-context record-type items opts]
+  (let [range (prefix-range txn-context record-type items)]
+    (scan-large-range txn-context range opts)))
 
 (defn delete-by-range
   [txn-context ^TupleRange range]
