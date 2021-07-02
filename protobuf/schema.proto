@@ -27,8 +27,15 @@ message Invoice {
     repeated InvoiceLine lines = 5;
 }
 
+message Object {
+    string bucket = 1;
+    string path   = 2;
+    int64 size    = 3;
+}
+
 message RecordTypeUnion {
     Account _Account = 1;
     User    _User    = 2;
     Invoice _Invoice = 3;
+    Object  _Object  = 4;
 }
