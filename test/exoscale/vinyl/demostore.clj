@@ -38,7 +38,11 @@
    :Invoice {:primary-key [:concat :type-key "account_id" "id"]
              :indices     [{:name "total_invoiced"
                             :on   [:group-by "total" "account_id"]
-                            :type :sum}]}})
+                            :type :sum}]}
+   :Object  {:primary-key [:concat :type-key "bucket" "path"]
+             :indices     [{:name "path_count"
+                            :on [:group-by "path" "bucket"]
+                            :type :count-not-null}]}})
 
 (def demostore
   (store/initialize :demostore (Demostore/getDescriptor) schema))
@@ -52,6 +56,26 @@
 (def ^:dynamic *db*)
 
 (defn with-open-fdb
+  [f]
+  (let [db      (store/start demostore)
+        records (all-records)]
+    (log/info "installing test data:" (count records) "records")
+    (store/run-in-context
+     db
+     (fn [store]
+       (store/delete-all-records store)
+       (store/save-record-batch store records)))
+
+    (Thread/sleep 200)
+    (log/info "ready to serve fdb queries")
+    (try
+      (binding [*db* db] (f))
+      (finally
+        (Thread/sleep 200)
+        (log/info "cleaning fdb store")
+        (store/delete-all-records db)))))
+
+(defn with-paths
   [f]
   (let [db      (store/start demostore)
         records (all-records)]

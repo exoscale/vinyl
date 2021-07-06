@@ -26,14 +26,15 @@
    com.apple.foundationdb.record.provider.foundationdb.FDBRecordContext
    com.apple.foundationdb.record.provider.foundationdb.FDBRecordStore
    com.apple.foundationdb.record.provider.foundationdb.FDBRecord
-   com.apple.foundationdb.record.cursors.AutoContinuingCursor
    com.apple.foundationdb.record.TupleRange
    com.apple.foundationdb.record.IsolationLevel
    com.apple.foundationdb.record.ExecuteProperties
    com.apple.foundationdb.record.ScanProperties
    com.apple.foundationdb.record.query.plan.plans.QueryPlan
    com.apple.foundationdb.record.RecordMetaDataProvider
+   com.apple.foundationdb.record.provider.foundationdb.FDBDatabaseRunner
    com.apple.foundationdb.tuple.Tuple
+   java.lang.AutoCloseable
    java.util.concurrent.CompletableFuture
    java.util.concurrent.TimeUnit
    java.util.function.Function))
@@ -51,6 +52,22 @@
     "Return this context's record metadata")
   (new-runner [this]
     "Return a runner to handle retryable logic"))
+
+(defn ^FDBDatabaseRunner runner-opts
+  [^FDBDatabaseRunner runner
+   {::keys [max-attempts
+            initial-delay
+            max-delay
+            transaction-timeout]}]
+  (when (some? max-attempts)
+    (.setMaxAttempts runner (int max-attempts)))
+  (when (some? initial-delay)
+    (.setInitialDelayMillis runner (long initial-delay)))
+  (when (some? max-delay)
+    (.setMaxDelayMillis runner (long max-delay)))
+  (when (some? transaction-timeout)
+    (.setTransactionTimeoutMillis runner (long transaction-timeout)))
+  runner)
 
 (def ^KeySpace top-level-keyspace
   "This builds a directory structure of /$environment/$schema"
@@ -145,6 +162,29 @@
             (apply [_ context]
               (f (store-from-builder (::builder this) context)))))))
 
+(defn wrapped-runner
+  [db opts]
+  (let [runner (-> (new-runner db) (runner-opts opts))]
+    (reify
+      DatabaseContext
+      (get-metadata [_] (get-metadata db))
+      (new-runner [_] runner)
+      (run-async [_ f]
+        (.runAsync
+         runner
+         (reify Function
+           (apply [_ context]
+             (.thenCompose (async-store-from-builder (::builder db) context)
+                           (fn/make-fun f))))))
+      (run-in-context [_ f]
+        (.run
+         runner
+         (reify Function
+           (apply [_ context]
+             (f (store-from-builder (::builder db) context))))))
+      AutoCloseable
+      (close [_] (.close runner)))))
+
 (def start component/start)
 (def stop component/stop)
 
@@ -198,6 +238,12 @@
   (run-in-context txn-context
                   (fn [^FDBRecordStore store]
                     (run! #(.saveRecord store %) batch))))
+
+(defn insert-record-batch
+  [txn-context batch]
+  (run-in-context txn-context
+                  (fn [^FDBRecordStore store]
+                    (run! #(.insertRecord store %) batch))))
 
 (defn delete-record
   ([txn-context ^Tuple k]
@@ -288,19 +334,26 @@
     IsolationLevel/SNAPSHOT
     IsolationLevel/SERIALIZABLE))
 
-(defn ^ScanProperties scan-properties
-  [{::keys [fail-on-scan-limit-reached? isolation-level skip limit reverse?]
+(defn ^ExecuteProperties execute-properties
+  [{::keys [fail-on-scan-limit-reached?
+            isolation-level
+            skip
+            limit]
     :as    props}]
   (if (nil? props)
+    ExecuteProperties/SERIAL_EXECUTE
+    (-> (ExecuteProperties/newBuilder)
+        (.setFailOnScanLimitReached (boolean fail-on-scan-limit-reached?))
+        (.setIsolationLevel (as-isolation-level isolation-level))
+        (cond-> (some? skip) (.setSkip (int skip)))
+        (cond-> (some? limit) (.setReturnedRowLimit (int limit)))
+        (.build))))
+
+(defn ^ScanProperties scan-properties
+  [{::keys [reverse?] :as props}]
+  (if (nil? props)
     ScanProperties/FORWARD_SCAN
-    (ScanProperties.
-     (-> (ExecuteProperties/newBuilder)
-         (.setFailOnScanLimitReached (boolean fail-on-scan-limit-reached?))
-         (.setIsolationLevel (as-isolation-level isolation-level))
-         (cond-> (some? skip) (.setSkip (int skip)))
-         (cond-> (some? limit) (.setReturnedRowLimit (int limit)))
-         (.build))
-     (boolean reverse?))))
+    (.asScanProperties (execute-properties props) (boolean reverse?))))
 
 (defn scan-range
   [txn-context ^TupleRange range opts]
@@ -309,29 +362,12 @@
     (run-async
      txn-context
      (fn [^FDBRecordStore store]
-       (.scanRecords store range continuation props)))))
-
-(defn scan-large-range
-  [txn-context ^TupleRange range {::keys [inner-row-limit] :as opts}]
-  (let [props (scan-properties (assoc opts ::limit (or inner-row-limit 50000)))]
-    (run-async
-     txn-context
-     (fn [^FDBRecordStore store]
-       (-> (AutoContinuingCursor.
-            (new-runner txn-context)
-            (fn/make-fun
-             (fn [_ continuation]
-               (.scanRecords store range continuation props))))
+       (-> (.scanRecords store range continuation props)
            (cursor/apply-transforms opts))))))
 
 (defn scan-prefix
   [txn-context record-type items opts]
   (scan-range txn-context (prefix-range txn-context record-type items) opts))
-
-(defn scan-large-prefix
-  [txn-context record-type items opts]
-  (let [range (prefix-range txn-context record-type items)]
-    (scan-large-range txn-context range opts)))
 
 (defn delete-by-range
   [txn-context ^TupleRange range]
@@ -348,3 +384,52 @@
    all records for a specific composite key prefix"
   [txn-context record-type items]
   (delete-by-range txn-context (all-of-range txn-context record-type items)))
+
+(defn long-query-reducer
+  "A reducer over large ranges. Accepts queries as per `execute-query`. Results
+   are reduced into an accumulator with the help of the reducing function `f`.
+   The accumulator is initiated to `init`. `clojure.core.reduced` is honored.
+
+   Obviously, this approach does away with any consistency guarantees usually
+   offered by FDB.
+
+   Results being accumulated in memory, this also means that care must be
+   taken with the accumulator."
+  ;; Some cliff notes to read the code below.
+  ;; The basic idea is that scanning is done while it works, up until
+  ;; the point where an exception will be raised.
+  ;;
+  ;; By default, `run-async` uses a simple exponential back-off algorithm
+  ;; between transaction function retries. In this case we want to avoid that.
+  ;; To that effect, a runner is created with specific parameters (a large
+  ;; `max-attempts` value, as well as minimum viable delays.
+  ;;
+  ;; We then call `apply-reduce` on the returned cursor from our query with a
+  ;; twist: every visited element will get its continuation stored in an atom.
+  ;; When interrupted, the function will be retried, which pops the last seen
+  ;; continuation.
+  ;;
+  ([db f init query]
+   (long-query-reducer db f init query {}))
+  ([db f init query {::keys [values] :as opts}]
+   (let [cont    (atom nil)
+         result  (atom init)
+         props   (execute-properties (dissoc opts ::limit))
+         ctx     (if (some? values) (query/bindings values) query/empty-context)
+         q       (as-query query)
+         runner  (wrapped-runner db
+                                 {::max-attempts        Integer/MAX_VALUE
+                                   ::max-delay           2
+                                  ::initial-delay       2})]
+     (-> (run-async
+          runner
+          (fn [^FDBRecordStore store]
+            (-> (.execute (.planQuery store q)
+                          store
+                          ctx
+                          ^bytes @cont
+                          props)
+                (cursor/apply-reduce f result #(reset! cont %)))))
+         (fn/close-on-complete runner))))
+  ([db f init query opts values]
+   (long-query-reducer db f init query (assoc opts ::values values))))

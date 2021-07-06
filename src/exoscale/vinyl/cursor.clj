@@ -14,23 +14,30 @@
 (defn apply-reduce
   "A variant of `RecordCursor::reduce` that honors `reduced?`.
    Hopefully https://github.com/FoundationDB/fdb-record-layer/pull/1272
-   gets in which will provide a way to do this directly from record layer."
-  [^RecordCursor cursor f init]
-  (let [acc (atom (or init (f)))]
-    (.thenApply
-     (AsyncUtil/whileTrue
-      (reify Supplier
-        (get [_]
-          (-> cursor
-              .onNext
-              (.thenApply
-               (fn/make-fun
-                (fn [^RecordCursorResult result]
-                  (let [next?   (.hasNext result)
-                        new-acc (when next? (swap! acc f (.get result)))]
-                    (and (not (reduced? new-acc)) next?))))))))
-      (.getExecutor cursor))
-     (fn/make-fun (fn [_] (unreduced @acc))))))
+   gets in which will provide a way to do this directly from record layer.
+
+   When `cont-fn` is given, it will be called on the last seen continuation
+   byte array for every new element."
+  ([^RecordCursor cursor f init cont-fn]
+   (let [acc (if (instance? clojure.lang.Atom init) init (atom (or init (f))))]
+     (.thenApply
+      (AsyncUtil/whileTrue
+       (reify Supplier
+         (get [_]
+           (-> cursor
+               .onNext
+               (.thenApply
+                (fn/make-fun
+                 (fn [^RecordCursorResult result]
+                   (when (ifn? cont-fn)
+                     (-> result .getContinuation .toBytes cont-fn))
+                   (let [next?   (.hasNext result)
+                         new-acc (when next? (swap! acc f (.get result)))]
+                     (and (not (reduced? new-acc)) next?))))))))
+       (.getExecutor cursor))
+      (fn/make-fun (fn [_] (unreduced @acc))))))
+  ([cursor f init]
+   (apply-reduce cursor f init nil)))
 
 (defn apply-transforms
   "Apply transformations to a record cursor."
