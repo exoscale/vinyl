@@ -62,16 +62,22 @@
   (def db (store/start (assoc ds/demostore :env "dev")))
 
   ;; Run this if you want 4M records
-  #_(install-records db (record-generator "big-test-bucket" 4000000))
+  (install-records db (record-generator "big-test-bucket" 400))
+  (install-records db (record-generator "huge-test-bucket" 1000000))
+  (install-records db (record-generator "wow-test-bucket" 10000000))
+  (install-records db (record-generator "medium-test-bucket" 100000))
 
-  (agg/compute db :count-not-null :Object :path_count "big-test-bucket")
+  (agg/compute db :count-not-null :Object :path_count "wow-test-bucket")
+
+  (time
+   @(store/chunked-long-range-reducer db incrementor 0 :Object ["medium-test-bucket"] {::store/limit 100}))
 
   ;; This should yield 4000000
   (time
    @(store/long-query-reducer db incrementor 0
-                              [:Object [:= :bucket "big-test-bucket"]]))
+                              [:Object [:= :bucket "medium-test-bucket"]]))
 
   ;; This should yield 100 and return quick
   @(store/long-query-reducer db (max-incrementor 100) 0
-                              [:Object [:= :bucket "big-test-bucket"]])
+                             [:Object [:= :bucket "big-test-bucket"]])
   )

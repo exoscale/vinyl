@@ -12,13 +12,15 @@
             [exoscale.vinyl.query       :as query]
             [exoscale.vinyl.tuple       :as tuple]
             [exoscale.vinyl.cursor      :as cursor]
-            [exoscale.vinyl.fn          :as fn])
+            [exoscale.vinyl.fn          :as fn]
+            [exoscale.vinyl.store :as store])
   (:import
    (com.apple.foundationdb.record.provider.foundationdb.keyspace
     DirectoryLayerDirectory
     KeySpaceDirectory
     KeySpaceDirectory$KeyType
     KeySpace)
+   com.apple.foundationdb.async.AsyncUtil
    com.apple.foundationdb.record.query.RecordQuery
    com.apple.foundationdb.record.provider.foundationdb.FDBDatabase
    com.apple.foundationdb.record.provider.foundationdb.FDBDatabaseFactory
@@ -33,6 +35,9 @@
    com.apple.foundationdb.record.query.plan.plans.QueryPlan
    com.apple.foundationdb.record.RecordMetaDataProvider
    com.apple.foundationdb.record.provider.foundationdb.FDBDatabaseRunner
+   com.apple.foundationdb.record.RecordCursorContinuation
+   com.apple.foundationdb.record.RecordCursor
+   com.apple.foundationdb.record.RecordCursorResult
    com.apple.foundationdb.tuple.Tuple
    java.lang.AutoCloseable
    java.util.concurrent.CompletableFuture
@@ -419,7 +424,7 @@
          q       (as-query query)
          runner  (wrapped-runner db
                                  {::max-attempts        Integer/MAX_VALUE
-                                   ::max-delay           2
+                                  ::max-delay           2
                                   ::initial-delay       2})]
      (-> (run-async
           runner
@@ -433,3 +438,45 @@
          (fn/close-on-complete runner))))
   ([db f init query opts values]
    (long-query-reducer db f init query (assoc opts ::values values))))
+
+(defn fetch [db record-type ^RecordCursorContinuation cont cont-fn result-fn range opts]
+  (let [runner (wrapped-runner db {})
+        cursor (volatile! nil)]
+    (run-async
+     runner
+     (fn [^FDBRecordStore store]
+
+       (when-not @cursor
+         (vreset! cursor (.scanRecords store (prefix-range runner record-type range) (some-> cont .toBytes) (scan-properties opts))))
+
+       (AsyncUtil/whileTrue
+        (reify java.util.function.Supplier
+          (get [_]
+            (-> ^RecordCursor @cursor
+                .onNext
+                (.thenApply
+                 (fn/make-fun
+                  (fn [^RecordCursorResult result]
+                    (cond
+                      (not (.hasNext result))
+                      (do
+                        (cont-fn (-> result .getContinuation))
+                        false)
+
+                      (.hasStoppedBeforeEnd result)
+                      (do
+                        (cont-fn (-> result .getContinuation))
+                        false)
+
+                      :else
+                      (not (reduced? (result-fn result)))))))))))))))
+
+(defn chunked-long-range-reducer [db f init record-type range opts]
+  (let [cont (volatile! nil)
+        result (volatile! init)]
+    (.thenApply (AsyncUtil/whileTrue
+                 (reify java.util.function.Supplier
+                   (get [_]
+                     (-> ^CompletableFuture (fetch db record-type @cont #(vreset! cont %) #(vswap! result f %) range opts)
+                         (.thenApply (fn/make-fun (fn [_] (not (or (reduced? @result) (nil? @cont) (.isEnd ^RecordCursorContinuation @cont))))))))))
+                (fn/make-fun (fn [_] (unreduced @result))))))
