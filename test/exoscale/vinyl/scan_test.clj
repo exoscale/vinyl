@@ -61,6 +61,10 @@
   ;; Here we do the same thing but with a larger amount of records
   (def db (store/start (assoc ds/demostore :env "dev")))
 
+  ;; Installing a few records
+  (install-records db (record-generator "mini-bucket" 100))
+  (install-records db (record-generator "small-bucket" 100000))
+
   ;; Run this if you want 4M records
   #_(install-records db (record-generator "big-test-bucket" 4000000))
 

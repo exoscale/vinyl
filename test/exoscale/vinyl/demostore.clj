@@ -42,7 +42,9 @@
    :Object  {:primary-key [:concat :type-key "bucket" "path"]
              :indices     [{:name "path_count"
                             :on [:group-by "path" "bucket"]
-                            :type :count-not-null}]}})
+                            :type :count-not-null}
+                           {:name "bucket_paths"
+                            :on [:concat "bucket" "path"]}]}})
 
 (def demostore
   (store/initialize :demostore (Demostore/getDescriptor) schema))

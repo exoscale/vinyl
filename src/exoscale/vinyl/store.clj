@@ -26,12 +26,15 @@
    com.apple.foundationdb.record.provider.foundationdb.FDBRecordContext
    com.apple.foundationdb.record.provider.foundationdb.FDBRecordStore
    com.apple.foundationdb.record.provider.foundationdb.FDBRecord
+   com.apple.foundationdb.record.IndexScanType
+   com.apple.foundationdb.record.metadata.Index
    com.apple.foundationdb.record.TupleRange
    com.apple.foundationdb.record.IsolationLevel
    com.apple.foundationdb.record.ExecuteProperties
    com.apple.foundationdb.record.ScanProperties
    com.apple.foundationdb.record.query.plan.plans.QueryPlan
    com.apple.foundationdb.record.RecordMetaDataProvider
+   com.apple.foundationdb.record.RecordMetaData
    com.apple.foundationdb.record.provider.foundationdb.FDBDatabaseRunner
    com.apple.foundationdb.tuple.Tuple
    java.lang.AutoCloseable
@@ -209,6 +212,20 @@
     q
     (apply query/build-query q)))
 
+(def ^:no-doc  ^:private
+  known-scan-types
+  {::by-value       IndexScanType/BY_VALUE
+   ::by-group       IndexScanType/BY_GROUP
+   ::by-rank        IndexScanType/BY_RANK
+   ::by-time-window IndexScanType/BY_TIME_WINDOW
+   ::by-text-token  IndexScanType/BY_TEXT_TOKEN})
+
+(defn ^IndexScanType as-scan-type
+  [t]
+  (if (instance? IndexScanType t)
+    t
+    (get known-scan-types t IndexScanType/BY_VALUE)))
+
 (defn store-query-fn
   [^RecordQuery query {::keys [values intercept-plan-fn log-plan?] :as opts}]
   (fn [^FDBRecordStore store]
@@ -306,27 +323,42 @@
      (let [opts {::foreach  #(delete-record store (record-primary-key %))}]
        (run-async store (store-query-fn (as-query query) opts))))))
 
+(defn ^TupleRange all-of-range
+  [txn-context record-type items]
+  (if (= ::raw record-type)
+    (TupleRange/allOf (tuple/from-seq items))
+    (TupleRange/allOf (key-for* txn-context record-type items))))
+
 (defn ^TupleRange prefix-range
   [txn-context record-type items]
   (let [fixed  (butlast items)
         prefix (last items)
         range   (TupleRange/prefixedBy (str prefix))]
-    (.prepend range (key-for* txn-context record-type fixed))))
-
-(defn ^TupleRange all-of-range
-  [txn-context record-type items]
-  (TupleRange/allOf (key-for* txn-context record-type items)))
+    (if (seq prefix)
+      (.prepend range (if (= record-type ::raw)
+                        (tuple/from-seq fixed)
+                        (key-for* txn-context record-type fixed)))
+      ;; An empty prefix would result in a bad range, we want an
+      ;; all-of range on the leading parts of the tuple in this
+      ;; case.
+      (all-of-range txn-context record-type fixed))))
 
 (defn ^TupleRange greater-than-range
   [txn-context record-type items]
-  (TupleRange/between (key-for* txn-context record-type items)
+  (TupleRange/between (if (= ::raw record-type)
+                        (tuple/from-seq items)
+                        (key-for* txn-context record-type items))
                       nil))
 
 (defn ^TupleRange between
   [txn-context record-type items start end]
-  (TupleRange/between
-   (key-for* txn-context record-type (conj (vec items) start))
-   (key-for* txn-context record-type (conj (vec items) end))))
+  (if (= ::raw record-type)
+    (TupleRange/between
+     (tuple/from-seq (conj (vec items) start))
+     (tuple/from-seq (conj (vec items) end)))
+    (TupleRange/between
+     (key-for* txn-context record-type (conj (vec items) start))
+     (key-for* txn-context record-type (conj (vec items) end)))))
 
 (defn ^IsolationLevel as-isolation-level
   [level]
@@ -369,6 +401,21 @@
   [txn-context record-type items opts]
   (scan-range txn-context (prefix-range txn-context record-type items) opts))
 
+(defn ^Index metadata-index
+  [^RecordMetaData metadata ^String index-name]
+  (.getIndex metadata index-name))
+
+(defn scan-index
+  [txn-context index-name scan-type ^TupleRange range ^bytes continuation opts]
+  (let [props     (scan-properties opts)
+        scan-type (as-scan-type scan-type)
+        index     (-> txn-context get-metadata (metadata-index index-name))]
+    (run-async
+     txn-context
+     (fn [^FDBRecordStore store]
+       (-> (.scanIndex store index scan-type range continuation props)
+           (cursor/apply-transforms opts))))))
+
 (defn delete-by-range
   [txn-context ^TupleRange range]
   (let [callback (fn [store] #(delete-record store (record-primary-key %)))]
@@ -386,7 +433,7 @@
   (delete-by-range txn-context (all-of-range txn-context record-type items)))
 
 (defn long-query-reducer
-  "A reducer over large ranges. Accepts queries as per `execute-query`. Results
+  "A reducer over large queries. Accepts queries as per `execute-query`. Results
    are reduced into an accumulator with the help of the reducing function `f`.
    The accumulator is initiated to `init`. `clojure.core.reduced` is honored.
 
@@ -419,7 +466,7 @@
          q       (as-query query)
          runner  (wrapped-runner db
                                  {::max-attempts        Integer/MAX_VALUE
-                                   ::max-delay           2
+                                  ::max-delay           2
                                   ::initial-delay       2})]
      (-> (run-async
           runner
