@@ -343,6 +343,25 @@
       ;; case.
       (all-of-range txn-context record-type fixed))))
 
+(defn inc-prefix
+  "Given an object path, yield the next semantic one."
+  [^String p]
+  (when (seq p)
+    (let [[c & s]  (reverse p)
+          reversed (conj s (-> c int inc char))]
+      (reduce str "" (reverse reversed)))))
+
+(defn ^TupleRange marker-range
+  [txn-context record-type items marker]
+  (if marker
+    (TupleRange/between
+     (key-for* txn-context record-type (conj (vec (butlast items)) marker))
+     (let [prefix (last items)]
+       (if (seq prefix)
+         (key-for* txn-context record-type (conj (vec (butlast items)) (inc-prefix prefix)))
+         (key-for* txn-context record-type (conj (vec (drop-last 2 items)) (inc-prefix (nth items (- (count items) 2))))))))
+    (prefix-range txn-context record-type items)))
+
 (defn ^TupleRange greater-than-range
   [txn-context record-type items]
   (TupleRange/between (if (= ::raw record-type)
@@ -432,6 +451,51 @@
   [txn-context record-type items]
   (delete-by-range txn-context (all-of-range txn-context record-type items)))
 
+(def ^:private ^:no-doc runner-params
+  {::max-attempts        Integer/MAX_VALUE
+   ::max-delay           2
+   ::initial-delay       2})
+
+(defn long-range-reducer
+  "A reducer over large ranges.
+   Results are reduced into an accumulator with the help of the reducing
+   function `f`.
+   The accumulator is initiated to `init`. `clojure.core.reduced` is honored.
+
+   Obviously, this approach does away with any consistency guarantees usually
+   offered by FDB.
+
+   Results being accumulated in memory, this also means that care must be
+   taken with the accumulator."
+  ;; Some cliff notes to read the code below.
+  ;; The basic idea is that scanning is done while it works, up until
+  ;; the point where an exception will be raised.
+  ;;
+  ;; By default, `run-async` uses a simple exponential back-off algorithm
+  ;; between transaction function retries. In this case we want to avoid that.
+  ;; To that effect, a runner is created with specific parameters (a large
+  ;; `max-attempts` value, as well as minimum viable delays.
+  ;;
+  ;; We then call `apply-reduce` on the returned cursor from our query with a
+  ;; twist: every visited element will get its continuation stored in an atom.
+  ;; When interrupted, the function will be retried, which pops the last seen
+  ;; continuation.
+  ;;
+  ([db f init record-type items]
+   (long-range-reducer db f init record-type items {}))
+  ([db f init record-type items {::keys [marker] :as opts}]
+   (let [cont    (atom nil)
+         result  (atom init)
+         props   (execute-properties (dissoc opts ::limit))
+         runner  (wrapped-runner db runner-params)
+         range   (marker-range runner record-type items marker)]
+     (-> (run-async
+          runner
+          (fn [^FDBRecordStore store]
+            (-> (.scanRecords store range @cont (scan-properties props))
+                (cursor/apply-reduce f result #(reset! cont %)))))
+         (fn/close-on-complete runner)))))
+
 (defn long-query-reducer
   "A reducer over large queries. Accepts queries as per `execute-query`. Results
    are reduced into an accumulator with the help of the reducing function `f`.
@@ -464,10 +528,7 @@
          props   (execute-properties (dissoc opts ::limit))
          ctx     (if (some? values) (query/bindings values) query/empty-context)
          q       (as-query query)
-         runner  (wrapped-runner db
-                                 {::max-attempts        Integer/MAX_VALUE
-                                  ::max-delay           2
-                                  ::initial-delay       2})]
+         runner  (wrapped-runner db runner-params)]
      (-> (run-async
           runner
           (fn [^FDBRecordStore store]

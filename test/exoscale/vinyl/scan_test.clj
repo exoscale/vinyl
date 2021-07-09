@@ -70,6 +70,20 @@
                                       [:Object [:and
                                                 [:= :bucket "small-bucket"]
                                                 [:starts-with? :path "files/00000010.txt"]]]))))
+    (is (= 100
+           @(store/long-range-reducer *db* incrementor 0 :Object ["small-bucket"])))
+
+    (is (= 100
+           @(store/long-range-reducer *db* incrementor 0 :Object ["small-bucket" ""])))
+
+    (is (= 100
+           @(store/long-range-reducer *db* incrementor 0 :Object ["small-bucket" "files/"])))
+
+    (is (= 90
+           @(store/long-range-reducer *db* incrementor 0 :Object ["small-bucket" "files/"] {::store/marker "files/00000010.txt"})))
+
+    (is (= 90
+           @(store/long-range-reducer *db* incrementor 0 :Object ["small-bucket" ""] {::store/marker "files/00000010.txt"})))
 
   (testing "returning a `reduced` value stops iteration"
     (is (= 10
