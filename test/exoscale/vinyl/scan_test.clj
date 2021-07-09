@@ -71,7 +71,6 @@
                                                 [:= :bucket "small-bucket"]
                                                 [:starts-with? :path "files/00000010.txt"]]]))))
 
-
   (testing "returning a `reduced` value stops iteration"
     (is (= 10
            @(store/long-query-reducer *db* (max-incrementor 10) 0
