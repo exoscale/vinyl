@@ -29,6 +29,14 @@
   [x _]
   (inc x))
 
+(defn inc-prefix
+  "Given an object path, yield the next semantic one."
+  [^String p]
+  (when (seq p)
+    (let [[c & s]  (reverse p)
+          reversed (conj s (-> c int inc char))]
+      (reduce str "" (reverse reversed)))))
+
 ;; For the sake of test run times we keep this small, bump at will
 ;; in the REPL!
 (def small-test-data
@@ -44,8 +52,30 @@
 
     (is (= 100
            @(store/long-query-reducer *db* incrementor 0
-                                      [:Object [:= :bucket "small-bucket"]]))))
+                                      [:Object [:= :bucket "small-bucket"]])))
 
+    (is (= 90
+           @(store/long-query-reducer *db* incrementor 0
+                                      [:Object [:and
+                                                [:= :bucket "small-bucket"]
+                                                [:>= :path "files/00000010.txt"]]])))
+    (is (= 90
+           @(store/long-query-reducer *db* incrementor 0
+                                      [:Object [:and
+                                                [:= :bucket "small-bucket"]
+                                                [:>= :path "files/00000010.txt"]
+                                                [:< :path (inc-prefix "files/")]]])))
+    (is (= 1
+           @(store/long-query-reducer *db* incrementor 0
+                                      [:Object [:and
+                                                [:= :bucket "small-bucket"]
+                                                [:starts-with? :path "files/00000010.txt"]]])))
+    (is (= 1
+           @(store/long-query-reducer *db* incrementor 0
+                                      [:Object [:and
+                                                [:= :bucket "small-bucket"]
+                                                [:starts-with? :path "files/00000010.txt"]
+                                                [:< :path (inc-prefix "files/")]]]))))
   (testing "returning a `reduced` value stops iteration"
     (is (= 10
            @(store/long-query-reducer *db* (max-incrementor 10) 0
@@ -77,5 +107,5 @@
 
   ;; This should yield 100 and return quick
   @(store/long-query-reducer db (max-incrementor 100) 0
-                              [:Object [:= :bucket "big-test-bucket"]])
+                             [:Object [:= :bucket "big-test-bucket"]])
   )
