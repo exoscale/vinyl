@@ -475,11 +475,11 @@
             (let [plan ^QueryPlan (.planQuery store q)]
               (when (true? log-plan?)
                 (log/info "planned-query:" (str plan)))
-              (-> (.execute
-                   store
-                   ctx
-                   ^bytes @cont
-                   props)
+              (-> (.execute plan
+                            store
+                            ctx
+                            ^bytes @cont
+                            props)
                   (cursor/apply-reduce f result #(reset! cont %))))))
          (fn/close-on-complete runner))))
   ([db f init query opts values]
