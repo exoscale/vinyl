@@ -69,13 +69,9 @@
            @(store/long-query-reducer *db* incrementor 0
                                       [:Object [:and
                                                 [:= :bucket "small-bucket"]
-                                                [:starts-with? :path "files/00000010.txt"]]])))
-    (is (= 1
-           @(store/long-query-reducer *db* incrementor 0
-                                      [:Object [:and
-                                                [:= :bucket "small-bucket"]
-                                                [:starts-with? :path "files/00000010.txt"]
-                                                [:< :path (inc-prefix "files/")]]]))))
+                                                [:starts-with? :path "files/00000010.txt"]]]))))
+
+
   (testing "returning a `reduced` value stops iteration"
     (is (= 10
            @(store/long-query-reducer *db* (max-incrementor 10) 0
@@ -84,7 +80,22 @@
   (testing "maintained indices are consistent"
     (is (= (agg/compute *db* :count-not-null :Object :path_count "small-bucket")
            @(store/long-query-reducer *db* incrementor 0
-                                      [:Object [:= :bucket "small-bucket"]])))))
+                                      [:Object [:= :bucket "small-bucket"]]))))
+
+  (testing "incompatible operators"
+    (is (thrown? java.util.concurrent.ExecutionException
+                 @(store/long-query-reducer *db* incrementor 0
+                                            [:Object [:and
+                                                      [:= :bucket "small-bucket"]
+                                                      [:starts-with? :path "files/00000010.txt"]
+                                                      [:>= :path "files/"]]])))
+
+    (is (thrown? java.util.concurrent.ExecutionException
+                 @(store/long-query-reducer *db* incrementor 0
+                                            [:Object [:and
+                                                      [:= :bucket "small-bucket"]
+                                                      [:starts-with? :path "files/00000010.txt"]
+                                                      [:< :path (inc-prefix "files/")]]])))))
 
 (comment
 
@@ -107,5 +118,4 @@
 
   ;; This should yield 100 and return quick
   @(store/long-query-reducer db (max-incrementor 100) 0
-                             [:Object [:= :bucket "big-test-bucket"]])
-  )
+                             [:Object [:= :bucket "big-test-bucket"]]))
