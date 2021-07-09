@@ -12,7 +12,8 @@
             [exoscale.vinyl.query       :as query]
             [exoscale.vinyl.tuple       :as tuple]
             [exoscale.vinyl.cursor      :as cursor]
-            [exoscale.vinyl.fn          :as fn])
+            [exoscale.vinyl.fn          :as fn]
+            [clojure.string :as str])
   (:import
    (com.apple.foundationdb.record.provider.foundationdb.keyspace
     DirectoryLayerDirectory
@@ -458,7 +459,7 @@
   ;;
   ([db f init query]
    (long-query-reducer db f init query {}))
-  ([db f init query {::keys [values] :as opts}]
+  ([db f init query {::keys [values log-plan?] :as opts}]
    (let [cont    (atom nil)
          result  (atom init)
          props   (execute-properties (dissoc opts ::limit))
@@ -471,12 +472,15 @@
      (-> (run-async
           runner
           (fn [^FDBRecordStore store]
-            (-> (.execute (.planQuery store q)
-                          store
-                          ctx
-                          ^bytes @cont
-                          props)
-                (cursor/apply-reduce f result #(reset! cont %)))))
+            (let [plan ^QueryPlan (.planQuery store q)]
+              (when (true? log-plan?)
+                (log/info "planned-query:" (str plan)))
+              (-> (.execute
+                   store
+                   ctx
+                   ^bytes @cont
+                   props)
+                  (cursor/apply-reduce f result #(reset! cont %))))))
          (fn/close-on-complete runner))))
   ([db f init query opts values]
    (long-query-reducer db f init query (assoc opts ::values values))))
