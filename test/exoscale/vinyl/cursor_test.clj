@@ -21,3 +21,12 @@
                                      ::store/reduce-init init}))
     [0 1 2 3 4 5 6] +           0 21
     [0 1 2 3 4 5 6] reduce-plus 0 15))
+
+(deftest transduce-test
+  (are [items reducer init result]
+       (= result @(apply-transforms (from-list items)
+                                    {::store/reducer     reducer
+                                     ::store/transducer  (map inc)
+                                     ::store/reduce-init init}))
+    [0 1 2 3 4 5 6] +           0 28
+    [0 1 2 3 4 5 6] (completing reduce-plus) 0 15))
