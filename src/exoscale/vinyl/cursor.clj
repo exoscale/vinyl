@@ -11,15 +11,19 @@
   (as-list     [this] "Transform a cursor or cursor future to a list")
   (as-iterator [this] "Transform a cursor or cursor future to an iterator"))
 
-(defn apply-reduce
-  "A variant of `RecordCursor::reduce` that honors `reduced?`.
+(defn apply-transduce
+  "A variant of `RecordCursor::reduce` that honors `reduced?` and supports
+   transducers.
    Hopefully https://github.com/FoundationDB/fdb-record-layer/pull/1272
    gets in which will provide a way to do this directly from record layer.
 
    When `cont-fn` is given, it will be called on the last seen continuation
    byte array for every new element."
-  ([^RecordCursor cursor f init cont-fn]
-   (let [acc (if (instance? clojure.lang.Atom init) init (atom (or init (f))))]
+  ([^RecordCursor cursor xform f init cont-fn]
+   (let [reducer (if (some? xform) (xform f) f)
+         acc     (if (instance? clojure.lang.Atom init)
+                   init
+                   (atom (or init (f))))]
      (.thenApply
       (AsyncUtil/whileTrue
        (reify Supplier
@@ -32,18 +36,24 @@
                    (when (ifn? cont-fn)
                      (-> result .getContinuation .toBytes cont-fn))
                    (let [next?   (.hasNext result)
-                         new-acc (when next? (swap! acc f (.get result)))]
+                         new-acc (when next? (swap! acc reducer (.get result)))]
                      (and (not (reduced? new-acc)) next?))))))))
        (.getExecutor cursor))
-      (fn/make-fun (fn [_] (unreduced @acc))))))
+      (fn/make-fun (fn [_]
+                     (unreduced
+                      (cond-> @acc
+                        (some? xform)
+                        reducer)))))))
+  ([cursor f init cont-fn]
+   (apply-transduce cursor nil f init cont-fn))
   ([cursor f init]
-   (apply-reduce cursor f init nil)))
+   (apply-transduce cursor nil f init nil)))
 
 (defn apply-transforms
   "Apply transformations to a record cursor."
   [^RecordCursor cursor
    {:exoscale.vinyl.store/keys [list? skip limit transform reduce-init
-                                reducer filter foreach iterator?]}]
+                                transducer reducer filter foreach iterator?]}]
   (let [list?     (if reducer false list?)
         iterator? (if reducer false iterator?)
         foreach!  (fn [^RecordCursor c] (.forEach c (fn/make-fun foreach)))]
@@ -57,7 +67,7 @@
       (some? transform)
       (.map (fn/make-fun transform))
       (some? reducer)
-      (apply-reduce reducer reduce-init)
+      (apply-transduce transducer reducer reduce-init nil)
       (some? foreach)
       (foreach!)
       (true? list?)
@@ -68,7 +78,7 @@
 (deftype ReducibleCursor [cursor]
   clojure.lang.IReduceInit
   (reduce [_ f init]
-    @(apply-reduce cursor f init)))
+    @(apply-transduce cursor f init)))
 
 (defn reducible
   [cursor]

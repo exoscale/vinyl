@@ -458,10 +458,10 @@
    ::max-delay           2
    ::initial-delay       2})
 
-(defn continuation-traversing-reducer
-  "A reducer over large ranges.
+(defn continuation-traversing-transduce
+  "A transducer over large ranges.
    Results are reduced into an accumulator with the help of the reducing
-   function `f`.
+   function `f` and transformation `xform`.
    The accumulator is initiated to `init`. `clojure.core.reduced` is honored.
 
    Obviously, this approach does away with any consistency guarantees usually
@@ -478,12 +478,12 @@
   ;; To that effect, a runner is created with specific parameters (a large
   ;; `max-attempts` value, as well as minimum viable delays.
   ;;
-  ;; We then call `apply-reduce` on the returned cursor from our query with a
+  ;; We then call `apply-transduce` on the returned cursor from our query with a
   ;; twist: every visited element will get its continuation stored in an atom.
   ;; When interrupted, the function will be retried, which pops the last seen
   ;; continuation.
   ;;
-  [db f val continuing-fn]
+  [db xform f val continuing-fn]
   (let [cont    (atom nil)
         result  (atom val)
         runner  (wrapped-runner db runner-params)]
@@ -491,10 +491,12 @@
          runner
          (fn [^FDBRecordStore store]
            (-> (continuing-fn store @cont)
-               (cursor/apply-reduce f result #(reset! cont %)))))
+               (cursor/apply-transduce xform f result #(reset! cont %)))))
         (fn/close-on-complete runner))))
 
-(defn long-range-reducer
+
+
+(defn long-range-reduce
   "A reducer over large ranges.
    Results are reduced into an accumulator with the help of the reducing
    function `f`.
@@ -506,16 +508,29 @@
    Results being accumulated in memory, this also means that care must be
    taken with the accumulator."
   ([db f val record-type items]
-   (long-range-reducer db f val record-type items {}))
+   (long-range-reduce db f val record-type items {}))
   ([db f val record-type items {::keys [marker] :as opts}]
    (let [range (marker-range db record-type items marker)
          props (scan-properties opts)]
-     (continuation-traversing-reducer
-      db f val
+     (continuation-traversing-transduce
+      db nil f val
       (fn [^FDBRecordStore store ^bytes cont]
         (.scanRecords store range cont props))))))
 
-(defn long-query-reducer
+(defn long-range-transduce
+  "A transducer over large ranges. Except for the addition of `xform`
+   behaves like `long-range-reducer`."
+  ([db xform f val record-type items]
+   (long-range-transduce db xform f val record-type items {}))
+  ([db xform f val record-type items {::keys [marker] :as opts}]
+   (let [range (marker-range db record-type items marker)
+         props (scan-properties opts)]
+     (continuation-traversing-transduce
+      db xform f val
+      (fn [^FDBRecordStore store ^bytes cont]
+        (.scanRecords store range cont props))))))
+
+(defn long-query-reduce
   "A reducer over large queries. Accepts queries as per `execute-query`. Results
    are reduced into an accumulator with the help of the reducing function `f`.
    The accumulator is initiated to `init`. `clojure.core.reduced` is honored.
@@ -526,14 +541,14 @@
    Results being accumulated in memory, this also means that care must be
    taken with the accumulator."
   ([db f val query]
-   (long-query-reducer db f val query {}))
+   (long-query-reduce db f val query {}))
+  ([db f init query opts values]
+   (long-query-reduce db f init query (assoc opts ::values values)))
   ([db f val query {::keys [values] :as opts}]
    (let [props   (execute-properties (dissoc opts ::limit))
          ctx     (if (some? values) (query/bindings values) query/empty-context)
          q       (as-query query)]
-     (continuation-traversing-reducer
-      db f val
+     (continuation-traversing-transduce
+      db nil f val
       (fn [^FDBRecordStore store ^bytes cont]
-        (.execute (.planQuery store q) store ctx cont props)))))
-  ([db f init query opts values]
-   (long-query-reducer db f init query (assoc opts ::values values))))
+        (.execute (.planQuery store q) store ctx cont props))))))
