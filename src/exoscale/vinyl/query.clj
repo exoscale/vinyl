@@ -156,7 +156,7 @@
 
 (defmethod multi-build-filter :<=
   [{:keys [field comparand]}]
-  (-> (Query/keyExpression (build-field field))
+  (-> (build-field field)
       (.lessThanOrEquals comparand)))
 
 (defn ^RecordQuery build-query
