@@ -32,7 +32,13 @@
            {:id 4 :account-id 4 :total 10 :lines [{:product "p1" :quantity 2}
                                                   {:product "p2" :quantity 4}]}
            {:id 5 :account-id 4 :total 80 :lines [{:product "p4" :quantity 1}]}]
-          @(store/list-query *db* [:Invoice [:>= :id 3]] opts))))
+          @(store/list-query *db* [:Invoice [:>= :id 3]] opts)))
+      (is
+       (= [{:account-id 1 :id 1 :total 10 :lines [{:product "p1" :quantity 2}
+                                                  {:product "p2" :quantity 4}]}
+           {:account-id 1 :id 2 :total 30 :lines [{:product "p1" :quantity 8}]}
+           {:account-id 3 :id 3 :total 80 :lines [{:product "p4" :quantity 1}]}]
+          @(store/list-query *db* [:Invoice [:<= :id 3]] opts))))
     (testing "equality comparisons"
       (is
        (= [{:id 1 :name "a1" :state :active}
@@ -54,14 +60,14 @@
   (testing "Aggregation queries"
     (testing "Count not null aggregation"
       (are [account-id total]
-           (= total (agg/compute *db* :count-not-null :User :usercnt account-id))
+          (= total (agg/compute *db* :count-not-null :User :usercnt account-id))
         1 2
         2 1
         3 3
         4 0))
     (testing "Sum aggregation"
       (are [account-id total]
-           (= total (agg/compute *db* :sum :Invoice :total_invoiced account-id))
+          (= total (agg/compute *db* :sum :Invoice :total_invoiced account-id))
         1 40
         2 0
         3 80
