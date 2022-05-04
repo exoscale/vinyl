@@ -21,7 +21,9 @@
            exoscale.vinyl.Demostore$LocationOrBuilder
            exoscale.vinyl.Demostore$Object
            exoscale.vinyl.Demostore$ObjectOrBuilder
-           exoscale.vinyl.Demostore$Object$Builder))
+           exoscale.vinyl.Demostore$Object$Builder
+           exoscale.vinyl.Demostore$Payment))
+
 
 (defprotocol RecordParser (parse-record [this]))
 (defprotocol RecordMerger (merge-from [this other]))
@@ -32,6 +34,17 @@
 (defn next-id   []                   (swap! counter inc))
 (defn ensure-id [{:keys [id] :as m}] (cond-> m (nil? id) (assoc :id (next-id))))
 
+(def prepaid (.ordinal Demostore$Payment/PREPAID))
+(def postpaid (.ordinal Demostore$Payment/POSTPAID))
+(def wired (.ordinal Demostore$Payment/WIRED))
+
+(defn- payment->enum [state]
+  (condp = state
+    :prepaid  Demostore$Payment/PREPAID
+    :postpaid Demostore$Payment/POSTPAID
+    :wired    Demostore$Payment/WIRED
+    Demostore$Payment/UNRECOGNIZED))
+
 (defn ^Demostore$Account account->record
   [account]
   (let [account (ex/assert-spec-valid ::account (ensure-id account))
@@ -40,6 +53,7 @@
         (.setId (long (or (:id account) (next-id))))
         (.setName (str (:name account)))
         (.setState (name (:state account)))
+        (.setPayment (payment->enum (:payment account)))
         (.build))))
 
 (defn ^Demostore$Location location->record
@@ -134,9 +148,14 @@
   Demostore$AccountOrBuilder
   (parse-record [r]
     (with-meta
-      {:id    (.getId r)
-       :name  (.getName r)
-       :state (some-> (.getState r) keyword)}
+      {:id      (.getId r)
+       :name    (.getName r)
+       :state   (keyword (.getState r))
+       :payment (let [state (.getPayment r)]
+                  (cond
+                    (= Demostore$Payment/PREPAID state)  :prepaid
+                    (= Demostore$Payment/POSTPAID state) :postpaid
+                    (= Demostore$Payment/WIRED state)    :wired))}
       {::record-type :Account}))
   Demostore$CityOrBuilder
   (parse-record [r]

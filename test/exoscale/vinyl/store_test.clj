@@ -9,7 +9,7 @@
 
 (deftest liveness-test
   (testing "Things are set up correctly"
-    (is (= {:id 1 :name "a1" :state :active}
+    (is (= {:id 1 :name "a1" :state :active :payment :wired}
            (p/parse-record (store/load-record *db* :Account [1]))))))
 
 (deftest query-test
@@ -42,30 +42,31 @@
           @(store/list-query *db* [:Invoice [:<= :id 3]] opts))))
     (testing "equality comparisons"
       (is
-       (= [{:id 1 :name "a1" :state :active}
-           {:id 2 :name "a2" :state :suspended}
-           {:id 3 :name "a3" :state :suspended}]
+       (= [{:id 1 :name "a1" :state :active    :payment :wired}
+           {:id 2 :name "a2" :state :suspended :payment :prepaid}
+           {:id 3 :name "a3" :state :suspended :payment :wired}]
           @(store/list-query *db* [:Account [:not [:= :state "terminated"]]]
                              opts)))
       (is
-       (= [{:id 1 :name "a1" :state :active}
-           {:id 2 :name "a2" :state :suspended}
-           {:id 3 :name "a3" :state :suspended}]
+       (= [{:id 1 :name "a1" :state :active    :payment :wired}
+           {:id 2 :name "a2" :state :suspended :payment :prepaid}
+           {:id 3 :name "a3" :state :suspended :payment :wired}]
           @(store/list-query *db* [:Account [:not= :state "terminated"]] opts)))
       (is
-       (= [{:id 2 :name "a2" :state :suspended}
-           {:id 3 :name "a3" :state :suspended}]
+       (= [{:id 2 :name "a2" :state :suspended :payment :prepaid}
+           {:id 3 :name "a3" :state :suspended :payment :wired}]
           @(store/list-query *db* [:Account [:= :state "suspended"]] opts))))
     (testing "list-query"
       (is
-       (= [{:id 1 :location {:name "Lausanne"  :zip-code 1000}}
-           {:id 2 :location {:name "Lausanne"  :zip-code 1001}}
-           {:id 3 :location {:name "Lausanne"  :zip-code 1002}}
-           {:id 4 :location {:name "Lausanne"  :zip-code 1003}}
-           {:id 5 :location {:name "Lausanne"  :zip-code 1004}}]
-          @(store/list-query *db* [:City [:nested :location [:= :name "Lausanne"]]] opts))
-       (= [{:id 6 :location {:name "Neuchatel" :zip-code 2000}}]
-          @(store/list-query *db* [:City [:nested :location [:= :name "Neuchatel"]]] opts))))))
+        (= [{:id 1 :location {:name "Lausanne"  :zip-code 1000}
+                {:id 2 :location {:name "Lausanne"  :zip-code 1001}}
+                {:id 3 :location {:name "Lausanne"  :zip-code 1002}}
+                {:id 4 :location {:name "Lausanne"  :zip-code 1003}}
+                {:id 5 :location {:name "Lausanne"  :zip-code 1004}}}]
+           @(store/list-query *db* [:City [:nested :location [:= :name "Lausanne"]]] opts))
+        (is
+          (= [{:id 6 :location {:name "Neuchatel" :zip-code 2000}}]
+             @(store/list-query *db* [:City [:nested :location [:= :name "Neuchatel"]]] opts)))))))
 
 (defn- ensure-plan [query plan-str]
   (let [plan (atom nil)]
@@ -102,4 +103,10 @@
         1 40
         2 0
         3 80
-        4 90))))
+        4 90))
+    (testing "Enum aggregation"
+       (are [payment cnt]
+         (= cnt (agg/compute *db* :count-not-null :Account :account_payment_count payment))
+         p/prepaid 1
+         p/postpaid 1
+         p/wired 2))))
