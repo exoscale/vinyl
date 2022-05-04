@@ -43,60 +43,60 @@
            (agg/compute *db* :count-not-null :Object :path_count "small-bucket")))
 
     (is (= 100
-           @(store/long-query-reducer *db* incrementor 0
+           @(store/long-query-reduce *db* incrementor 0
                                       [:Object [:= :bucket "small-bucket"]])))
 
     (is (= 90
-           @(store/long-query-reducer *db* incrementor 0
+           @(store/long-query-reduce *db* incrementor 0
                                       [:Object [:and
                                                 [:= :bucket "small-bucket"]
                                                 [:>= :path "files/00000010.txt"]]])))
     (is (= 90
-           @(store/long-query-reducer *db* incrementor 0
+           @(store/long-query-reduce *db* incrementor 0
                                       [:Object [:and
                                                 [:= :bucket "small-bucket"]
                                                 [:>= :path "files/00000010.txt"]
                                                 [:< :path (store/inc-prefix "files/")]]])))
     (is (= 1
-           @(store/long-query-reducer *db* incrementor 0
+           @(store/long-query-reduce *db* incrementor 0
                                       [:Object [:and
                                                 [:= :bucket "small-bucket"]
                                                 [:starts-with? :path "files/00000010.txt"]]])))
     (is (= 100
-           @(store/long-range-reducer *db* incrementor 0 :Object ["small-bucket"])))
+           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket"])))
 
     (is (= 100
-           @(store/long-range-reducer *db* incrementor 0 :Object ["small-bucket" ""])))
+           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" ""])))
 
     (is (= 100
-           @(store/long-range-reducer *db* incrementor 0 :Object ["small-bucket" "files/"])))
+           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" "files/"])))
 
     (is (= 90
-           @(store/long-range-reducer *db* incrementor 0 :Object ["small-bucket" "files/"] {::store/marker "files/00000010.txt"})))
+           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" "files/"] {::store/marker "files/00000010.txt"})))
 
     (is (= 90
-           @(store/long-range-reducer *db* incrementor 0 :Object ["small-bucket" ""] {::store/marker "files/00000010.txt"}))))
+           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" ""] {::store/marker "files/00000010.txt"}))))
 
   (testing "returning a `reduced` value stops iteration"
     (is (= 10
-           @(store/long-query-reducer *db* (max-incrementor 10) 0
+           @(store/long-query-reduce *db* (max-incrementor 10) 0
                                       [:Object [:= :bucket "small-bucket"]]))))
 
   (testing "maintained indices are consistent"
     (is (= (agg/compute *db* :count-not-null :Object :path_count "small-bucket")
-           @(store/long-query-reducer *db* incrementor 0
+           @(store/long-query-reduce *db* incrementor 0
                                       [:Object [:= :bucket "small-bucket"]]))))
 
   (testing "incompatible operators"
     (is (thrown? java.util.concurrent.ExecutionException
-                 @(store/long-query-reducer *db* incrementor 0
+                 @(store/long-query-reduce *db* incrementor 0
                                             [:Object [:and
                                                       [:= :bucket "small-bucket"]
                                                       [:starts-with? :path "files/00000010.txt"]
                                                       [:>= :path "files/"]]])))
 
     (is (thrown? java.util.concurrent.ExecutionException
-                 @(store/long-query-reducer *db* incrementor 0
+                 @(store/long-query-reduce *db* incrementor 0
                                             [:Object [:and
                                                       [:= :bucket "small-bucket"]
                                                       [:starts-with? :path "files/00000010.txt"]
