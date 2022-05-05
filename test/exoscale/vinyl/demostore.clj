@@ -25,7 +25,15 @@
     {:id 3 :account-id 2 :name "a2u3" :email "a2u3@hello.com"}
     {:id 4 :account-id 3 :name "a3u4" :email "a3u5@hello.com"}
     {:id 5 :account-id 3 :name "a3u5" :email "a3u5@hello.com"}
-    {:id 6 :account-id 3 :name "a3u6" :email "a3u6@hello.com"}]})
+    {:id 6 :account-id 3 :name "a3u6" :email "a3u6@hello.com"}]
+   :City
+   [{:id 1 :location {:name "Lausanne"  :zip-code 1000}}
+    {:id 2 :location {:name "Lausanne"  :zip-code 1001}}
+    {:id 3 :location {:name "Lausanne"  :zip-code 1002}}
+    {:id 4 :location {:name "Lausanne"  :zip-code 1003}}
+    {:id 5 :location {:name "Lausanne"  :zip-code 1004}}
+    {:id 6 :location {:name "Neuchatel" :zip-code 2000}}]})
+   
 
 (def schema
   {:Account {:primary-key [:concat :type-key "id"]
@@ -44,7 +52,11 @@
                             :on [:group-by "path" "bucket"]
                             :type :count-not-null}
                            {:name "bucket_paths"
-                            :on [:concat "bucket" "path"]}]}})
+                            :on [:concat "bucket" "path"]}]}
+   :City   {:primary-key [:concat :type-key [:nest "location" "name"]
+                                            [:nest "location" "zip_code"]]}})
+
+
 
 (def demostore
   (store/initialize :demostore (Demostore/getDescriptor) schema))

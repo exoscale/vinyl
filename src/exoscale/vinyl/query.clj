@@ -6,6 +6,7 @@
   (:import com.apple.foundationdb.record.query.RecordQuery
            com.apple.foundationdb.record.query.expressions.Query
            com.apple.foundationdb.record.query.expressions.Field
+           com.apple.foundationdb.record.query.expressions.NestedField
            com.apple.foundationdb.record.query.expressions.QueryComponent
            com.apple.foundationdb.record.EvaluationContextBuilder
            com.apple.foundationdb.record.EvaluationContext
@@ -22,6 +23,10 @@
 (defmethod vec-filter-type :matches
   [_]
   (s/cat :type #{:matches} :field keyword? :filter ::filter))
+
+(defmethod vec-filter-type :nest
+  [_]
+  (s/cat :type #{:nest} :field keyword? :filter ::filter))
 
 (defmethod vec-filter-type :one-of-them
   [_]
@@ -138,6 +143,10 @@
   [{:keys [field filter]}]
   (-> (build-field field)
       (.matches (multi-build-filter filter))))
+
+(defmethod multi-build-filter :nest
+  [{:keys [field filter]}]
+  (NestedField. (name field) (multi-build-filter filter)))
 
 (defmethod multi-build-filter :>
   [{:keys [field comparand]}]

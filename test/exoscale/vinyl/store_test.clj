@@ -20,7 +20,8 @@
                             @(store/list-query *db* [record-type] opts))
         :Account
         :User
-        :Invoice))
+        :Invoice
+        :City))
     (testing "starts-with"
       (is
        (= [{:id 1 :account-id 1 :name "a1u1" :email "a1u1@hello.com"}
@@ -54,8 +55,34 @@
       (is
        (= [{:id 2 :name "a2" :state :suspended}
            {:id 3 :name "a3" :state :suspended}]
-          @(store/list-query *db* [:Account [:= :state "suspended"]] opts))))))
+          @(store/list-query *db* [:Account [:= :state "suspended"]] opts))))
+    (testing "list-query"
+      (is
+       (= [{:id 1 :location {:name "Lausanne"  :zip-code 1000}}
+           {:id 2 :location {:name "Lausanne"  :zip-code 1001}}
+           {:id 3 :location {:name "Lausanne"  :zip-code 1002}}
+           {:id 4 :location {:name "Lausanne"  :zip-code 1003}}
+           {:id 5 :location {:name "Lausanne"  :zip-code 1004}}]
+          @(store/list-query *db* [:City [:matches :location [:= :name "Lausanne"]]] opts))
+       (= [{:id 6 :location {:name "Neuchatel" :zip-code 2000}}]
+          @(store/list-query *db* [:City [:matches :location [:= :name "Neuchatel"]]] opts))))))
 
+
+(defn- ensure-plan [query plan-str]
+  (let [plan (atom nil)]
+    @(store/list-query *db* query
+                       {::store/intercept-plan-fn
+                        (fn [p] (reset! plan p))})
+    (is (= plan-str (str @plan)))))
+
+
+(deftest query-plan-test
+  (testing "No full scan"
+    (ensure-plan [:City] "Scan([IS City])")
+    (ensure-plan [:Account [:= :state "terminated"]] "Index(account_state [[terminated],[terminated]])")
+    (ensure-plan [:Account [:not= :state "terminated"]] "Scan(<,>) | [Account] | state NOT_EQUALS terminated")
+    (ensure-plan [:City [:nest :location [:= :name "Lausanne"]]] "WEIRD")))
+    
 (deftest aggregation-test
   (testing "Aggregation queries"
     (testing "Count not null aggregation"
@@ -72,5 +99,3 @@
         2 0
         3 80
         4 90))))
-
-(deftest query-filter-test)
