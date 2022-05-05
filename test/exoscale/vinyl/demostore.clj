@@ -54,7 +54,13 @@
                            {:name "bucket_paths"
                             :on [:concat "bucket" "path"]}]}
    :City   {:primary-key [:concat :type-key [:nest "location" "name"]
-                                            [:nest "location" "zip_code"]]}})
+                                            [:nest "location" "zip_code"]]
+            :indices     [{:name "city_name_zip_code"
+                           :on [:nest "location" "name"]
+                           #_
+                           [:concat :type-key
+                            [:nest "location" "name"]
+                            [:nest "location" "zip_code"]]}]}})
 
 
 

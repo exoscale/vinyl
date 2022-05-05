@@ -2,11 +2,17 @@
   :description "Clojure facade for the FoundationDB record-layer"
   :url "https://github.com/exoscale/vinyl"
   :license {:name "MIT/ISC"}
+  :repositories [["releases" {:id "jfrog"
+                              :url "https://ossartifacts.jfrog.io/artifactory/fdb-record-layer"
+                              :sign-releases false}]]
 
   :dependencies [[org.clojure/clojure                        "1.10.3"]
                  [org.clojure/tools.logging                  "1.1.0"]
                  [org.foundationdb/fdb-java                  "6.3.15"]
-                 [org.foundationdb/fdb-record-layer-core-pb3 "2.8.110.0"]
+                 [org.foundationdb/fdb-record-layer-core-pb3 "3.2.257.0"
+                  :exclusions [org.slf4j/slf4j-api
+                               com.google.protobuf/protobuf-java
+                               org.foundationdb/fdb-java]]
                  [com.google.protobuf/protobuf-java          "3.15.8"]
                  [com.stuartsierra/component                 "1.0.0"]
                  [exoscale/ex                                "0.3.17"]

@@ -78,10 +78,11 @@
 
 (deftest query-plan-test
   (testing "No full scan"
-    (ensure-plan [:City] "Scan([IS City])")
-    (ensure-plan [:Account [:= :state "terminated"]] "Index(account_state [[terminated],[terminated]])")
-    (ensure-plan [:Account [:not= :state "terminated"]] "Scan(<,>) | [Account] | state NOT_EQUALS terminated")
-    (ensure-plan [:City [:nest :location [:= :name "Lausanne"]]] "WEIRD")))
+
+    ;(ensure-plan [:City] "Scan([IS City])")
+    ;(ensure-plan [:Account [:= :state "terminated"]] "Index(account_state [[terminated],[terminated]])")))
+    ;(ensure-plan [:Account [:not= :state "terminated"]] "Scan(<,>) | [Account] | state NOT_EQUALS terminated")
+    (ensure-plan [:City [:nest :location [:= :name "Lausanne"]]] "Index(city_name_zip_code [[Lausanne],[Lausanne]])")))
     
 (deftest aggregation-test
   (testing "Aggregation queries"
