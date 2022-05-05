@@ -67,14 +67,12 @@
        (= [{:id 6 :location {:name "Neuchatel" :zip-code 2000}}]
           @(store/list-query *db* [:City [:matches :location [:= :name "Neuchatel"]]] opts))))))
 
-
 (defn- ensure-plan [query plan-str]
   (let [plan (atom nil)]
     @(store/list-query *db* query
                        {::store/intercept-plan-fn
                         (fn [p] (reset! plan p))})
     (is (= plan-str (str @plan)))))
-
 
 (deftest query-plan-test
   (testing "Planned queries"
