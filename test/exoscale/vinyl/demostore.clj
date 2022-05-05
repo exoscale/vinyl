@@ -33,7 +33,6 @@
     {:id 4 :location {:name "Lausanne"  :zip-code 1003}}
     {:id 5 :location {:name "Lausanne"  :zip-code 1004}}
     {:id 6 :location {:name "Neuchatel" :zip-code 2000}}]})
-   
 
 (def schema
   {:Account {:primary-key [:concat :type-key "id"]
