@@ -20,10 +20,6 @@ public final class Demostore {
   public enum Payment
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
-     * <pre>
-     * proto3 requires an enum to start with 0 but it's an invalid value for FDB Record Layer
-     * </pre>
-     *
      * <code>INVALID = 0;</code>
      */
     INVALID(0),
@@ -43,10 +39,6 @@ public final class Demostore {
     ;
 
     /**
-     * <pre>
-     * proto3 requires an enum to start with 0 but it's an invalid value for FDB Record Layer
-     * </pre>
-     *
      * <code>INVALID = 0;</code>
      */
     public static final int INVALID_VALUE = 0;
@@ -4338,6 +4330,1337 @@ public final class Demostore {
 
   }
 
+  public interface LocationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:exoscale.vinyl.Location)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 zip_code = 1;</code>
+     * @return The zipCode.
+     */
+    long getZipCode();
+
+    /**
+     * <code>string name = 2;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <code>string name = 2;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+  }
+  /**
+   * Protobuf type {@code exoscale.vinyl.Location}
+   */
+  public static final class Location extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:exoscale.vinyl.Location)
+      LocationOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use Location.newBuilder() to construct.
+    private Location(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private Location() {
+      name_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new Location();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private Location(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+
+              zipCode_ = input.readInt64();
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              name_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_Location_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_Location_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              exoscale.vinyl.Demostore.Location.class, exoscale.vinyl.Demostore.Location.Builder.class);
+    }
+
+    public static final int ZIP_CODE_FIELD_NUMBER = 1;
+    private long zipCode_;
+    /**
+     * <code>int64 zip_code = 1;</code>
+     * @return The zipCode.
+     */
+    @java.lang.Override
+    public long getZipCode() {
+      return zipCode_;
+    }
+
+    public static final int NAME_FIELD_NUMBER = 2;
+    private volatile java.lang.Object name_;
+    /**
+     * <code>string name = 2;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string name = 2;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (zipCode_ != 0L) {
+        output.writeInt64(1, zipCode_);
+      }
+      if (!getNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (zipCode_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, zipCode_);
+      }
+      if (!getNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof exoscale.vinyl.Demostore.Location)) {
+        return super.equals(obj);
+      }
+      exoscale.vinyl.Demostore.Location other = (exoscale.vinyl.Demostore.Location) obj;
+
+      if (getZipCode()
+          != other.getZipCode()) return false;
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ZIP_CODE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getZipCode());
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static exoscale.vinyl.Demostore.Location parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static exoscale.vinyl.Demostore.Location parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.Location parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static exoscale.vinyl.Demostore.Location parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.Location parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static exoscale.vinyl.Demostore.Location parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.Location parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static exoscale.vinyl.Demostore.Location parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.Location parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static exoscale.vinyl.Demostore.Location parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.Location parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static exoscale.vinyl.Demostore.Location parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(exoscale.vinyl.Demostore.Location prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code exoscale.vinyl.Location}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:exoscale.vinyl.Location)
+        exoscale.vinyl.Demostore.LocationOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_Location_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_Location_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                exoscale.vinyl.Demostore.Location.class, exoscale.vinyl.Demostore.Location.Builder.class);
+      }
+
+      // Construct using exoscale.vinyl.Demostore.Location.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        zipCode_ = 0L;
+
+        name_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_Location_descriptor;
+      }
+
+      @java.lang.Override
+      public exoscale.vinyl.Demostore.Location getDefaultInstanceForType() {
+        return exoscale.vinyl.Demostore.Location.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public exoscale.vinyl.Demostore.Location build() {
+        exoscale.vinyl.Demostore.Location result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public exoscale.vinyl.Demostore.Location buildPartial() {
+        exoscale.vinyl.Demostore.Location result = new exoscale.vinyl.Demostore.Location(this);
+        result.zipCode_ = zipCode_;
+        result.name_ = name_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof exoscale.vinyl.Demostore.Location) {
+          return mergeFrom((exoscale.vinyl.Demostore.Location)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(exoscale.vinyl.Demostore.Location other) {
+        if (other == exoscale.vinyl.Demostore.Location.getDefaultInstance()) return this;
+        if (other.getZipCode() != 0L) {
+          setZipCode(other.getZipCode());
+        }
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        exoscale.vinyl.Demostore.Location parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (exoscale.vinyl.Demostore.Location) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private long zipCode_ ;
+      /**
+       * <code>int64 zip_code = 1;</code>
+       * @return The zipCode.
+       */
+      @java.lang.Override
+      public long getZipCode() {
+        return zipCode_;
+      }
+      /**
+       * <code>int64 zip_code = 1;</code>
+       * @param value The zipCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setZipCode(long value) {
+        
+        zipCode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 zip_code = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearZipCode() {
+        
+        zipCode_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object name_ = "";
+      /**
+       * <code>string name = 2;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string name = 2;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string name = 2;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string name = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string name = 2;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:exoscale.vinyl.Location)
+    }
+
+    // @@protoc_insertion_point(class_scope:exoscale.vinyl.Location)
+    private static final exoscale.vinyl.Demostore.Location DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new exoscale.vinyl.Demostore.Location();
+    }
+
+    public static exoscale.vinyl.Demostore.Location getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<Location>
+        PARSER = new com.google.protobuf.AbstractParser<Location>() {
+      @java.lang.Override
+      public Location parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new Location(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<Location> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Location> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public exoscale.vinyl.Demostore.Location getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CityOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:exoscale.vinyl.City)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 id = 1;</code>
+     * @return The id.
+     */
+    long getId();
+
+    /**
+     * <code>.exoscale.vinyl.Location location = 2;</code>
+     * @return Whether the location field is set.
+     */
+    boolean hasLocation();
+    /**
+     * <code>.exoscale.vinyl.Location location = 2;</code>
+     * @return The location.
+     */
+    exoscale.vinyl.Demostore.Location getLocation();
+    /**
+     * <code>.exoscale.vinyl.Location location = 2;</code>
+     */
+    exoscale.vinyl.Demostore.LocationOrBuilder getLocationOrBuilder();
+  }
+  /**
+   * Protobuf type {@code exoscale.vinyl.City}
+   */
+  public static final class City extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:exoscale.vinyl.City)
+      CityOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use City.newBuilder() to construct.
+    private City(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private City() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new City();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private City(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+
+              id_ = input.readInt64();
+              break;
+            }
+            case 18: {
+              exoscale.vinyl.Demostore.Location.Builder subBuilder = null;
+              if (location_ != null) {
+                subBuilder = location_.toBuilder();
+              }
+              location_ = input.readMessage(exoscale.vinyl.Demostore.Location.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(location_);
+                location_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_City_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_City_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              exoscale.vinyl.Demostore.City.class, exoscale.vinyl.Demostore.City.Builder.class);
+    }
+
+    public static final int ID_FIELD_NUMBER = 1;
+    private long id_;
+    /**
+     * <code>int64 id = 1;</code>
+     * @return The id.
+     */
+    @java.lang.Override
+    public long getId() {
+      return id_;
+    }
+
+    public static final int LOCATION_FIELD_NUMBER = 2;
+    private exoscale.vinyl.Demostore.Location location_;
+    /**
+     * <code>.exoscale.vinyl.Location location = 2;</code>
+     * @return Whether the location field is set.
+     */
+    @java.lang.Override
+    public boolean hasLocation() {
+      return location_ != null;
+    }
+    /**
+     * <code>.exoscale.vinyl.Location location = 2;</code>
+     * @return The location.
+     */
+    @java.lang.Override
+    public exoscale.vinyl.Demostore.Location getLocation() {
+      return location_ == null ? exoscale.vinyl.Demostore.Location.getDefaultInstance() : location_;
+    }
+    /**
+     * <code>.exoscale.vinyl.Location location = 2;</code>
+     */
+    @java.lang.Override
+    public exoscale.vinyl.Demostore.LocationOrBuilder getLocationOrBuilder() {
+      return getLocation();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (id_ != 0L) {
+        output.writeInt64(1, id_);
+      }
+      if (location_ != null) {
+        output.writeMessage(2, getLocation());
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (id_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, id_);
+      }
+      if (location_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getLocation());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof exoscale.vinyl.Demostore.City)) {
+        return super.equals(obj);
+      }
+      exoscale.vinyl.Demostore.City other = (exoscale.vinyl.Demostore.City) obj;
+
+      if (getId()
+          != other.getId()) return false;
+      if (hasLocation() != other.hasLocation()) return false;
+      if (hasLocation()) {
+        if (!getLocation()
+            .equals(other.getLocation())) return false;
+      }
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getId());
+      if (hasLocation()) {
+        hash = (37 * hash) + LOCATION_FIELD_NUMBER;
+        hash = (53 * hash) + getLocation().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static exoscale.vinyl.Demostore.City parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static exoscale.vinyl.Demostore.City parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.City parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static exoscale.vinyl.Demostore.City parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.City parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static exoscale.vinyl.Demostore.City parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.City parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static exoscale.vinyl.Demostore.City parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.City parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static exoscale.vinyl.Demostore.City parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static exoscale.vinyl.Demostore.City parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static exoscale.vinyl.Demostore.City parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(exoscale.vinyl.Demostore.City prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code exoscale.vinyl.City}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:exoscale.vinyl.City)
+        exoscale.vinyl.Demostore.CityOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_City_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_City_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                exoscale.vinyl.Demostore.City.class, exoscale.vinyl.Demostore.City.Builder.class);
+      }
+
+      // Construct using exoscale.vinyl.Demostore.City.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        id_ = 0L;
+
+        if (locationBuilder_ == null) {
+          location_ = null;
+        } else {
+          location_ = null;
+          locationBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return exoscale.vinyl.Demostore.internal_static_exoscale_vinyl_City_descriptor;
+      }
+
+      @java.lang.Override
+      public exoscale.vinyl.Demostore.City getDefaultInstanceForType() {
+        return exoscale.vinyl.Demostore.City.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public exoscale.vinyl.Demostore.City build() {
+        exoscale.vinyl.Demostore.City result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public exoscale.vinyl.Demostore.City buildPartial() {
+        exoscale.vinyl.Demostore.City result = new exoscale.vinyl.Demostore.City(this);
+        result.id_ = id_;
+        if (locationBuilder_ == null) {
+          result.location_ = location_;
+        } else {
+          result.location_ = locationBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof exoscale.vinyl.Demostore.City) {
+          return mergeFrom((exoscale.vinyl.Demostore.City)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(exoscale.vinyl.Demostore.City other) {
+        if (other == exoscale.vinyl.Demostore.City.getDefaultInstance()) return this;
+        if (other.getId() != 0L) {
+          setId(other.getId());
+        }
+        if (other.hasLocation()) {
+          mergeLocation(other.getLocation());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        exoscale.vinyl.Demostore.City parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (exoscale.vinyl.Demostore.City) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private long id_ ;
+      /**
+       * <code>int64 id = 1;</code>
+       * @return The id.
+       */
+      @java.lang.Override
+      public long getId() {
+        return id_;
+      }
+      /**
+       * <code>int64 id = 1;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setId(long value) {
+        
+        id_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearId() {
+        
+        id_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private exoscale.vinyl.Demostore.Location location_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          exoscale.vinyl.Demostore.Location, exoscale.vinyl.Demostore.Location.Builder, exoscale.vinyl.Demostore.LocationOrBuilder> locationBuilder_;
+      /**
+       * <code>.exoscale.vinyl.Location location = 2;</code>
+       * @return Whether the location field is set.
+       */
+      public boolean hasLocation() {
+        return locationBuilder_ != null || location_ != null;
+      }
+      /**
+       * <code>.exoscale.vinyl.Location location = 2;</code>
+       * @return The location.
+       */
+      public exoscale.vinyl.Demostore.Location getLocation() {
+        if (locationBuilder_ == null) {
+          return location_ == null ? exoscale.vinyl.Demostore.Location.getDefaultInstance() : location_;
+        } else {
+          return locationBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.exoscale.vinyl.Location location = 2;</code>
+       */
+      public Builder setLocation(exoscale.vinyl.Demostore.Location value) {
+        if (locationBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          location_ = value;
+          onChanged();
+        } else {
+          locationBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.exoscale.vinyl.Location location = 2;</code>
+       */
+      public Builder setLocation(
+          exoscale.vinyl.Demostore.Location.Builder builderForValue) {
+        if (locationBuilder_ == null) {
+          location_ = builderForValue.build();
+          onChanged();
+        } else {
+          locationBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.exoscale.vinyl.Location location = 2;</code>
+       */
+      public Builder mergeLocation(exoscale.vinyl.Demostore.Location value) {
+        if (locationBuilder_ == null) {
+          if (location_ != null) {
+            location_ =
+              exoscale.vinyl.Demostore.Location.newBuilder(location_).mergeFrom(value).buildPartial();
+          } else {
+            location_ = value;
+          }
+          onChanged();
+        } else {
+          locationBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.exoscale.vinyl.Location location = 2;</code>
+       */
+      public Builder clearLocation() {
+        if (locationBuilder_ == null) {
+          location_ = null;
+          onChanged();
+        } else {
+          location_ = null;
+          locationBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.exoscale.vinyl.Location location = 2;</code>
+       */
+      public exoscale.vinyl.Demostore.Location.Builder getLocationBuilder() {
+        
+        onChanged();
+        return getLocationFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.exoscale.vinyl.Location location = 2;</code>
+       */
+      public exoscale.vinyl.Demostore.LocationOrBuilder getLocationOrBuilder() {
+        if (locationBuilder_ != null) {
+          return locationBuilder_.getMessageOrBuilder();
+        } else {
+          return location_ == null ?
+              exoscale.vinyl.Demostore.Location.getDefaultInstance() : location_;
+        }
+      }
+      /**
+       * <code>.exoscale.vinyl.Location location = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          exoscale.vinyl.Demostore.Location, exoscale.vinyl.Demostore.Location.Builder, exoscale.vinyl.Demostore.LocationOrBuilder> 
+          getLocationFieldBuilder() {
+        if (locationBuilder_ == null) {
+          locationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              exoscale.vinyl.Demostore.Location, exoscale.vinyl.Demostore.Location.Builder, exoscale.vinyl.Demostore.LocationOrBuilder>(
+                  getLocation(),
+                  getParentForChildren(),
+                  isClean());
+          location_ = null;
+        }
+        return locationBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:exoscale.vinyl.City)
+    }
+
+    // @@protoc_insertion_point(class_scope:exoscale.vinyl.City)
+    private static final exoscale.vinyl.Demostore.City DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new exoscale.vinyl.Demostore.City();
+    }
+
+    public static exoscale.vinyl.Demostore.City getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<City>
+        PARSER = new com.google.protobuf.AbstractParser<City>() {
+      @java.lang.Override
+      public City parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new City(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<City> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<City> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public exoscale.vinyl.Demostore.City getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface RecordTypeUnionOrBuilder extends
       // @@protoc_insertion_point(interface_extends:exoscale.vinyl.RecordTypeUnion)
       com.google.protobuf.MessageOrBuilder {
@@ -4401,6 +5724,21 @@ public final class Demostore {
      * <code>.exoscale.vinyl.Object _Object = 4;</code>
      */
     exoscale.vinyl.Demostore.ObjectOrBuilder getObjectOrBuilder();
+
+    /**
+     * <code>.exoscale.vinyl.City _City = 5;</code>
+     * @return Whether the city field is set.
+     */
+    boolean hasCity();
+    /**
+     * <code>.exoscale.vinyl.City _City = 5;</code>
+     * @return The city.
+     */
+    exoscale.vinyl.Demostore.City getCity();
+    /**
+     * <code>.exoscale.vinyl.City _City = 5;</code>
+     */
+    exoscale.vinyl.Demostore.CityOrBuilder getCityOrBuilder();
   }
   /**
    * Protobuf type {@code exoscale.vinyl.RecordTypeUnion}
@@ -4495,6 +5833,19 @@ public final class Demostore {
               if (subBuilder != null) {
                 subBuilder.mergeFrom(Object_);
                 Object_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 42: {
+              exoscale.vinyl.Demostore.City.Builder subBuilder = null;
+              if (City_ != null) {
+                subBuilder = City_.toBuilder();
+              }
+              City_ = input.readMessage(exoscale.vinyl.Demostore.City.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(City_);
+                City_ = subBuilder.buildPartial();
               }
 
               break;
@@ -4635,6 +5986,32 @@ public final class Demostore {
       return getObject();
     }
 
+    public static final int _CITY_FIELD_NUMBER = 5;
+    private exoscale.vinyl.Demostore.City City_;
+    /**
+     * <code>.exoscale.vinyl.City _City = 5;</code>
+     * @return Whether the city field is set.
+     */
+    @java.lang.Override
+    public boolean hasCity() {
+      return City_ != null;
+    }
+    /**
+     * <code>.exoscale.vinyl.City _City = 5;</code>
+     * @return The city.
+     */
+    @java.lang.Override
+    public exoscale.vinyl.Demostore.City getCity() {
+      return City_ == null ? exoscale.vinyl.Demostore.City.getDefaultInstance() : City_;
+    }
+    /**
+     * <code>.exoscale.vinyl.City _City = 5;</code>
+     */
+    @java.lang.Override
+    public exoscale.vinyl.Demostore.CityOrBuilder getCityOrBuilder() {
+      return getCity();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -4661,6 +6038,9 @@ public final class Demostore {
       if (Object_ != null) {
         output.writeMessage(4, getObject());
       }
+      if (City_ != null) {
+        output.writeMessage(5, getCity());
+      }
       unknownFields.writeTo(output);
     }
 
@@ -4685,6 +6065,10 @@ public final class Demostore {
       if (Object_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, getObject());
+      }
+      if (City_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, getCity());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -4721,6 +6105,11 @@ public final class Demostore {
         if (!getObject()
             .equals(other.getObject())) return false;
       }
+      if (hasCity() != other.hasCity()) return false;
+      if (hasCity()) {
+        if (!getCity()
+            .equals(other.getCity())) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -4747,6 +6136,10 @@ public final class Demostore {
       if (hasObject()) {
         hash = (37 * hash) + _OBJECT_FIELD_NUMBER;
         hash = (53 * hash) + getObject().hashCode();
+      }
+      if (hasCity()) {
+        hash = (37 * hash) + _CITY_FIELD_NUMBER;
+        hash = (53 * hash) + getCity().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -4905,6 +6298,12 @@ public final class Demostore {
           Object_ = null;
           ObjectBuilder_ = null;
         }
+        if (CityBuilder_ == null) {
+          City_ = null;
+        } else {
+          City_ = null;
+          CityBuilder_ = null;
+        }
         return this;
       }
 
@@ -4950,6 +6349,11 @@ public final class Demostore {
           result.Object_ = Object_;
         } else {
           result.Object_ = ObjectBuilder_.build();
+        }
+        if (CityBuilder_ == null) {
+          result.City_ = City_;
+        } else {
+          result.City_ = CityBuilder_.build();
         }
         onBuilt();
         return result;
@@ -5010,6 +6414,9 @@ public final class Demostore {
         }
         if (other.hasObject()) {
           mergeObject(other.getObject());
+        }
+        if (other.hasCity()) {
+          mergeCity(other.getCity());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -5515,6 +6922,125 @@ public final class Demostore {
         }
         return ObjectBuilder_;
       }
+
+      private exoscale.vinyl.Demostore.City City_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          exoscale.vinyl.Demostore.City, exoscale.vinyl.Demostore.City.Builder, exoscale.vinyl.Demostore.CityOrBuilder> CityBuilder_;
+      /**
+       * <code>.exoscale.vinyl.City _City = 5;</code>
+       * @return Whether the city field is set.
+       */
+      public boolean hasCity() {
+        return CityBuilder_ != null || City_ != null;
+      }
+      /**
+       * <code>.exoscale.vinyl.City _City = 5;</code>
+       * @return The city.
+       */
+      public exoscale.vinyl.Demostore.City getCity() {
+        if (CityBuilder_ == null) {
+          return City_ == null ? exoscale.vinyl.Demostore.City.getDefaultInstance() : City_;
+        } else {
+          return CityBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.exoscale.vinyl.City _City = 5;</code>
+       */
+      public Builder setCity(exoscale.vinyl.Demostore.City value) {
+        if (CityBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          City_ = value;
+          onChanged();
+        } else {
+          CityBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.exoscale.vinyl.City _City = 5;</code>
+       */
+      public Builder setCity(
+          exoscale.vinyl.Demostore.City.Builder builderForValue) {
+        if (CityBuilder_ == null) {
+          City_ = builderForValue.build();
+          onChanged();
+        } else {
+          CityBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.exoscale.vinyl.City _City = 5;</code>
+       */
+      public Builder mergeCity(exoscale.vinyl.Demostore.City value) {
+        if (CityBuilder_ == null) {
+          if (City_ != null) {
+            City_ =
+              exoscale.vinyl.Demostore.City.newBuilder(City_).mergeFrom(value).buildPartial();
+          } else {
+            City_ = value;
+          }
+          onChanged();
+        } else {
+          CityBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.exoscale.vinyl.City _City = 5;</code>
+       */
+      public Builder clearCity() {
+        if (CityBuilder_ == null) {
+          City_ = null;
+          onChanged();
+        } else {
+          City_ = null;
+          CityBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.exoscale.vinyl.City _City = 5;</code>
+       */
+      public exoscale.vinyl.Demostore.City.Builder getCityBuilder() {
+        
+        onChanged();
+        return getCityFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.exoscale.vinyl.City _City = 5;</code>
+       */
+      public exoscale.vinyl.Demostore.CityOrBuilder getCityOrBuilder() {
+        if (CityBuilder_ != null) {
+          return CityBuilder_.getMessageOrBuilder();
+        } else {
+          return City_ == null ?
+              exoscale.vinyl.Demostore.City.getDefaultInstance() : City_;
+        }
+      }
+      /**
+       * <code>.exoscale.vinyl.City _City = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          exoscale.vinyl.Demostore.City, exoscale.vinyl.Demostore.City.Builder, exoscale.vinyl.Demostore.CityOrBuilder> 
+          getCityFieldBuilder() {
+        if (CityBuilder_ == null) {
+          CityBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              exoscale.vinyl.Demostore.City, exoscale.vinyl.Demostore.City.Builder, exoscale.vinyl.Demostore.CityOrBuilder>(
+                  getCity(),
+                  getParentForChildren(),
+                  isClean());
+          City_ = null;
+        }
+        return CityBuilder_;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -5594,6 +7120,16 @@ public final class Demostore {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_exoscale_vinyl_Object_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_exoscale_vinyl_Location_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_exoscale_vinyl_Location_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_exoscale_vinyl_City_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_exoscale_vinyl_City_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_exoscale_vinyl_RecordTypeUnion_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -5617,13 +7153,17 @@ public final class Demostore {
       "\030\002 \001(\003\022\r\n\005total\030\004 \001(\003\022*\n\005lines\030\005 \003(\0132\033.e" +
       "xoscale.vinyl.InvoiceLine\"4\n\006Object\022\016\n\006b" +
       "ucket\030\001 \001(\t\022\014\n\004path\030\002 \001(\t\022\014\n\004size\030\003 \001(\003\"" +
-      "\265\001\n\017RecordTypeUnion\022)\n\010_Account\030\001 \001(\0132\027." +
-      "exoscale.vinyl.Account\022#\n\005_User\030\002 \001(\0132\024." +
-      "exoscale.vinyl.User\022)\n\010_Invoice\030\003 \001(\0132\027." +
-      "exoscale.vinyl.Invoice\022\'\n\007_Object\030\004 \001(\0132" +
-      "\026.exoscale.vinyl.Object*<\n\007Payment\022\013\n\007IN" +
-      "VALID\020\000\022\013\n\007PREPAID\020\001\022\014\n\010POSTPAID\020\002\022\t\n\005WI" +
-      "RED\020\003B\013B\tDemostoreb\006proto3"
+      "*\n\010Location\022\020\n\010zip_code\030\001 \001(\003\022\014\n\004name\030\002 " +
+      "\001(\t\">\n\004City\022\n\n\002id\030\001 \001(\003\022*\n\010location\030\002 \001(" +
+      "\0132\030.exoscale.vinyl.Location\"\332\001\n\017RecordTy" +
+      "peUnion\022)\n\010_Account\030\001 \001(\0132\027.exoscale.vin" +
+      "yl.Account\022#\n\005_User\030\002 \001(\0132\024.exoscale.vin" +
+      "yl.User\022)\n\010_Invoice\030\003 \001(\0132\027.exoscale.vin" +
+      "yl.Invoice\022\'\n\007_Object\030\004 \001(\0132\026.exoscale.v" +
+      "inyl.Object\022#\n\005_City\030\005 \001(\0132\024.exoscale.vi" +
+      "nyl.City*<\n\007Payment\022\013\n\007INVALID\020\000\022\013\n\007PREP" +
+      "AID\020\001\022\014\n\010POSTPAID\020\002\022\t\n\005WIRED\020\003B\013B\tDemost" +
+      "oreb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -5659,12 +7199,24 @@ public final class Demostore {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_exoscale_vinyl_Object_descriptor,
         new java.lang.String[] { "Bucket", "Path", "Size", });
-    internal_static_exoscale_vinyl_RecordTypeUnion_descriptor =
+    internal_static_exoscale_vinyl_Location_descriptor =
       getDescriptor().getMessageTypes().get(5);
+    internal_static_exoscale_vinyl_Location_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_exoscale_vinyl_Location_descriptor,
+        new java.lang.String[] { "ZipCode", "Name", });
+    internal_static_exoscale_vinyl_City_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_exoscale_vinyl_City_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_exoscale_vinyl_City_descriptor,
+        new java.lang.String[] { "Id", "Location", });
+    internal_static_exoscale_vinyl_RecordTypeUnion_descriptor =
+      getDescriptor().getMessageTypes().get(7);
     internal_static_exoscale_vinyl_RecordTypeUnion_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_exoscale_vinyl_RecordTypeUnion_descriptor,
-        new java.lang.String[] { "Account", "User", "Invoice", "Object", });
+        new java.lang.String[] { "Account", "User", "Invoice", "Object", "City", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

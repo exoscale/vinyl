@@ -58,15 +58,15 @@
           @(store/list-query *db* [:Account [:= :state "suspended"]] opts))))
     (testing "list-query"
       (is
-        (= [{:id 1 :location {:name "Lausanne"  :zip-code 1000}
-                {:id 2 :location {:name "Lausanne"  :zip-code 1001}}
-                {:id 3 :location {:name "Lausanne"  :zip-code 1002}}
-                {:id 4 :location {:name "Lausanne"  :zip-code 1003}}
-                {:id 5 :location {:name "Lausanne"  :zip-code 1004}}}]
-           @(store/list-query *db* [:City [:nested :location [:= :name "Lausanne"]]] opts))
-        (is
-          (= [{:id 6 :location {:name "Neuchatel" :zip-code 2000}}]
-             @(store/list-query *db* [:City [:nested :location [:= :name "Neuchatel"]]] opts)))))))
+        (= [{:id 1 :location {:name "Lausanne"  :zip-code 1000}}
+            {:id 2 :location {:name "Lausanne"  :zip-code 1001}}
+            {:id 3 :location {:name "Lausanne"  :zip-code 1002}}
+            {:id 4 :location {:name "Lausanne"  :zip-code 1003}}
+            {:id 5 :location {:name "Lausanne"  :zip-code 1004}}]
+           @(store/list-query *db* [:City [:nested :location [:= :name "Lausanne"]]] opts)))
+      (is
+        (= [{:id 6 :location {:name "Neuchatel" :zip-code 2000}}]
+           @(store/list-query *db* [:City [:nested :location [:= :name "Neuchatel"]]] opts))))))
 
 (defn- ensure-plan [query plan-str]
   (let [plan (atom nil)]
@@ -107,7 +107,8 @@
     (testing "Enum aggregation"
       (are [payment cnt]
         (= cnt (agg/compute *db* :count-not-null :Account :account_payment_count payment))
-        p/invalid 0 ;; ordinal 0 cannot be indexed by FDB Record Layer
+        ;; enum value 0 cannot be indexed
+        p/invalid 0
         p/prepaid 1
         p/postpaid 1
         p/wired 2))))
