@@ -105,8 +105,9 @@
         3 80
         4 90))
     (testing "Enum aggregation"
-       (are [payment cnt]
-         (= cnt (agg/compute *db* :count-not-null :Account :account_payment_count payment))
-         p/prepaid 1
-         p/postpaid 1
-         p/wired 2))))
+      (are [payment cnt]
+        (= cnt (agg/compute *db* :count-not-null :Account :account_payment_count payment))
+        p/invalid 0 ;; ordinal 0 cannot be indexed by FDB Record Layer
+        p/prepaid 1
+        p/postpaid 1
+        p/wired 2))))

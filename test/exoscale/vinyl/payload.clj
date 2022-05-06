@@ -34,12 +34,14 @@
 (defn next-id   []                   (swap! counter inc))
 (defn ensure-id [{:keys [id] :as m}] (cond-> m (nil? id) (assoc :id (next-id))))
 
+(def invalid (.ordinal Demostore$Payment/INVALID))
 (def prepaid (.ordinal Demostore$Payment/PREPAID))
 (def postpaid (.ordinal Demostore$Payment/POSTPAID))
 (def wired (.ordinal Demostore$Payment/WIRED))
 
 (defn- payment->enum [state]
   (condp = state
+    :invalid  Demostore$Payment/INVALID
     :prepaid  Demostore$Payment/PREPAID
     :postpaid Demostore$Payment/POSTPAID
     :wired    Demostore$Payment/WIRED
@@ -153,6 +155,7 @@
        :state   (keyword (.getState r))
        :payment (let [state (.getPayment r)]
                   (cond
+                    (= Demostore$Payment/INVALID state) :invalid
                     (= Demostore$Payment/PREPAID state)  :prepaid
                     (= Demostore$Payment/POSTPAID state) :postpaid
                     (= Demostore$Payment/WIRED state)    :wired))}
