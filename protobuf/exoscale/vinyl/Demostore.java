@@ -20,32 +20,48 @@ public final class Demostore {
   public enum Payment
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
-     * <code>PREPAID = 0;</code>
+     * <pre>
+     * proto3 requires an enum to start with 0 but it's an invalid value for FDB Record Layer
+     * </pre>
+     *
+     * <code>INVALID = 0;</code>
      */
-    PREPAID(0),
+    INVALID(0),
     /**
-     * <code>POSTPAID = 1;</code>
+     * <code>PREPAID = 1;</code>
      */
-    POSTPAID(1),
+    PREPAID(1),
     /**
-     * <code>WIRED = 2;</code>
+     * <code>POSTPAID = 2;</code>
      */
-    WIRED(2),
+    POSTPAID(2),
+    /**
+     * <code>WIRED = 3;</code>
+     */
+    WIRED(3),
     UNRECOGNIZED(-1),
     ;
 
     /**
-     * <code>PREPAID = 0;</code>
+     * <pre>
+     * proto3 requires an enum to start with 0 but it's an invalid value for FDB Record Layer
+     * </pre>
+     *
+     * <code>INVALID = 0;</code>
      */
-    public static final int PREPAID_VALUE = 0;
+    public static final int INVALID_VALUE = 0;
     /**
-     * <code>POSTPAID = 1;</code>
+     * <code>PREPAID = 1;</code>
      */
-    public static final int POSTPAID_VALUE = 1;
+    public static final int PREPAID_VALUE = 1;
     /**
-     * <code>WIRED = 2;</code>
+     * <code>POSTPAID = 2;</code>
      */
-    public static final int WIRED_VALUE = 2;
+    public static final int POSTPAID_VALUE = 2;
+    /**
+     * <code>WIRED = 3;</code>
+     */
+    public static final int WIRED_VALUE = 3;
 
 
     public final int getNumber() {
@@ -72,9 +88,10 @@ public final class Demostore {
      */
     public static Payment forNumber(int value) {
       switch (value) {
-        case 0: return PREPAID;
-        case 1: return POSTPAID;
-        case 2: return WIRED;
+        case 0: return INVALID;
+        case 1: return PREPAID;
+        case 2: return POSTPAID;
+        case 3: return WIRED;
         default: return null;
       }
     }
@@ -408,7 +425,7 @@ public final class Demostore {
       if (!getStateBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, state_);
       }
-      if (payment_ != exoscale.vinyl.Demostore.Payment.PREPAID.getNumber()) {
+      if (payment_ != exoscale.vinyl.Demostore.Payment.INVALID.getNumber()) {
         output.writeEnum(4, payment_);
       }
       unknownFields.writeTo(output);
@@ -430,7 +447,7 @@ public final class Demostore {
       if (!getStateBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, state_);
       }
-      if (payment_ != exoscale.vinyl.Demostore.Payment.PREPAID.getNumber()) {
+      if (payment_ != exoscale.vinyl.Demostore.Payment.INVALID.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, payment_);
       }
@@ -5604,9 +5621,9 @@ public final class Demostore {
       "exoscale.vinyl.Account\022#\n\005_User\030\002 \001(\0132\024." +
       "exoscale.vinyl.User\022)\n\010_Invoice\030\003 \001(\0132\027." +
       "exoscale.vinyl.Invoice\022\'\n\007_Object\030\004 \001(\0132" +
-      "\026.exoscale.vinyl.Object*/\n\007Payment\022\013\n\007PR" +
-      "EPAID\020\000\022\014\n\010POSTPAID\020\001\022\t\n\005WIRED\020\002B\013B\tDemo" +
-      "storeb\006proto3"
+      "\026.exoscale.vinyl.Object*<\n\007Payment\022\013\n\007IN" +
+      "VALID\020\000\022\013\n\007PREPAID\020\001\022\014\n\010POSTPAID\020\002\022\t\n\005WI" +
+      "RED\020\003B\013B\tDemostoreb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

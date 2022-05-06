@@ -3,9 +3,10 @@ package exoscale.vinyl;
 option java_outer_classname = "Demostore";
 
 enum Payment {
-    PREPAID  = 0;
-    POSTPAID = 1;
-    WIRED    = 2;
+    INVALID  = 0; // proto3 requires an enum to start with 0 but it's an invalid value for FDB Record Layer
+    PREPAID  = 1;
+    POSTPAID = 2;
+    WIRED    = 3;
 }
 
 message Account {
