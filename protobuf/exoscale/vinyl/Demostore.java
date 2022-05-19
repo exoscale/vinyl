@@ -14,6 +14,132 @@ public final class Demostore {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
+  /**
+   * Protobuf enum {@code exoscale.vinyl.Payment}
+   */
+  public enum Payment
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>INVALID = 0;</code>
+     */
+    INVALID(0),
+    /**
+     * <code>PREPAID = 1;</code>
+     */
+    PREPAID(1),
+    /**
+     * <code>POSTPAID = 2;</code>
+     */
+    POSTPAID(2),
+    /**
+     * <code>WIRED = 3;</code>
+     */
+    WIRED(3),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>INVALID = 0;</code>
+     */
+    public static final int INVALID_VALUE = 0;
+    /**
+     * <code>PREPAID = 1;</code>
+     */
+    public static final int PREPAID_VALUE = 1;
+    /**
+     * <code>POSTPAID = 2;</code>
+     */
+    public static final int POSTPAID_VALUE = 2;
+    /**
+     * <code>WIRED = 3;</code>
+     */
+    public static final int WIRED_VALUE = 3;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Payment valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static Payment forNumber(int value) {
+      switch (value) {
+        case 0: return INVALID;
+        case 1: return PREPAID;
+        case 2: return POSTPAID;
+        case 3: return WIRED;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Payment>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Payment> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Payment>() {
+            public Payment findValueByNumber(int number) {
+              return Payment.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return exoscale.vinyl.Demostore.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final Payment[] VALUES = values();
+
+    public static Payment valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private Payment(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:exoscale.vinyl.Payment)
+  }
+
   public interface AccountOrBuilder extends
       // @@protoc_insertion_point(interface_extends:exoscale.vinyl.Account)
       com.google.protobuf.MessageOrBuilder {
@@ -47,6 +173,17 @@ public final class Demostore {
      */
     com.google.protobuf.ByteString
         getStateBytes();
+
+    /**
+     * <code>.exoscale.vinyl.Payment payment = 4;</code>
+     * @return The enum numeric value on the wire for payment.
+     */
+    int getPaymentValue();
+    /**
+     * <code>.exoscale.vinyl.Payment payment = 4;</code>
+     * @return The payment.
+     */
+    exoscale.vinyl.Demostore.Payment getPayment();
   }
   /**
    * Protobuf type {@code exoscale.vinyl.Account}
@@ -63,6 +200,7 @@ public final class Demostore {
     private Account() {
       name_ = "";
       state_ = "";
+      payment_ = 0;
     }
 
     @java.lang.Override
@@ -110,6 +248,12 @@ public final class Demostore {
               java.lang.String s = input.readStringRequireUtf8();
 
               state_ = s;
+              break;
+            }
+            case 32: {
+              int rawValue = input.readEnum();
+
+              payment_ = rawValue;
               break;
             }
             default: {
@@ -231,6 +375,25 @@ public final class Demostore {
       }
     }
 
+    public static final int PAYMENT_FIELD_NUMBER = 4;
+    private int payment_;
+    /**
+     * <code>.exoscale.vinyl.Payment payment = 4;</code>
+     * @return The enum numeric value on the wire for payment.
+     */
+    @java.lang.Override public int getPaymentValue() {
+      return payment_;
+    }
+    /**
+     * <code>.exoscale.vinyl.Payment payment = 4;</code>
+     * @return The payment.
+     */
+    @java.lang.Override public exoscale.vinyl.Demostore.Payment getPayment() {
+      @SuppressWarnings("deprecation")
+      exoscale.vinyl.Demostore.Payment result = exoscale.vinyl.Demostore.Payment.valueOf(payment_);
+      return result == null ? exoscale.vinyl.Demostore.Payment.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -254,6 +417,9 @@ public final class Demostore {
       if (!getStateBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, state_);
       }
+      if (payment_ != exoscale.vinyl.Demostore.Payment.INVALID.getNumber()) {
+        output.writeEnum(4, payment_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -272,6 +438,10 @@ public final class Demostore {
       }
       if (!getStateBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, state_);
+      }
+      if (payment_ != exoscale.vinyl.Demostore.Payment.INVALID.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(4, payment_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -294,6 +464,7 @@ public final class Demostore {
           .equals(other.getName())) return false;
       if (!getState()
           .equals(other.getState())) return false;
+      if (payment_ != other.payment_) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -312,6 +483,8 @@ public final class Demostore {
       hash = (53 * hash) + getName().hashCode();
       hash = (37 * hash) + STATE_FIELD_NUMBER;
       hash = (53 * hash) + getState().hashCode();
+      hash = (37 * hash) + PAYMENT_FIELD_NUMBER;
+      hash = (53 * hash) + payment_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -451,6 +624,8 @@ public final class Demostore {
 
         state_ = "";
 
+        payment_ = 0;
+
         return this;
       }
 
@@ -480,6 +655,7 @@ public final class Demostore {
         result.id_ = id_;
         result.name_ = name_;
         result.state_ = state_;
+        result.payment_ = payment_;
         onBuilt();
         return result;
       }
@@ -538,6 +714,9 @@ public final class Demostore {
         if (!other.getState().isEmpty()) {
           state_ = other.state_;
           onChanged();
+        }
+        if (other.payment_ != 0) {
+          setPaymentValue(other.getPaymentValue());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -747,6 +926,60 @@ public final class Demostore {
   checkByteStringIsUtf8(value);
         
         state_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int payment_ = 0;
+      /**
+       * <code>.exoscale.vinyl.Payment payment = 4;</code>
+       * @return The enum numeric value on the wire for payment.
+       */
+      @java.lang.Override public int getPaymentValue() {
+        return payment_;
+      }
+      /**
+       * <code>.exoscale.vinyl.Payment payment = 4;</code>
+       * @param value The enum numeric value on the wire for payment to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPaymentValue(int value) {
+        
+        payment_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.exoscale.vinyl.Payment payment = 4;</code>
+       * @return The payment.
+       */
+      @java.lang.Override
+      public exoscale.vinyl.Demostore.Payment getPayment() {
+        @SuppressWarnings("deprecation")
+        exoscale.vinyl.Demostore.Payment result = exoscale.vinyl.Demostore.Payment.valueOf(payment_);
+        return result == null ? exoscale.vinyl.Demostore.Payment.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.exoscale.vinyl.Payment payment = 4;</code>
+       * @param value The payment to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPayment(exoscale.vinyl.Demostore.Payment value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        payment_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.exoscale.vinyl.Payment payment = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPayment() {
+        
+        payment_ = 0;
         onChanged();
         return this;
       }
@@ -6910,24 +7143,27 @@ public final class Demostore {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014schema.proto\022\016exoscale.vinyl\"2\n\007Accoun" +
+      "\n\014schema.proto\022\016exoscale.vinyl\"\\\n\007Accoun" +
       "t\022\n\n\002id\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\022\r\n\005state\030\003 \001" +
-      "(\t\"C\n\004User\022\022\n\naccount_id\030\001 \001(\003\022\n\n\002id\030\002 \001" +
-      "(\003\022\014\n\004name\030\003 \001(\t\022\r\n\005email\030\004 \001(\t\"0\n\013Invoi" +
-      "ceLine\022\017\n\007product\030\001 \001(\t\022\020\n\010quantity\030\002 \001(" +
-      "\003\"d\n\007Invoice\022\022\n\naccount_id\030\001 \001(\003\022\n\n\002id\030\002" +
-      " \001(\003\022\r\n\005total\030\004 \001(\003\022*\n\005lines\030\005 \003(\0132\033.exo" +
-      "scale.vinyl.InvoiceLine\"4\n\006Object\022\016\n\006buc" +
-      "ket\030\001 \001(\t\022\014\n\004path\030\002 \001(\t\022\014\n\004size\030\003 \001(\003\"*\n" +
-      "\010Location\022\020\n\010zip_code\030\001 \001(\003\022\014\n\004name\030\002 \001(" +
-      "\t\">\n\004City\022\n\n\002id\030\001 \001(\003\022*\n\010location\030\002 \001(\0132" +
-      "\030.exoscale.vinyl.Location\"\332\001\n\017RecordType" +
-      "Union\022)\n\010_Account\030\001 \001(\0132\027.exoscale.vinyl" +
-      ".Account\022#\n\005_User\030\002 \001(\0132\024.exoscale.vinyl" +
-      ".User\022)\n\010_Invoice\030\003 \001(\0132\027.exoscale.vinyl" +
-      ".Invoice\022\'\n\007_Object\030\004 \001(\0132\026.exoscale.vin" +
-      "yl.Object\022#\n\005_City\030\005 \001(\0132\024.exoscale.viny" +
-      "l.CityB\013B\tDemostoreb\006proto3"
+      "(\t\022(\n\007payment\030\004 \001(\0162\027.exoscale.vinyl.Pay" +
+      "ment\"C\n\004User\022\022\n\naccount_id\030\001 \001(\003\022\n\n\002id\030\002" +
+      " \001(\003\022\014\n\004name\030\003 \001(\t\022\r\n\005email\030\004 \001(\t\"0\n\013Inv" +
+      "oiceLine\022\017\n\007product\030\001 \001(\t\022\020\n\010quantity\030\002 " +
+      "\001(\003\"d\n\007Invoice\022\022\n\naccount_id\030\001 \001(\003\022\n\n\002id" +
+      "\030\002 \001(\003\022\r\n\005total\030\004 \001(\003\022*\n\005lines\030\005 \003(\0132\033.e" +
+      "xoscale.vinyl.InvoiceLine\"4\n\006Object\022\016\n\006b" +
+      "ucket\030\001 \001(\t\022\014\n\004path\030\002 \001(\t\022\014\n\004size\030\003 \001(\003\"" +
+      "*\n\010Location\022\020\n\010zip_code\030\001 \001(\003\022\014\n\004name\030\002 " +
+      "\001(\t\">\n\004City\022\n\n\002id\030\001 \001(\003\022*\n\010location\030\002 \001(" +
+      "\0132\030.exoscale.vinyl.Location\"\332\001\n\017RecordTy" +
+      "peUnion\022)\n\010_Account\030\001 \001(\0132\027.exoscale.vin" +
+      "yl.Account\022#\n\005_User\030\002 \001(\0132\024.exoscale.vin" +
+      "yl.User\022)\n\010_Invoice\030\003 \001(\0132\027.exoscale.vin" +
+      "yl.Invoice\022\'\n\007_Object\030\004 \001(\0132\026.exoscale.v" +
+      "inyl.Object\022#\n\005_City\030\005 \001(\0132\024.exoscale.vi" +
+      "nyl.City*<\n\007Payment\022\013\n\007INVALID\020\000\022\013\n\007PREP" +
+      "AID\020\001\022\014\n\010POSTPAID\020\002\022\t\n\005WIRED\020\003B\013B\tDemost" +
+      "oreb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -6938,7 +7174,7 @@ public final class Demostore {
     internal_static_exoscale_vinyl_Account_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_exoscale_vinyl_Account_descriptor,
-        new java.lang.String[] { "Id", "Name", "State", });
+        new java.lang.String[] { "Id", "Name", "State", "Payment", });
     internal_static_exoscale_vinyl_User_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_exoscale_vinyl_User_fieldAccessorTable = new

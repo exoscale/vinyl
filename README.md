@@ -139,11 +139,11 @@ There needs to be support for matching those in queries.
 Suppose you have the following protobuf definition:
 
 ``` protocol-buffer
-Message Info {
+message Info {
   string path = 1;
 }
 
-Message Top {
+message Top {
    int64 id = 1;
    Info info = 2;
 }
@@ -153,4 +153,20 @@ You can apply any field query to fields in info by using `:nested`:
 
 ``` clojure
 @(store/list-query store [:Top [:nested :info [:starts-with? :path "/"]]])
+```
+
+#### Enums
+
+Proto3 enum must start at ordinal 0.  
+Internally, FDB record layer does not make the difference between
+0 and null and thus 0 will be serialized as null.
+
+When defining an enum, you must add a dummy entry that you must never use.
+
+``` protocol-buffer
+ enum Payment {
+    INVALID = 0; # This value must not be used
+    PREPAID = 1;
+    POSTPAID = 2;
+ }
 ```

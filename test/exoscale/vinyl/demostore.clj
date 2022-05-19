@@ -7,10 +7,12 @@
 
 (def fixtures
   {:Account
-   [{:id 1 :name "a1" :state :active}
-    {:id 2 :name "a2" :state :suspended}
-    {:id 3 :name "a3" :state :suspended}
-    {:id 4 :name "a4" :state :terminated}]
+   [{:id 1 :name "a1" :state :active     :payment :wired}
+    {:id 2 :name "a2" :state :suspended  :payment :prepaid}
+    {:id 3 :name "a3" :state :suspended  :payment :wired}
+    {:id 4 :name "a4" :state :terminated :payment :postpaid}
+    {:id 5 :name "a5" :state :terminated :payment :invalid}
+    {:id 6 :name "a6" :state :terminated :payment :invalid}]
    :Invoice
    [{:id 1 :account-id 1 :total 10 :lines [{:product "p1" :quantity 2}
                                            {:product "p2" :quantity 4}]}
@@ -36,7 +38,10 @@
 
 (def schema
   {:Account {:primary-key [:concat :type-key "id"]
-             :indices     [{:name "account_state" :on "state"}]}
+             :indices     [{:name "account_state" :on "state"}
+                           {:name "account_payment_count"
+                            :on [:group-by "payment"]
+                            :type :count-not-null}]}
    :User    {:primary-key [:concat :type-key "account_id" "id"]
              :indices     [{:name "username" :on "name"}
                            {:name "usercnt"

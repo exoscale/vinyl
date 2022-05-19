@@ -2,10 +2,18 @@ syntax = "proto3";
 package exoscale.vinyl;
 option java_outer_classname = "Demostore";
 
+enum Payment {
+    INVALID  = 0;
+    PREPAID  = 1;
+    POSTPAID = 2;
+    WIRED    = 3;
+}
+
 message Account {
-    int64  id    = 1;
-    string name  = 2;
-    string state = 3;
+    int64  id       = 1;
+    string name     = 2;
+    string state    = 3;
+    Payment payment = 4;
 }
 
 message User {
