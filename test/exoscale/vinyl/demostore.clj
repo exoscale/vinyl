@@ -52,8 +52,8 @@
                             :type :count-not-null}
                            {:name "bucket_paths"
                             :on [:concat "bucket" "path"]}]}
-   :City   {:primary-key [:concat :type-key [:nest "location" "name"]
-                                            [:nest "location" "zip_code"]]}})
+   :City   {:primary-key [:concat :type-key [:nested "location" "name"]
+                                            [:nested "location" "zip_code"]]}})
 
 
 
