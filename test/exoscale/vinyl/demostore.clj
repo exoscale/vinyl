@@ -65,7 +65,6 @@
 (def demostore
   (store/initialize :demostore (Demostore/getDescriptor) schema))
 
-
 (defn all-records
   []
   (->> fixtures
