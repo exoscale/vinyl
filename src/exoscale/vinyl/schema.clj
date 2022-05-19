@@ -49,7 +49,7 @@
   [{:keys [args]}]
   (Key$Expressions/concat (mapv build-field args)))
 
-(defmethod multi-build-field :nest
+(defmethod multi-build-field :nested
   [{:keys [args]}]
   (nest (build-field (first args))
         (build-field (last args))))
