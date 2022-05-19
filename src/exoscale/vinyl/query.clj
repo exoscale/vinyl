@@ -24,9 +24,9 @@
   [_]
   (s/cat :type #{:matches} :field keyword? :filter ::filter))
 
-(defmethod vec-filter-type :nest
+(defmethod vec-filter-type :nested
   [_]
-  (s/cat :type #{:nest} :field keyword? :filter ::filter))
+  (s/cat :type #{:nested} :field keyword? :filter ::filter))
 
 (defmethod vec-filter-type :one-of-them
   [_]
@@ -144,7 +144,7 @@
   (-> (build-field field)
       (.matches (multi-build-filter filter))))
 
-(defmethod multi-build-filter :nest
+(defmethod multi-build-filter :nested
   [{:keys [field filter]}]
   (NestedField. (name field) (multi-build-filter filter)))
 

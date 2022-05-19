@@ -149,8 +149,8 @@ Message Top {
 }
 ```
 
-You can apply any field query to fields in info by using `:nest`:
+You can apply any field query to fields in info by using `:nested`:
 
 ``` clojure
-@(store/list-query store [:Top [:nest :info [:starts-with? :path "/"]]])
+@(store/list-query store [:Top [:nested :info [:starts-with? :path "/"]]])
 ```

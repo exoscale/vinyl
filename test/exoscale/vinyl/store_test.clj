@@ -63,9 +63,9 @@
            {:id 3 :location {:name "Lausanne"  :zip-code 1002}}
            {:id 4 :location {:name "Lausanne"  :zip-code 1003}}
            {:id 5 :location {:name "Lausanne"  :zip-code 1004}}]
-          @(store/list-query *db* [:City [:nest :location [:= :name "Lausanne"]]] opts))
+          @(store/list-query *db* [:City [:nested :location [:= :name "Lausanne"]]] opts))
        (= [{:id 6 :location {:name "Neuchatel" :zip-code 2000}}]
-          @(store/list-query *db* [:City [:nest :location [:= :name "Neuchatel"]]] opts))))))
+          @(store/list-query *db* [:City [:nested :location [:= :name "Neuchatel"]]] opts))))))
 
 (defn- ensure-plan [query plan-str]
   (let [plan (atom nil)]
@@ -85,7 +85,7 @@
     (ensure-plan [:Invoice [:>= :id 3]] "Scan([IS Invoice]) | id GREATER_THAN_OR_EQUALS 3")
     (ensure-plan [:Invoice [:<= :id 3]] "Scan([IS Invoice]) | id LESS_THAN_OR_EQUALS 3")
     (ensure-plan [:City] "Scan([IS City])")
-    (ensure-plan [:City [:nest :location [:= :name "Lausanne"]]] "Scan(<,>) | [City] | location/{name EQUALS Lausanne}")))
+    (ensure-plan [:City [:nested :location [:= :name "Lausanne"]]] "Scan(<,>) | [City] | location/{name EQUALS Lausanne}")))
 
 (deftest aggregation-test
   (testing "Aggregation queries"
