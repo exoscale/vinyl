@@ -37,14 +37,10 @@
           reversed (conj s (-> c int inc char))]
       (reduce str "" (reverse reversed)))))
 
-;; For the sake of test run times we keep this small, bump at will
-;; in the REPL!
-(def small-test-data
-  (record-generator "small-bucket" 100))
-
 (deftest large-range-scan-test-on-small-data
 
-  (install-records *db* small-test-data)
+  (install-records *db* (record-generator "small-bucket" 100))
+  (install-records *db* (record-generator "small-bucket-a" 100))
 
   (testing "we get back expected values"
     (is (= 100
@@ -115,7 +111,7 @@
   (install-records *db* (record-generator "bucket-666" 20))
 
   (testing "we get back expected values"
-    (doseq [ bucket [ "bucket-66" "bucket-666" ] ]
+    (doseq [ bucket [ "bucket-66" "bucket-666"]]
       (is (= 20
              (agg/compute *db* :count-not-null :Object :path_count bucket)))
 
@@ -144,12 +140,7 @@
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/marker "files/00000015.txt"})))
 
       (is (thrown? java.util.concurrent.ExecutionException
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/marker "files/00000005.txt"})))
-
-    )
-  )
-)
-
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/marker "files/00000005.txt"}))))))
 
 (comment
 
@@ -167,9 +158,9 @@
 
   ;; This should yield 4000000
   (time
-   @(store/long-query-reducer db incrementor 0
+   @(store/long-query-reduce db incrementor 0
                               [:Object [:= :bucket "big-test-bucket"]]))
 
   ;; This should yield 100 and return quick
-  @(store/long-query-reducer db (max-incrementor 100) 0
+  @(store/long-query-reduce db (max-incrementor 100) 0
                              [:Object [:= :bucket "big-test-bucket"]]))
