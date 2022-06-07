@@ -134,6 +134,18 @@
       (is (= 10
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"])))
 
+      (is (= 5
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/marker "files/00000005.txt"})))
+
+      (is (= 5
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/marker "files/00000015.txt"})))
+
+      (is (thrown? java.util.concurrent.ExecutionException
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/marker "files/00000015.txt"})))
+
+      (is (thrown? java.util.concurrent.ExecutionException
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/marker "files/00000005.txt"})))
+
     )
   )
 )
