@@ -111,22 +111,29 @@
                                                       [:< :path (inc-prefix "files/")]]])))))
 
 (deftest large-range-scan-test-on-overlapping-bucket-names
-  (install-records *db* (record-generator "bucket-66" 10))
-  (install-records *db* (record-generator "bucket-666" 10))
+  (install-records *db* (record-generator "bucket-66"  20))
+  (install-records *db* (record-generator "bucket-666" 20))
 
   (testing "we get back expected values"
     (doseq [ bucket [ "bucket-66" "bucket-666" ] ]
-      (is (= 10
+      (is (= 20
              (agg/compute *db* :count-not-null :Object :path_count bucket)))
 
-      (is (= 10
+      (is (= 20
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil])))
 
-      (is (= 5
+      (is (= 15
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil] {::store/marker "files/00000005.txt"})))
 
       (is (= 0
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil] {::store/marker "files/66666666.txt"})))
+
+      (is (= 10
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"])))
+
+      (is (= 10
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"])))
+
     )
   )
 )
