@@ -12,9 +12,13 @@
            com.apple.foundationdb.record.EvaluationContext
            java.util.List))
 
-(defn ^Field build-field
+(defn ^QueryComponent build-field
   [k]
-  (Query/field (name k)))
+  (if (keyword? k)
+    (Query/field (name k))
+    k
+  )
+)
 
 (s/def ::field keyword?)
 
@@ -167,6 +171,13 @@
   [{:keys [field comparand]}]
   (-> (build-field field)
       (.lessThanOrEquals comparand)))
+
+(defmethod multi-build-filter :one-of-them
+  [{:keys [field filter]}]
+  (->> (build-field field)
+       (.oneOfThem)
+       (assoc filter :field)
+       multi-build-filter))
 
 (defn ^RecordQuery build-query
   ([record-type]
