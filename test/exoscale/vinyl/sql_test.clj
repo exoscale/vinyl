@@ -20,11 +20,11 @@
        {:id 5 :account-id 4 :total 80 :lines [{:product "p4" :quantity 1}]}]
 
       "SELECT * FROM Account where state != 'terminated'"
-      [{:id 1 :name "a1" :state :active}
-       {:id 2 :name "a2" :state :suspended}
-       {:id 3 :name "a3" :state :suspended}]
+      [{:id 1 :name "a1" :state :active :payment :wired}
+       {:id 2 :name "a2" :state :suspended :payment :prepaid}
+       {:id 3 :name "a3" :state :suspended :payment :wired}]
 
       "SELECT * FROM Account where !(state = 'terminated')"
-      [{:id 1 :name "a1" :state :active}
-       {:id 2 :name "a2" :state :suspended}
-       {:id 3 :name "a3" :state :suspended}])))
+      [{:id 1 :name "a1" :state :active :payment :wired}
+       {:id 2 :name "a2" :state :suspended :payment :prepaid}
+       {:id 3 :name "a3" :state :suspended :payment :wired}])))

@@ -66,7 +66,9 @@
                                       [:Object [:and
                                                 [:= :bucket "small-bucket"]
                                                 [:starts-with? :path "files/00000010.txt"]]])))
-    (is (= 100
+    ;; As small-bucket is considered as a prefix of small-bucket-a, we get both
+    ;; the objects from small-bucket and small-bucket-a
+    (is (= 200
            @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket"])))
 
     (is (= 100
@@ -79,39 +81,44 @@
            @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" "files/"] {::store/marker "files/00000010.txt"})))
 
     (is (= 90
-           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" ""] {::store/marker "files/00000010.txt"}))))
+           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" ""] {::store/marker "files/00000010.txt"})))
 
-  (testing "returning a `reduced` value stops iteration"
-    (is (= 10
-           @(store/long-query-reduce *db* (max-incrementor 10) 0
-                                      [:Object [:= :bucket "small-bucket"]]))))
+    (testing "returning a `reduced` value stops iteration"
+      (is (= 10
+             @(store/long-query-reduce *db* (max-incrementor 10) 0
+                                        [:Object [:= :bucket "small-bucket"]]))))
 
-  (testing "maintained indices are consistent"
-    (is (= (agg/compute *db* :count-not-null :Object :path_count "small-bucket")
-           @(store/long-query-reduce *db* incrementor 0
-                                      [:Object [:= :bucket "small-bucket"]]))))
+    (testing "maintained indices are consistent"
+      (is (= (agg/compute *db* :count-not-null :Object :path_count "small-bucket")
+             @(store/long-query-reduce *db* incrementor 0
+                                        [:Object [:= :bucket "small-bucket"]]))))
 
-  (testing "incompatible operators"
-    (is (thrown? java.util.concurrent.ExecutionException
-                 @(store/long-query-reduce *db* incrementor 0
-                                            [:Object [:and
-                                                      [:= :bucket "small-bucket"]
-                                                      [:starts-with? :path "files/00000010.txt"]
-                                                      [:>= :path "files/"]]])))
+    (testing "incompatible operators"
+      (is (thrown? java.util.concurrent.ExecutionException
+                   @(store/long-query-reduce *db* incrementor 0
+                                              [:Object [:and
+                                                        [:= :bucket "small-bucket"]
+                                                        [:starts-with? :path "files/00000010.txt"]
+                                                        [:>= :path "files/"]]])))
 
-    (is (thrown? java.util.concurrent.ExecutionException
-                 @(store/long-query-reduce *db* incrementor 0
-                                            [:Object [:and
-                                                      [:= :bucket "small-bucket"]
-                                                      [:starts-with? :path "files/00000010.txt"]
-                                                      [:< :path (inc-prefix "files/")]]])))))
+      (is (thrown? java.util.concurrent.ExecutionException
+                   @(store/long-query-reduce *db* incrementor 0
+                                              [:Object [:and
+                                                        [:= :bucket "small-bucket"]
+                                                        [:starts-with? :path "files/00000010.txt"]
+                                                        [:< :path (inc-prefix "files/")]]]))))))
 
 (deftest large-range-scan-test-on-overlapping-bucket-names
   (install-records *db* (record-generator "bucket-66"  20))
   (install-records *db* (record-generator "bucket-666" 20))
 
   (testing "we get back expected values"
-    (doseq [ bucket [ "bucket-66" "bucket-666"]]
+    (is (= 40
+           @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-66"])))
+    (is (= 20
+           @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-666"])))
+
+    (doseq [bucket ["bucket-66" "bucket-666"]]
       (is (= 20
              (agg/compute *db* :count-not-null :Object :path_count bucket)))
 
