@@ -24,9 +24,16 @@
         :City))
     (testing "starts-with"
       (is
-       (= [{:id 1 :account-id 1 :name "a1u1" :email "a1u1@hello.com"}
-           {:id 2 :account-id 1 :name "a1u2" :email "a1u2@hello.com"}]
-          @(store/list-query *db* [:User [:starts-with? :name "a1"]] opts))))
+       (= [{:id 1 :account-id 1 :name "a1u1" :email "a1u1@hello.com" :backup2fa ["1111" "2222" "3333"]}
+           {:id 2 :account-id 1 :name "a1u2" :email "a1u2@hello.com" :backup2fa ["5243" "2959" "9938"]}]
+          @(store/list-query *db* [:User [:starts-with? :name "a1"]] opts)))
+
+      (is
+       (= [{:id 3 :account-id 2 :name "a2u3" :email "a2u3@hello.com" :backup2fa ["8304" "1111" "5472"]}
+           {:id 4 :account-id 3 :name "a3u4" :email "a3u5@hello.com" :backup2fa ["8397" "1714"]}]
+          @(store/list-query *db* [:User [:one-of-them :backup2fa [:starts-with? :the-one-of-them "83"]]] opts)))
+    )
+
     (testing "int comparisons"
       (is
        (= [{:id 3 :account-id 3 :total 80 :lines [{:product "p4" :quantity 1}]}
@@ -55,7 +62,12 @@
       (is
        (= [{:id 2 :name "a2" :state :suspended :payment :prepaid}
            {:id 3 :name "a3" :state :suspended :payment :wired}]
-          @(store/list-query *db* [:Account [:= :state "suspended"]] opts))))
+          @(store/list-query *db* [:Account [:= :state "suspended"]] opts)))
+
+      (is
+       (= [{:account-id 1, :id 1, :name "a1u1", :email "a1u1@hello.com", :backup2fa ["1111" "2222" "3333"]}
+           {:account-id 2, :id 3, :name "a2u3", :email "a2u3@hello.com", :backup2fa ["8304" "1111" "5472"]}]
+          @(store/list-query *db* [:User [:one-of-them :backup2fa [:= :the-one-of-them "1111"]]] opts))))
     (testing "list-query"
       (is
         (= [{:id 1 :location {:name "Lausanne"  :zip-code 1000}}

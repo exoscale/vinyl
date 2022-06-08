@@ -85,6 +85,7 @@
         (.setId (long (or (:id user) (next-id))))
         (.setName (str (:name user)))
         (.setEmail (str (:email user)))
+        (.addAllBackup2Fa (->> user :backup2fa (map str) vec))
         (.build))))
 
 (defn ^Demostore$InvoiceLine invoice-line->record
@@ -178,7 +179,8 @@
       {:account-id (.getAccountId r)
        :id         (.getId r)
        :name       (.getName r)
-       :email      (.getEmail r)}
+       :email      (.getEmail r)
+       :backup2fa  (.getBackup2FaList r)}
       {::record-type :User}))
   Demostore$InvoiceLineOrBuilder
   (parse-record [r]
@@ -217,6 +219,7 @@
 (s/def ::id         nat-int?)
 (s/def ::name       string?)
 (s/def ::email      string?)
+(s/def ::backup2fa  (s/coll-of string?))
 (s/def ::product    string?)
 (s/def ::quantity   pos-int?)
 (s/def ::total      pos-int?)
@@ -224,7 +227,7 @@
 (s/def ::account-id ::id)
 (s/def ::payment    #{:invalid :prepaid :postpaid :wired})
 (s/def ::account    (s/keys :req-un [::id ::name ::state ::payment]))
-(s/def ::user       (s/keys :req-un [::id ::account-id ::name ::email]))
+(s/def ::user       (s/keys :req-un [::id ::account-id ::name ::email ::backup2fa]))
 (s/def ::line       (s/keys :req-un [::product ::quantity]))
 (s/def ::lines      (s/coll-of ::line))
 (s/def ::invoice    (s/keys :req-un [::id ::account-id ::total ::lines]))

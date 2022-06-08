@@ -1075,6 +1075,31 @@ public final class Demostore {
      */
     com.google.protobuf.ByteString
         getEmailBytes();
+
+    /**
+     * <code>repeated string backup2fa = 5;</code>
+     * @return A list containing the backup2fa.
+     */
+    java.util.List<java.lang.String>
+        getBackup2FaList();
+    /**
+     * <code>repeated string backup2fa = 5;</code>
+     * @return The count of backup2fa.
+     */
+    int getBackup2FaCount();
+    /**
+     * <code>repeated string backup2fa = 5;</code>
+     * @param index The index of the element to return.
+     * @return The backup2fa at the given index.
+     */
+    java.lang.String getBackup2Fa(int index);
+    /**
+     * <code>repeated string backup2fa = 5;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the backup2fa at the given index.
+     */
+    com.google.protobuf.ByteString
+        getBackup2FaBytes(int index);
   }
   /**
    * Protobuf type {@code exoscale.vinyl.User}
@@ -1091,6 +1116,7 @@ public final class Demostore {
     private User() {
       name_ = "";
       email_ = "";
+      backup2Fa_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     }
 
     @java.lang.Override
@@ -1113,6 +1139,7 @@ public final class Demostore {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1145,6 +1172,15 @@ public final class Demostore {
               email_ = s;
               break;
             }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                backup2Fa_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              backup2Fa_.add(s);
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -1160,6 +1196,9 @@ public final class Demostore {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          backup2Fa_ = backup2Fa_.getUnmodifiableView();
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -1275,6 +1314,41 @@ public final class Demostore {
       }
     }
 
+    public static final int BACKUP2FA_FIELD_NUMBER = 5;
+    private com.google.protobuf.LazyStringList backup2Fa_;
+    /**
+     * <code>repeated string backup2fa = 5;</code>
+     * @return A list containing the backup2fa.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getBackup2FaList() {
+      return backup2Fa_;
+    }
+    /**
+     * <code>repeated string backup2fa = 5;</code>
+     * @return The count of backup2fa.
+     */
+    public int getBackup2FaCount() {
+      return backup2Fa_.size();
+    }
+    /**
+     * <code>repeated string backup2fa = 5;</code>
+     * @param index The index of the element to return.
+     * @return The backup2fa at the given index.
+     */
+    public java.lang.String getBackup2Fa(int index) {
+      return backup2Fa_.get(index);
+    }
+    /**
+     * <code>repeated string backup2fa = 5;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the backup2fa at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getBackup2FaBytes(int index) {
+      return backup2Fa_.getByteString(index);
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -1301,6 +1375,9 @@ public final class Demostore {
       if (!getEmailBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, email_);
       }
+      for (int i = 0; i < backup2Fa_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, backup2Fa_.getRaw(i));
+      }
       unknownFields.writeTo(output);
     }
 
@@ -1323,6 +1400,14 @@ public final class Demostore {
       }
       if (!getEmailBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, email_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < backup2Fa_.size(); i++) {
+          dataSize += computeStringSizeNoTag(backup2Fa_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getBackup2FaList().size();
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1347,6 +1432,8 @@ public final class Demostore {
           .equals(other.getName())) return false;
       if (!getEmail()
           .equals(other.getEmail())) return false;
+      if (!getBackup2FaList()
+          .equals(other.getBackup2FaList())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -1368,6 +1455,10 @@ public final class Demostore {
       hash = (53 * hash) + getName().hashCode();
       hash = (37 * hash) + EMAIL_FIELD_NUMBER;
       hash = (53 * hash) + getEmail().hashCode();
+      if (getBackup2FaCount() > 0) {
+        hash = (37 * hash) + BACKUP2FA_FIELD_NUMBER;
+        hash = (53 * hash) + getBackup2FaList().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1509,6 +1600,8 @@ public final class Demostore {
 
         email_ = "";
 
+        backup2Fa_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -1535,10 +1628,16 @@ public final class Demostore {
       @java.lang.Override
       public exoscale.vinyl.Demostore.User buildPartial() {
         exoscale.vinyl.Demostore.User result = new exoscale.vinyl.Demostore.User(this);
+        int from_bitField0_ = bitField0_;
         result.accountId_ = accountId_;
         result.id_ = id_;
         result.name_ = name_;
         result.email_ = email_;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          backup2Fa_ = backup2Fa_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.backup2Fa_ = backup2Fa_;
         onBuilt();
         return result;
       }
@@ -1601,6 +1700,16 @@ public final class Demostore {
           email_ = other.email_;
           onChanged();
         }
+        if (!other.backup2Fa_.isEmpty()) {
+          if (backup2Fa_.isEmpty()) {
+            backup2Fa_ = other.backup2Fa_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureBackup2FaIsMutable();
+            backup2Fa_.addAll(other.backup2Fa_);
+          }
+          onChanged();
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -1629,6 +1738,7 @@ public final class Demostore {
         }
         return this;
       }
+      private int bitField0_;
 
       private long accountId_ ;
       /**
@@ -1840,6 +1950,116 @@ public final class Demostore {
   checkByteStringIsUtf8(value);
         
         email_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.LazyStringList backup2Fa_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureBackup2FaIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          backup2Fa_ = new com.google.protobuf.LazyStringArrayList(backup2Fa_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <code>repeated string backup2fa = 5;</code>
+       * @return A list containing the backup2fa.
+       */
+      public com.google.protobuf.ProtocolStringList
+          getBackup2FaList() {
+        return backup2Fa_.getUnmodifiableView();
+      }
+      /**
+       * <code>repeated string backup2fa = 5;</code>
+       * @return The count of backup2fa.
+       */
+      public int getBackup2FaCount() {
+        return backup2Fa_.size();
+      }
+      /**
+       * <code>repeated string backup2fa = 5;</code>
+       * @param index The index of the element to return.
+       * @return The backup2fa at the given index.
+       */
+      public java.lang.String getBackup2Fa(int index) {
+        return backup2Fa_.get(index);
+      }
+      /**
+       * <code>repeated string backup2fa = 5;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the backup2fa at the given index.
+       */
+      public com.google.protobuf.ByteString
+          getBackup2FaBytes(int index) {
+        return backup2Fa_.getByteString(index);
+      }
+      /**
+       * <code>repeated string backup2fa = 5;</code>
+       * @param index The index to set the value at.
+       * @param value The backup2fa to set.
+       * @return This builder for chaining.
+       */
+      public Builder setBackup2Fa(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureBackup2FaIsMutable();
+        backup2Fa_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string backup2fa = 5;</code>
+       * @param value The backup2fa to add.
+       * @return This builder for chaining.
+       */
+      public Builder addBackup2Fa(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureBackup2FaIsMutable();
+        backup2Fa_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string backup2fa = 5;</code>
+       * @param values The backup2fa to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllBackup2Fa(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureBackup2FaIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, backup2Fa_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string backup2fa = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearBackup2Fa() {
+        backup2Fa_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string backup2fa = 5;</code>
+       * @param value The bytes of the backup2fa to add.
+       * @return This builder for chaining.
+       */
+      public Builder addBackup2FaBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        ensureBackup2FaIsMutable();
+        backup2Fa_.add(value);
         onChanged();
         return this;
       }
@@ -7146,24 +7366,24 @@ public final class Demostore {
       "\n\014schema.proto\022\016exoscale.vinyl\"\\\n\007Accoun" +
       "t\022\n\n\002id\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\022\r\n\005state\030\003 \001" +
       "(\t\022(\n\007payment\030\004 \001(\0162\027.exoscale.vinyl.Pay" +
-      "ment\"C\n\004User\022\022\n\naccount_id\030\001 \001(\003\022\n\n\002id\030\002" +
-      " \001(\003\022\014\n\004name\030\003 \001(\t\022\r\n\005email\030\004 \001(\t\"0\n\013Inv" +
-      "oiceLine\022\017\n\007product\030\001 \001(\t\022\020\n\010quantity\030\002 " +
-      "\001(\003\"d\n\007Invoice\022\022\n\naccount_id\030\001 \001(\003\022\n\n\002id" +
-      "\030\002 \001(\003\022\r\n\005total\030\004 \001(\003\022*\n\005lines\030\005 \003(\0132\033.e" +
-      "xoscale.vinyl.InvoiceLine\"4\n\006Object\022\016\n\006b" +
-      "ucket\030\001 \001(\t\022\014\n\004path\030\002 \001(\t\022\014\n\004size\030\003 \001(\003\"" +
-      "*\n\010Location\022\020\n\010zip_code\030\001 \001(\003\022\014\n\004name\030\002 " +
-      "\001(\t\">\n\004City\022\n\n\002id\030\001 \001(\003\022*\n\010location\030\002 \001(" +
-      "\0132\030.exoscale.vinyl.Location\"\332\001\n\017RecordTy" +
-      "peUnion\022)\n\010_Account\030\001 \001(\0132\027.exoscale.vin" +
-      "yl.Account\022#\n\005_User\030\002 \001(\0132\024.exoscale.vin" +
-      "yl.User\022)\n\010_Invoice\030\003 \001(\0132\027.exoscale.vin" +
-      "yl.Invoice\022\'\n\007_Object\030\004 \001(\0132\026.exoscale.v" +
-      "inyl.Object\022#\n\005_City\030\005 \001(\0132\024.exoscale.vi" +
-      "nyl.City*<\n\007Payment\022\013\n\007INVALID\020\000\022\013\n\007PREP" +
-      "AID\020\001\022\014\n\010POSTPAID\020\002\022\t\n\005WIRED\020\003B\013B\tDemost" +
-      "oreb\006proto3"
+      "ment\"V\n\004User\022\022\n\naccount_id\030\001 \001(\003\022\n\n\002id\030\002" +
+      " \001(\003\022\014\n\004name\030\003 \001(\t\022\r\n\005email\030\004 \001(\t\022\021\n\tbac" +
+      "kup2fa\030\005 \003(\t\"0\n\013InvoiceLine\022\017\n\007product\030\001" +
+      " \001(\t\022\020\n\010quantity\030\002 \001(\003\"d\n\007Invoice\022\022\n\nacc" +
+      "ount_id\030\001 \001(\003\022\n\n\002id\030\002 \001(\003\022\r\n\005total\030\004 \001(\003" +
+      "\022*\n\005lines\030\005 \003(\0132\033.exoscale.vinyl.Invoice" +
+      "Line\"4\n\006Object\022\016\n\006bucket\030\001 \001(\t\022\014\n\004path\030\002" +
+      " \001(\t\022\014\n\004size\030\003 \001(\003\"*\n\010Location\022\020\n\010zip_co" +
+      "de\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\">\n\004City\022\n\n\002id\030\001 \001" +
+      "(\003\022*\n\010location\030\002 \001(\0132\030.exoscale.vinyl.Lo" +
+      "cation\"\332\001\n\017RecordTypeUnion\022)\n\010_Account\030\001" +
+      " \001(\0132\027.exoscale.vinyl.Account\022#\n\005_User\030\002" +
+      " \001(\0132\024.exoscale.vinyl.User\022)\n\010_Invoice\030\003" +
+      " \001(\0132\027.exoscale.vinyl.Invoice\022\'\n\007_Object" +
+      "\030\004 \001(\0132\026.exoscale.vinyl.Object\022#\n\005_City\030" +
+      "\005 \001(\0132\024.exoscale.vinyl.City*<\n\007Payment\022\013" +
+      "\n\007INVALID\020\000\022\013\n\007PREPAID\020\001\022\014\n\010POSTPAID\020\002\022\t" +
+      "\n\005WIRED\020\003B\013B\tDemostoreb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -7180,7 +7400,7 @@ public final class Demostore {
     internal_static_exoscale_vinyl_User_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_exoscale_vinyl_User_descriptor,
-        new java.lang.String[] { "AccountId", "Id", "Name", "Email", });
+        new java.lang.String[] { "AccountId", "Id", "Name", "Email", "Backup2Fa", });
     internal_static_exoscale_vinyl_InvoiceLine_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_exoscale_vinyl_InvoiceLine_fieldAccessorTable = new

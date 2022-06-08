@@ -10,8 +10,8 @@
   (let [opts {:exoscale.vinyl.store/transform p/parse-record}]
     (are [query results] (= results @(list-query *db* query opts))
       "SELECT * FROM User WHERE name STARTS WITH 'a1'"
-      [{:id 1 :account-id 1 :name "a1u1" :email "a1u1@hello.com"}
-       {:id 2 :account-id 1 :name "a1u2" :email "a1u2@hello.com"}]
+      [{:id 1 :account-id 1 :name "a1u1" :email "a1u1@hello.com" :backup2fa ["1111" "2222" "3333"]}
+       {:id 2 :account-id 1 :name "a1u2" :email "a1u2@hello.com" :backup2fa ["5243" "2959" "9938"]}]
 
       "SELECT * FROM Invoice where id >= 3"
       [{:id 3 :account-id 3 :total 80 :lines [{:product "p4" :quantity 1}]}

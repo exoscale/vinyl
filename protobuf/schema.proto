@@ -17,10 +17,11 @@ message Account {
 }
 
 message User {
-    int64  account_id = 1;
-    int64  id         = 2;
-    string name       = 3;
-    string email      = 4;
+    int64  account_id         = 1;
+    int64  id                 = 2;
+    string name               = 3;
+    string email              = 4;
+    repeated string backup2fa = 5;
 }
 
 message InvoiceLine {

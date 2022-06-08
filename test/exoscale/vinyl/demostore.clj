@@ -22,12 +22,12 @@
                                            {:product "p2" :quantity 4}]}
     {:id 5 :account-id 4 :total 80 :lines [{:product "p4" :quantity 1}]}]
    :User
-   [{:id 1 :account-id 1 :name "a1u1" :email "a1u1@hello.com"}
-    {:id 2 :account-id 1 :name "a1u2" :email "a1u2@hello.com"}
-    {:id 3 :account-id 2 :name "a2u3" :email "a2u3@hello.com"}
-    {:id 4 :account-id 3 :name "a3u4" :email "a3u5@hello.com"}
-    {:id 5 :account-id 3 :name "a3u5" :email "a3u5@hello.com"}
-    {:id 6 :account-id 3 :name "a3u6" :email "a3u6@hello.com"}]
+   [{:id 1 :account-id 1 :name "a1u1" :email "a1u1@hello.com" :backup2fa ["1111" "2222" "3333"]}
+    {:id 2 :account-id 1 :name "a1u2" :email "a1u2@hello.com" :backup2fa ["5243" "2959" "9938"]}
+    {:id 3 :account-id 2 :name "a2u3" :email "a2u3@hello.com" :backup2fa ["8304" "1111" "5472"]}
+    {:id 4 :account-id 3 :name "a3u4" :email "a3u5@hello.com" :backup2fa ["8397" "1714"]}
+    {:id 5 :account-id 3 :name "a3u5" :email "a3u5@hello.com" :backup2fa []}
+    {:id 6 :account-id 3 :name "a3u6" :email "a3u6@hello.com" :backup2fa ["4291" "4774"]}]
    :City
    [{:id 1 :location {:name "Lausanne"  :zip-code 1000}}
     {:id 2 :location {:name "Lausanne"  :zip-code 1001}}
