@@ -78,10 +78,10 @@
            @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" "files/"])))
 
     (is (= 90
-           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" "files/"] {::store/marker "files/00000010.txt"})))
+           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" "files/"] {::store/continuation "files/00000010.txt"})))
 
     (is (= 90
-           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" ""] {::store/marker "files/00000010.txt"})))
+           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" ""] {::store/continuation "files/00000010.txt"})))
 
     (testing "returning a `reduced` value stops iteration"
       (is (= 10
@@ -126,10 +126,10 @@
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil])))
 
       (is (= 15
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil] {::store/marker "files/00000005.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil] {::store/continuation "files/00000005.txt"})))
 
       (is (= 0
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil] {::store/marker "files/66666666.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil] {::store/continuation "files/66666666.txt"})))
 
       (is (= 10
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"])))
@@ -138,16 +138,16 @@
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"])))
 
       (is (= 5
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/marker "files/00000005.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/continuation "files/00000005.txt"})))
 
       (is (= 5
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/marker "files/00000015.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/continuation "files/00000015.txt"})))
 
       (is (thrown? java.util.concurrent.ExecutionException
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/marker "files/00000015.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/continuation "files/00000015.txt"})))
 
       (is (thrown? java.util.concurrent.ExecutionException
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/marker "files/00000005.txt"}))))))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/continuation "files/00000005.txt"}))))))
 
 (comment
 

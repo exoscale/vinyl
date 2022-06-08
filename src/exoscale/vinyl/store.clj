@@ -344,12 +344,12 @@
       ;; case.
       (all-of-range txn-context record-type fixed))))
 
-(defn ^TupleRange marker-range
-  "Given a prefix and an optionnal marker, return a TupleRange catching all
-   elements with the given prefix, starting from marker if present."
-  [txn-context record-type items marker]
-  (if marker
-    (let [tuple-start (key-for* txn-context record-type (conj (vec (butlast items)) marker))
+(defn ^TupleRange continuation-range
+  "Given a prefix and an optional continuation, return a TupleRange catching all
+   elements with the given prefix, starting from continuation if present."
+  [txn-context record-type items continuation]
+  (if continuation
+    (let [tuple-start (key-for* txn-context record-type (conj (vec (butlast items)) continuation))
           tuple-end   (key-for* txn-context record-type (conj (vec items)))]
       (TupleRange.
         tuple-start
@@ -505,8 +505,8 @@
    taken with the accumulator."
   ([db f val record-type items]
    (long-range-reduce db f val record-type items {}))
-  ([db f val record-type items {::keys [marker] :as opts}]
-   (let [range (marker-range db record-type items marker)
+  ([db f val record-type items {::keys [continuation] :as opts}]
+   (let [range (continuation-range db record-type items continuation)
          props (scan-properties opts)]
      (continuation-traversing-transduce
       db nil f val
@@ -518,8 +518,8 @@
    behaves like `long-range-reducer`."
   ([db xform f val record-type items]
    (long-range-transduce db xform f val record-type items {}))
-  ([db xform f val record-type items {::keys [marker] :as opts}]
-   (let [range (marker-range db record-type items marker)
+  ([db xform f val record-type items {::keys [continuation] :as opts}]
+   (let [range (continuation-range db record-type items continuation)
          props (scan-properties opts)]
      (continuation-traversing-transduce
       db xform f val
