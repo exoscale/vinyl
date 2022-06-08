@@ -50,11 +50,11 @@
 
 (defmethod vec-filter-type :nil?
   [_]
-  (s/cat :type #{:=} :field ::field))
+  (s/cat :type #{:nil?} :field ::field))
 
 (defmethod vec-filter-type :some?
   [_]
-  (s/cat :type #{:=} :field ::field))
+  (s/cat :type #{:some?} :field ::field))
 
 (defmethod vec-filter-type :and
   [_]
@@ -62,7 +62,7 @@
 
 (defmethod vec-filter-type :or
   [_]
-  (s/cat :type #{:and} :components (s/* ::filter)))
+  (s/cat :type #{:or} :components (s/* ::filter)))
 
 (defmethod vec-filter-type :not
   [_]
