@@ -67,7 +67,7 @@
                                                 [:= :bucket "small-bucket"]
                                                 [:starts-with? :path "files/00000010.txt"]]])))
     ;; As small-bucket is considered as a prefix of small-bucket-a, we get both
-    ;; the objects from small-bucket and small-bucket-a
+    ;; the objects from small-bucket and small-bucket-a (and it's expected)
     (is (= 200
            @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket"])))
 
