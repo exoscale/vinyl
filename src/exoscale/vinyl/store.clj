@@ -29,6 +29,7 @@
    com.apple.foundationdb.record.IndexScanType
    com.apple.foundationdb.record.metadata.Index
    com.apple.foundationdb.record.TupleRange
+   com.apple.foundationdb.record.EndpointType
    com.apple.foundationdb.record.IsolationLevel
    com.apple.foundationdb.record.ExecuteProperties
    com.apple.foundationdb.record.ScanProperties
@@ -343,23 +344,18 @@
       ;; case.
       (all-of-range txn-context record-type fixed))))
 
-(defn inc-prefix
-  "Given an object path, yield the next semantic one."
-  [^String p]
-  (when (seq p)
-    (let [[c & s]  (reverse p)
-          reversed (conj s (-> c int inc char))]
-      (reduce str "" (reverse reversed)))))
-
-(defn ^TupleRange marker-range
-  [txn-context record-type items marker]
-  (if marker
-    (TupleRange/between
-     (key-for* txn-context record-type (conj (vec (butlast items)) marker))
-     (let [prefix (last items)]
-       (if (seq prefix)
-         (key-for* txn-context record-type (conj (vec (butlast items)) (inc-prefix prefix)))
-         (key-for* txn-context record-type (conj (vec (drop-last 2 items)) (inc-prefix (nth items (- (count items) 2))))))))
+(defn ^TupleRange continuation-range
+  "Given a prefix and an optional continuation, return a TupleRange catching all
+   elements with the given prefix, starting from continuation if present."
+  [txn-context record-type items continuation]
+  (if continuation
+    (let [tuple-start (key-for* txn-context record-type (conj (vec (butlast items)) continuation))
+          tuple-end   (key-for* txn-context record-type (vec items))]
+      (TupleRange.
+        tuple-start
+        tuple-end
+        EndpointType/CONTINUATION
+        EndpointType/PREFIX_STRING))
     (prefix-range txn-context record-type items)))
 
 (defn ^TupleRange greater-than-range
@@ -509,8 +505,8 @@
    taken with the accumulator."
   ([db f val record-type items]
    (long-range-reduce db f val record-type items {}))
-  ([db f val record-type items {::keys [marker] :as opts}]
-   (let [range (marker-range db record-type items marker)
+  ([db f val record-type items {::keys [continuation] :as opts}]
+   (let [range (continuation-range db record-type items continuation)
          props (scan-properties opts)]
      (continuation-traversing-transduce
       db nil f val
@@ -522,8 +518,8 @@
    behaves like `long-range-reducer`."
   ([db xform f val record-type items]
    (long-range-transduce db xform f val record-type items {}))
-  ([db xform f val record-type items {::keys [marker] :as opts}]
-   (let [range (marker-range db record-type items marker)
+  ([db xform f val record-type items {::keys [continuation] :as opts}]
+   (let [range (continuation-range db record-type items continuation)
          props (scan-properties opts)]
      (continuation-traversing-transduce
       db xform f val
