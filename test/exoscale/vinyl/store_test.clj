@@ -31,9 +31,7 @@
       (is
        (= [{:id 3 :account-id 2 :name "a2u3" :email "a2u3@hello.com" :backup2fa ["8304" "1111" "5472"]}
            {:id 4 :account-id 3 :name "a3u4" :email "a3u5@hello.com" :backup2fa ["8397" "1714"]}]
-          @(store/list-query *db* [:User [:one-of-them :backup2fa [:starts-with? :the-one-of-them "83"]]] opts)))
-    )
-
+          @(store/list-query *db* [:User [:one-of-them :backup2fa [:starts-with? :the-one-of-them "83"]]] opts))))
     (testing "int comparisons"
       (is
        (= [{:id 3 :account-id 3 :total 80 :lines [{:product "p4" :quantity 1}]}
