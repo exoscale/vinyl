@@ -16,9 +16,7 @@
   [k]
   (if (keyword? k)
     (Query/field (name k))
-    k
-  )
-)
+    k))
 
 (s/def ::field keyword?)
 
