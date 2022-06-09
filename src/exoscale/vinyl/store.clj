@@ -350,7 +350,7 @@
   [txn-context record-type items continuation]
   (if continuation
     (let [tuple-start (key-for* txn-context record-type (conj (vec (butlast items)) continuation))
-          tuple-end   (key-for* txn-context record-type (conj (vec items)))]
+          tuple-end   (key-for* txn-context record-type (vec items))]
       (TupleRange.
         tuple-start
         tuple-end
