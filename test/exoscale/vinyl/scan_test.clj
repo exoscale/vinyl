@@ -113,10 +113,22 @@
   (install-records *db* (record-generator "bucket-666" 20))
 
   (testing "we get back expected values"
+
+    ;; This is an example of what to NOT do, listing an object without a final
+    ;; marker would include all elements with the same prefix
     (is (= 40
            @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-66"])))
     (is (= 20
            @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-666"])))
+
+    ; Using the multi-elements continuation, we can safely iterate over a
+    ; "table" when the primary-key is a concatenation of multiple fields
+    (is (= 40
+           @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-"])))
+    (is (= 30
+           @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-"] {::store/continuations ["bucket-66" "files/00000010.txt"]})))
+    (is (= 30
+           @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-"] {::store/continuations ["bucket-66"] ::store/continuation "files/00000010.txt"})))
 
     (doseq [bucket ["bucket-66" "bucket-666"]]
       (is (= 20
