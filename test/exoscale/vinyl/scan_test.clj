@@ -57,24 +57,13 @@
     (is (= [{:id 3, :location {:name "Lausanne", :zip-code 1002}}
             {:id 4, :location {:name "Lausanne", :zip-code 1003}}
             {:id 5, :location {:name "Lausanne", :zip-code 1004}}]
-           @(store/long-range-transduce *db* (map p/parse-record) (completing conj) [] :City ["Lausanne" nil] {::store/continuation 1002})))
-
-    (is (= [{:id 3, :location {:name "Lausanne", :zip-code 1002}}
-            {:id 4, :location {:name "Lausanne", :zip-code 1003}}
-            {:id 5, :location {:name "Lausanne", :zip-code 1004}}]
-           @(store/long-range-transduce *db* (map p/parse-record) (completing conj) [] :City ["Lausanne" nil] {::store/continuations [1002]})))
+           @(store/long-range-transduce *db* (map p/parse-record) (completing conj) [] :City ["Lausanne" nil] {::store/continuation [1002]})))
 
     (is (= [{:id 3, :location {:name "Lausanne", :zip-code 1002}}
             {:id 4, :location {:name "Lausanne", :zip-code 1003}}
             {:id 5, :location {:name "Lausanne", :zip-code 1004}}
             {:id 6, :location {:name "Neuchatel", :zip-code 2000}}]
-           @(store/long-range-transduce *db* (map p/parse-record) (completing conj) [] :City [""] {::store/continuations ["Lausanne" 1002]})))
-
-    (is (= [{:id 3, :location {:name "Lausanne", :zip-code 1002}}
-            {:id 4, :location {:name "Lausanne", :zip-code 1003}}
-            {:id 5, :location {:name "Lausanne", :zip-code 1004}}
-            {:id 6, :location {:name "Neuchatel", :zip-code 2000}}]
-           @(store/long-range-transduce *db* (map p/parse-record) (completing conj) [] :City [""] {::store/continuations ["Lausanne"] ::store/continuation 1002})))))
+           @(store/long-range-transduce *db* (map p/parse-record) (completing conj) [] :City [""] {::store/continuation ["Lausanne" 1002]})))))
 
 (deftest large-range-scan-test-on-small-data
 
@@ -117,10 +106,10 @@
            @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" "files/"])))
 
     (is (= 90
-           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" "files/"] {::store/continuation "files/00000010.txt"})))
+           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" "files/"] {::store/continuation ["files/00000010.txt"]})))
 
     (is (= 90
-           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" ""] {::store/continuation "files/00000010.txt"})))
+           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" ""] {::store/continuation ["files/00000010.txt"]})))
 
     (testing "returning a `reduced` value stops iteration"
       (is (= 10
@@ -165,9 +154,7 @@
     (is (= 40
            @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-"])))
     (is (= 30
-           @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-"] {::store/continuations ["bucket-66" "files/00000010.txt"]})))
-    (is (= 30
-           @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-"] {::store/continuations ["bucket-66"] ::store/continuation "files/00000010.txt"})))
+           @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-"] {::store/continuation ["bucket-66" "files/00000010.txt"]})))
 
     (doseq [bucket ["bucket-66" "bucket-666"]]
       (is (= 20
@@ -177,10 +164,10 @@
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil])))
 
       (is (= 15
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil] {::store/continuation "files/00000005.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil] {::store/continuation ["files/00000005.txt"]})))
 
       (is (= 0
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil] {::store/continuation "files/66666666.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil] {::store/continuation ["files/66666666.txt"]})))
 
       (is (= 10
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"])))
@@ -189,16 +176,16 @@
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"])))
 
       (is (= 5
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/continuation "files/00000005.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/continuation ["files/00000005.txt"]})))
 
       (is (= 5
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/continuation "files/00000015.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/continuation ["files/00000015.txt"]})))
 
       (is (thrown? java.util.concurrent.ExecutionException
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/continuation "files/00000015.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/continuation ["files/00000015.txt"]})))
 
       (is (thrown? java.util.concurrent.ExecutionException
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/continuation "files/00000005.txt"}))))))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/continuation ["files/00000005.txt"]}))))))
 
 (comment
 
