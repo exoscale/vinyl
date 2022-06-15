@@ -24,7 +24,6 @@
            exoscale.vinyl.Demostore$Object$Builder
            exoscale.vinyl.Demostore$Payment))
 
-
 (defprotocol RecordParser (parse-record [this]))
 (defprotocol RecordMerger (merge-from [this other]))
 
@@ -47,8 +46,8 @@
     :wired    Demostore$Payment/WIRED
     Demostore$Payment/UNRECOGNIZED))
 
-(defn ^Demostore$Account account->record
-  [account]
+(defn account->record
+  ^Demostore$Account [account]
   (let [account (ex/assert-spec-valid ::account (ensure-id account))
         b       (Demostore$Account/newBuilder)]
     (-> b
@@ -58,8 +57,8 @@
         (.setPayment (payment->enum (:payment account)))
         (.build))))
 
-(defn ^Demostore$Location location->record
-  [location]
+(defn location->record
+  ^Demostore$Location [location]
   (let [location (ex/assert-spec-valid ::location location)
         b        (Demostore$Location/newBuilder)]
     (-> b
@@ -67,8 +66,8 @@
         (.setZipCode  (:zip-code location))
         (.build))))
 
-(defn ^Demostore$City city->record
-  [city]
+(defn city->record
+  ^Demostore$City [city]
   (let [city    (ex/assert-spec-valid ::city (ensure-id city))
         b       (Demostore$City/newBuilder)]
     (-> b
@@ -76,8 +75,8 @@
         (.setLocation (location->record (:location city)))
         (.build))))
 
-(defn ^Demostore$User user->record
-  [user]
+(defn user->record
+  ^Demostore$User [user]
   (let [user (ex/assert-spec-valid ::user (ensure-id user))
         b    (Demostore$User/newBuilder)]
     (-> b
@@ -87,8 +86,8 @@
         (.setEmail (str (:email user)))
         (.build))))
 
-(defn ^Demostore$InvoiceLine invoice-line->record
-  [line]
+(defn invoice-line->record
+  ^Demostore$InvoiceLine [line]
   (ex/assert-spec-valid ::line line)
   (let [b (Demostore$InvoiceLine/newBuilder)]
     (-> b
@@ -96,8 +95,8 @@
         (.setQuantity (long (:quantity line)))
         (.build))))
 
-(defn ^Demostore$Invoice invoice->record
-  [invoice]
+(defn invoice->record
+  ^Demostore$Invoice [invoice]
   (let [invoice (ex/assert-spec-valid ::invoice (ensure-id invoice))
         b       (Demostore$Invoice/newBuilder)]
     (-> b
@@ -107,8 +106,8 @@
         (.addAllLines (mapv invoice-line->record (:lines invoice)))
         (.build))))
 
-(defn ^Demostore$Object object->record
-  [object]
+(defn object->record
+  ^Demostore$Object [object]
   (let [object (ex/assert-spec-valid ::object object)
         b      (Demostore$Object/newBuilder)]
     (-> b
@@ -117,10 +116,10 @@
         (.setBucket (:bucket object))
         (.build))))
 
-(defn ^Message map->record
-  ([m]
+(defn map->record
+  (^Message [m]
    (map->record (::record-type m) m))
-  ([record-type m]
+  (^Message [record-type m]
    (case record-type
      :Account     (account->record m)
      :City        (city->record m)
@@ -141,7 +140,7 @@
 
 (extend-protocol RecordParser
   nil
-  (parse-record [r]
+  (parse-record [_]
     nil)
   FDBRecord
   (parse-record [r]

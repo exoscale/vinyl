@@ -15,14 +15,14 @@
            java.util.function.Consumer
            java.util.function.BiConsumer])
 
-(defn ^exoscale.vinyl.fn.Functional make-fun
+(defn make-fun
   "Turn a function of one argument into an implementation
    of `Function`, `BiFunction`, `Consumer`, and `BiConsumer`.
 
    To allow type hinting on the way out, the extending interface
    `exoscale.vinyl.fn.Functional` is used which extends all
     of the above."
-  [f]
+  ^exoscale.vinyl.fn.Functional [f]
   (if (instance? Function f)
     f
     (reify
@@ -32,8 +32,8 @@
       (accept [_ arg]       (f arg))
       (accept [_ arg1 arg2] (f arg1 arg2)))))
 
-(defn ^Supplier make-supplier
-  [f]
+(defn make-supplier
+  ^Supplier [f]
   (reify
     Supplier (get [_] (f))))
 

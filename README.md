@@ -157,7 +157,7 @@ You can apply any field query to fields in info by using `:nested`:
 
 #### Enums
 
-Proto3 enum must start at ordinal 0.  
+Proto3 enum must start at ordinal 0.
 Internally, FDB record layer does not make the difference between
 0 and null and thus 0 will be serialized as null.
 

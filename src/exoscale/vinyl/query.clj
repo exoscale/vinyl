@@ -12,8 +12,8 @@
            com.apple.foundationdb.record.EvaluationContext
            java.util.List))
 
-(defn ^Field build-field
-  [k]
+(defn build-field
+  ^Field [k]
   (Query/field (name k)))
 
 (s/def ::field keyword?)
@@ -90,8 +90,8 @@
 
 (defmulti ^QueryComponent multi-build-filter :type)
 
-(defn ^QueryComponent build-filter
-  [filter]
+(defn build-filter
+  ^QueryComponent [filter]
   (ex/assert-spec-valid ::filter filter)
   (let [data (s/conform ::filter filter)]
     (multi-build-filter data)))
@@ -168,19 +168,19 @@
   (-> (build-field field)
       (.lessThanOrEquals comparand)))
 
-(defn ^RecordQuery build-query
-  ([record-type]
+(defn build-query
+  (^RecordQuery [record-type]
    (-> (RecordQuery/newBuilder)
        (.setRecordType (name record-type))
        (.build)))
-  ([record-type filter]
+  (^RecordQuery [record-type filter]
    (-> (RecordQuery/newBuilder)
        (.setRecordType (name record-type))
        (.setFilter (build-filter filter))
        (.build))))
 
-(defn ^EvaluationContext bindings
-  ([m]
+(defn bindings
+  (^EvaluationContext [m]
    (let [^EvaluationContextBuilder builder (EvaluationContext/newBuilder)]
      (doseq [[k v] m]
        (.setBinding builder (name k) v))

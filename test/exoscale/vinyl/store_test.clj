@@ -58,15 +58,15 @@
           @(store/list-query *db* [:Account [:= :state "suspended"]] opts))))
     (testing "list-query"
       (is
-        (= [{:id 1 :location {:name "Lausanne"  :zip-code 1000}}
-            {:id 2 :location {:name "Lausanne"  :zip-code 1001}}
-            {:id 3 :location {:name "Lausanne"  :zip-code 1002}}
-            {:id 4 :location {:name "Lausanne"  :zip-code 1003}}
-            {:id 5 :location {:name "Lausanne"  :zip-code 1004}}]
-           @(store/list-query *db* [:City [:nested :location [:= :name "Lausanne"]]] opts)))
+       (= [{:id 1 :location {:name "Lausanne"  :zip-code 1000}}
+           {:id 2 :location {:name "Lausanne"  :zip-code 1001}}
+           {:id 3 :location {:name "Lausanne"  :zip-code 1002}}
+           {:id 4 :location {:name "Lausanne"  :zip-code 1003}}
+           {:id 5 :location {:name "Lausanne"  :zip-code 1004}}]
+          @(store/list-query *db* [:City [:nested :location [:= :name "Lausanne"]]] opts)))
       (is
-        (= [{:id 6 :location {:name "Neuchatel" :zip-code 2000}}]
-           @(store/list-query *db* [:City [:nested :location [:= :name "Neuchatel"]]] opts))))))
+       (= [{:id 6 :location {:name "Neuchatel" :zip-code 2000}}]
+          @(store/list-query *db* [:City [:nested :location [:= :name "Neuchatel"]]] opts))))))
 
 (defn- ensure-plan [query plan-str]
   (let [plan (atom nil)]
@@ -92,21 +92,21 @@
   (testing "Aggregation queries"
     (testing "Count not null aggregation"
       (are [account-id total]
-          (= total (agg/compute *db* :count-not-null :User :usercnt account-id))
+           (= total (agg/compute *db* :count-not-null :User :usercnt account-id))
         1 2
         2 1
         3 3
         4 0))
     (testing "Sum aggregation"
       (are [account-id total]
-          (= total (agg/compute *db* :sum :Invoice :total_invoiced account-id))
+           (= total (agg/compute *db* :sum :Invoice :total_invoiced account-id))
         1 40
         2 0
         3 80
         4 90))
     (testing "Enum aggregation"
       (are [payment cnt]
-        (= cnt (agg/compute *db* :count-not-null :Account :account_payment_count payment))
+           (= cnt (agg/compute *db* :count-not-null :Account :account_payment_count payment))
         ;; enum value 0 cannot be indexed
         p/invalid 0
         p/prepaid 1

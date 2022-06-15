@@ -58,9 +58,7 @@
                            {:name "bucket_paths"
                             :on [:concat "bucket" "path"]}]}
    :City   {:primary-key [:concat :type-key [:nested "location" "name"]
-                                            [:nested "location" "zip_code"]]}})
-
-
+                          [:nested "location" "zip_code"]]}})
 
 (def demostore
   (store/initialize :demostore (Demostore/getDescriptor) schema))

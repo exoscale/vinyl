@@ -1,8 +1,40 @@
 {:paths ["src"]
- :deps  {org.clojure/clojure                        {:mvn/version "1.10.3"}
-         org.clojure/tools.logging                  {:mvn/version "1.1.0"}
+ :deps  {org.clojure/clojure                        {:mvn/version "1.11.1"}
+         org.clojure/tools.logging                  {:mvn/version "1.2.4"}
+         org.foundationdb/fdb-java                  {:mvn/version "6.3.24"}
          org.foundationdb/fdb-record-layer-core-pb3 {:mvn/version "2.8.110.0"}
-         com.google.protobuf/protobuf-java          {:mvn/version "3.15.8"}
-         com.stuartsierra/component                 {:mvn/version "1.0.0"}
-         exoscale/ex                                {:mvn/version "0.3.17"}
-         instaparse/instaparse                      {:mvn/version "1.4.10"}}}
+         com.google.protobuf/protobuf-java          {:mvn/version "3.21.1"}
+         com.stuartsierra/component                 {:mvn/version "1.1.0"}
+         exoscale/ex                                {:mvn/version "0.4.0"}
+         instaparse/instaparse                      {:mvn/version "1.4.12"}}
+
+ :exoscale.project/lib          com.exoscale/vinyl
+ :exoscale.project/version-file "VERSION"
+
+ :deps/prep-lib
+ {:ensure "target/classes"
+  :alias  :prep
+  :fn     compile-java}
+
+ :slipset.deps-deploy/exec-args
+ {:installer :remote :sign-releases? false :repository "clojars"}
+
+ :aliases
+ {:test
+  {:extra-deps  {lambdaisland/kaocha    {:mvn/version "1.66.1034"}
+                 org.slf4j/slf4j-api    {:mvn/version "2.0.0-alpha7"}
+                 org.slf4j/slf4j-simple {:mvn/version "2.0.0-alpha7"}
+                 org.clojure/test.check {:mvn/version "1.1.1"}}
+   :extra-paths ["test" "test/resources" "target/classes"]
+   :exec-fn     kaocha.runner/exec-fn}
+
+  :prep
+  {:deps        {io.github.clojure/tools.build {:git/tag "v0.8.2"
+                                                :git/sha "ba1a2bf"}}
+   :extra-paths ["protobuf"]
+   :ns-default  build}
+
+  :project
+  {:deps       {io.github.exoscale/tools.project
+                {:git/sha "39c80f58ee8c74ce64e981e4f8b9b70aeea648be"}}
+   :ns-default exoscale.tools.project}}}
