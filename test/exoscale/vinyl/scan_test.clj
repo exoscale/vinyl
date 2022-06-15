@@ -1,10 +1,9 @@
 (ns exoscale.vinyl.scan-test
-  (:require [clojure.test              :as test :refer [deftest testing is are]]
+  (:require [clojure.test              :as test :refer [deftest testing is]]
             [exoscale.vinyl.aggregates :as agg]
             [exoscale.vinyl.payload    :as p :refer [object->record]]
             [exoscale.vinyl.store      :as store]
             [exoscale.vinyl.demostore  :as ds :refer [*db*]]))
-
 
 (test/use-fixtures :once ds/with-open-fdb)
 
@@ -76,24 +75,24 @@
 
     (is (= 100
            @(store/long-query-reduce *db* incrementor 0
-                                      [:Object [:= :bucket "small-bucket"]])))
+                                     [:Object [:= :bucket "small-bucket"]])))
 
     (is (= 90
            @(store/long-query-reduce *db* incrementor 0
-                                      [:Object [:and
-                                                [:= :bucket "small-bucket"]
-                                                [:>= :path "files/00000010.txt"]]])))
+                                     [:Object [:and
+                                               [:= :bucket "small-bucket"]
+                                               [:>= :path "files/00000010.txt"]]])))
     (is (= 90
            @(store/long-query-reduce *db* incrementor 0
-                                      [:Object [:and
-                                                [:= :bucket "small-bucket"]
-                                                [:>= :path "files/00000010.txt"]
-                                                [:< :path (inc-prefix "files/")]]])))
+                                     [:Object [:and
+                                               [:= :bucket "small-bucket"]
+                                               [:>= :path "files/00000010.txt"]
+                                               [:< :path (inc-prefix "files/")]]])))
     (is (= 1
            @(store/long-query-reduce *db* incrementor 0
-                                      [:Object [:and
-                                                [:= :bucket "small-bucket"]
-                                                [:starts-with? :path "files/00000010.txt"]]])))
+                                     [:Object [:and
+                                               [:= :bucket "small-bucket"]
+                                               [:starts-with? :path "files/00000010.txt"]]])))
     ;; As small-bucket is considered as a prefix of small-bucket-a, we get both
     ;; the objects from small-bucket and small-bucket-a (and it's expected)
     (is (= 200
@@ -114,27 +113,27 @@
     (testing "returning a `reduced` value stops iteration"
       (is (= 10
              @(store/long-query-reduce *db* (max-incrementor 10) 0
-                                        [:Object [:= :bucket "small-bucket"]]))))
+                                       [:Object [:= :bucket "small-bucket"]]))))
 
     (testing "maintained indices are consistent"
       (is (= (agg/compute *db* :count-not-null :Object :path_count "small-bucket")
              @(store/long-query-reduce *db* incrementor 0
-                                        [:Object [:= :bucket "small-bucket"]]))))
+                                       [:Object [:= :bucket "small-bucket"]]))))
 
     (testing "incompatible operators"
       (is (thrown? java.util.concurrent.ExecutionException
                    @(store/long-query-reduce *db* incrementor 0
-                                              [:Object [:and
-                                                        [:= :bucket "small-bucket"]
-                                                        [:starts-with? :path "files/00000010.txt"]
-                                                        [:>= :path "files/"]]])))
+                                             [:Object [:and
+                                                       [:= :bucket "small-bucket"]
+                                                       [:starts-with? :path "files/00000010.txt"]
+                                                       [:>= :path "files/"]]])))
 
       (is (thrown? java.util.concurrent.ExecutionException
                    @(store/long-query-reduce *db* incrementor 0
-                                              [:Object [:and
-                                                        [:= :bucket "small-bucket"]
-                                                        [:starts-with? :path "files/00000010.txt"]
-                                                        [:< :path (inc-prefix "files/")]]]))))))
+                                             [:Object [:and
+                                                       [:= :bucket "small-bucket"]
+                                                       [:starts-with? :path "files/00000010.txt"]
+                                                       [:< :path (inc-prefix "files/")]]]))))))
 
 (deftest large-range-scan-test-on-overlapping-bucket-names
   (install-records *db* (record-generator "bucket-66"  20))
@@ -182,10 +181,10 @@
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/continuation ["files/00000015.txt"]})))
 
       (is (thrown? java.util.concurrent.ExecutionException
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/continuation ["files/00000015.txt"]})))
+                   @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/continuation ["files/00000015.txt"]})))
 
       (is (thrown? java.util.concurrent.ExecutionException
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/continuation ["files/00000005.txt"]}))))))
+                   @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/continuation ["files/00000005.txt"]}))))))
 
 (comment
 
@@ -204,8 +203,8 @@
   ;; This should yield 4000000
   (time
    @(store/long-query-reduce db incrementor 0
-                              [:Object [:= :bucket "big-test-bucket"]]))
+                             [:Object [:= :bucket "big-test-bucket"]]))
 
   ;; This should yield 100 and return quick
   @(store/long-query-reduce db (max-incrementor 100) 0
-                             [:Object [:= :bucket "big-test-bucket"]]))
+                            [:Object [:= :bucket "big-test-bucket"]]))

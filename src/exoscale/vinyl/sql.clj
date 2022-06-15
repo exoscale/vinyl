@@ -194,7 +194,6 @@ quoted = <'\\''> (#'[^\\'\\\\]+' | escaped-char)* <'\\''>
                 (conj (translate-filters (rest filters))))
        :opts (reduce merge {} (map translate-option (rest options)))})))
 
-
 (defn list-query
   "Acts as `exoscale.vinyl.store/list-query` but accepts strings queries
   written in a subset of SQL.

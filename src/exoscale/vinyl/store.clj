@@ -57,12 +57,12 @@
   (new-runner [this]
     "Return a runner to handle retryable logic"))
 
-(defn ^FDBDatabaseRunner runner-opts
-  [^FDBDatabaseRunner runner
-   {::keys [max-attempts
-            initial-delay
-            max-delay
-            transaction-timeout]}]
+(defn runner-opts
+  ^FDBDatabaseRunner [^FDBDatabaseRunner runner
+                      {::keys [max-attempts
+                               initial-delay
+                               max-delay
+                               transaction-timeout]}]
   (when (some? max-attempts)
     (.setMaxAttempts runner (int max-attempts)))
   (when (some? initial-delay)
@@ -80,20 +80,20 @@
              (.addSubdirectory (KeySpaceDirectory. "schema" kt)))]
     (KeySpace. (into-array KeySpaceDirectory [ds]))))
 
-(defn ^FDBDatabase db-from-instance
+(defn db-from-instance
   "Build a valid FDB database from configuration. Use the standard
    cluster-file location or a specific one if instructed to do so."
-  ([]
+  (^FDBDatabase []
    (db-from-instance nil))
-  ([^String cluster-file]
+  (^FDBDatabase [^String cluster-file]
    (let [^FDBDatabaseFactory factory (FDBDatabaseFactory/instance)]
      (if (some? cluster-file)
        (.getDatabase factory cluster-file)
        (.getDatabase factory)))))
 
-(defn ^FDBRecordStore$Builder record-store-builder
+(defn record-store-builder
   "Yield a new record store builder"
-  []
+  ^FDBRecordStore$Builder []
   (FDBRecordStore/newBuilder))
 
 (defn key-for*
@@ -114,18 +114,18 @@
   [db record-type & args]
   (key-for* db record-type args))
 
-(defn ^Tuple record-primary-key
-  [^FDBRecord r]
+(defn record-primary-key
+  ^Tuple [^FDBRecord r]
   (.getPrimaryKey r))
 
-(defn ^CompletableFuture async-store-from-builder
-  [^FDBRecordStore$Builder builder ^FDBRecordContext context]
+(defn async-store-from-builder
+  ^CompletableFuture [^FDBRecordStore$Builder builder ^FDBRecordContext context]
   (-> (.copyBuilder builder)
       (.setContext context)
       (.createOrOpenAsync)))
 
-(defn ^FDBRecordStore store-from-builder
-  [^FDBRecordStore$Builder builder ^FDBRecordContext context]
+(defn store-from-builder
+  ^FDBRecordStore [^FDBRecordStore$Builder builder ^FDBRecordContext context]
   (-> (.copyBuilder builder)
       (.setContext context)
       (.createOrOpen)))
@@ -207,8 +207,8 @@
   (run-in-context [this f] (f this))
   (run-async [this f]      (f this)))
 
-(defn ^RecordQuery as-query
-  [q]
+(defn as-query
+  ^RecordQuery [q]
   (if (instance? RecordQuery q)
     q
     (apply query/build-query q)))
@@ -221,8 +221,8 @@
    ::by-time-window IndexScanType/BY_TIME_WINDOW
    ::by-text-token  IndexScanType/BY_TEXT_TOKEN})
 
-(defn ^IndexScanType as-scan-type
-  [t]
+(defn as-scan-type
+  ^IndexScanType [t]
   (if (instance? IndexScanType t)
     t
     (get known-scan-types t IndexScanType/BY_VALUE)))
@@ -324,14 +324,14 @@
      (let [opts {::foreach  #(delete-record store (record-primary-key %))}]
        (run-async store (store-query-fn (as-query query) opts))))))
 
-(defn ^TupleRange all-of-range
-  [txn-context record-type items]
+(defn all-of-range
+  ^TupleRange [txn-context record-type items]
   (if (= ::raw record-type)
     (TupleRange/allOf (tuple/from-seq items))
     (TupleRange/allOf (key-for* txn-context record-type items))))
 
-(defn ^TupleRange prefix-range
-  [txn-context record-type items]
+(defn prefix-range
+  ^TupleRange [txn-context record-type items]
   (let [fixed  (butlast items)
         prefix (last items)
         range   (TupleRange/prefixedBy (str prefix))]
@@ -344,30 +344,30 @@
       ;; case.
       (all-of-range txn-context record-type fixed))))
 
-(defn ^TupleRange continuation-range
+(defn continuation-range
   "Given a prefix and an optional continuation, both being a collection of
    keys, return a TupleRange catching all elements with the given prefix, starting
    from continuation if present."
-  [txn-context record-type items continuation]
+  ^TupleRange [txn-context record-type items continuation]
   (if (seq continuation)
     (let [tuple-start (key-for* txn-context record-type (vec (concat (butlast items) continuation)))
           tuple-end   (key-for* txn-context record-type (vec items))]
       (TupleRange.
-        tuple-start
-        tuple-end
-        EndpointType/CONTINUATION
-        EndpointType/PREFIX_STRING))
+       tuple-start
+       tuple-end
+       EndpointType/CONTINUATION
+       EndpointType/PREFIX_STRING))
     (prefix-range txn-context record-type items)))
 
-(defn ^TupleRange greater-than-range
-  [txn-context record-type items]
+(defn greater-than-range
+  ^TupleRange [txn-context record-type items]
   (TupleRange/between (if (= ::raw record-type)
                         (tuple/from-seq items)
                         (key-for* txn-context record-type items))
                       nil))
 
-(defn ^TupleRange between
-  [txn-context record-type items start end]
+(defn between
+  ^TupleRange [txn-context record-type items start end]
   (if (= ::raw record-type)
     (TupleRange/between
      (tuple/from-seq (conj (vec items) start))
@@ -376,18 +376,18 @@
      (key-for* txn-context record-type (conj (vec items) start))
      (key-for* txn-context record-type (conj (vec items) end)))))
 
-(defn ^IsolationLevel as-isolation-level
-  [level]
+(defn as-isolation-level
+  ^IsolationLevel [level]
   (if (= ::snapshot level)
     IsolationLevel/SNAPSHOT
     IsolationLevel/SERIALIZABLE))
 
-(defn ^ExecuteProperties execute-properties
-  [{::keys [fail-on-scan-limit-reached?
-            isolation-level
-            skip
-            limit]
-    :as    props}]
+(defn execute-properties
+  ^ExecuteProperties [{::keys [fail-on-scan-limit-reached?
+                               isolation-level
+                               skip
+                               limit]
+                       :as    props}]
   (if (nil? props)
     ExecuteProperties/SERIAL_EXECUTE
     (-> (ExecuteProperties/newBuilder)
@@ -397,12 +397,12 @@
         (cond-> (some? limit) (.setReturnedRowLimit (int limit)))
         (.build))))
 
-(defn ^ScanProperties scan-properties
-  ([{::keys [reverse?] :as props}]
+(defn scan-properties
+  (^ScanProperties [{::keys [reverse?] :as props}]
    (if (nil? props)
      ScanProperties/FORWARD_SCAN
      (.asScanProperties (execute-properties props) (boolean reverse?))))
-  ([^ExecuteProperties props reverse?]
+  (^ScanProperties [^ExecuteProperties props reverse?]
    (.asScanProperties props (boolean reverse?))))
 
 (defn scan-range
@@ -419,8 +419,8 @@
   [txn-context record-type items opts]
   (scan-range txn-context (prefix-range txn-context record-type items) opts))
 
-(defn ^Index metadata-index
-  [^RecordMetaData metadata ^String index-name]
+(defn metadata-index
+  ^Index [^RecordMetaData metadata ^String index-name]
   (.getIndex metadata index-name))
 
 (defn scan-index
@@ -490,8 +490,6 @@
            (-> (continuing-fn store @cont)
                (cursor/apply-transduce xform f result #(reset! cont %)))))
         (fn/close-on-complete runner))))
-
-
 
 (defn long-range-reduce
   "A reducer over large ranges.

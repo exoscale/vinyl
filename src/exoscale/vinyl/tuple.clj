@@ -5,20 +5,20 @@
   :extend-via-metadata true
   (as-tuple [this]))
 
-(defn ^Tuple from-seq
-  [objs]
+(defn from-seq
+  ^Tuple [objs]
   (Tuple/from (into-array Object objs)))
 
-(defn ^Tuple from
-  [& objs]
+(defn from
+  ^Tuple [& objs]
   (from-seq objs))
 
-(defn ^bytes pack
-  [^Tuple t]
+(defn pack
+  ^bytes [^Tuple t]
   (.pack t))
 
-(defn ^String get-string
-  [^Tuple t index]
+(defn get-string
+  ^String [^Tuple t index]
   (.getString t (int index)))
 
 (defn expand
@@ -31,8 +31,8 @@
   ([^Tuple t index]
    (.getLong t (long index))))
 
-(defn ^Tuple decode
-  [^bytes b]
+(defn decode
+  ^Tuple [^bytes b]
   (Tuple/fromBytes b))
 
 (def decode-and-expand

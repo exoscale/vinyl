@@ -12,3 +12,6 @@ pom.xml.asc
 .hgignore
 .hg/
 /.clj-kondo/.cache
+.cpcache
+.lsp
+/resources/git-version

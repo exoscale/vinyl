@@ -33,9 +33,8 @@
   (group [field expr]
     (.groupBy field ^KeyExpression expr (into-array KeyExpression []))))
 
-(defn ^KeyExpression
-  build-field
-  [field-def]
+(defn build-field
+  ^KeyExpression [field-def]
   (ex/assert-spec-valid ::field field-def)
   (let [[type field] (s/conform ::field field-def)]
     (case type
@@ -71,16 +70,16 @@
   {:count-not-null IndexTypes/COUNT_NOT_NULL
    :sum            IndexTypes/SUM})
 
-(defn ^Index make-index
-  [index-name ^KeyExpression kx type]
+(defn make-index
+  ^Index [index-name ^KeyExpression kx type]
   (let [it (cond
              (keyword? type) (get index-types type)
              (string? type)  type
              :else           IndexTypes/VALUE)]
     (Index. (str index-name) kx (str it))))
 
-(defn ^RecordMetaData create-record-meta
-  [^Descriptors$FileDescriptor descriptor schema]
+(defn create-record-meta
+  ^RecordMetaData [^Descriptors$FileDescriptor descriptor schema]
   (ex/assert-spec-valid ::schema schema)
   (let [builder (doto (RecordMetaData/newBuilder)
                   (.setRecords descriptor)

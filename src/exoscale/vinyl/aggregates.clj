@@ -17,12 +17,12 @@
    :sum            FunctionNames/SUM})
 
 ;; If this gets bigger let's move to auspex
-(defn ^CompletableFuture then-apply
-  [^CompletableFuture ftr f]
+(defn then-apply
+  ^CompletableFuture [^CompletableFuture ftr f]
   (.thenApply ftr (fn/make-fun f)))
 
-(defn ^Index get-index
-  [^FDBRecordStore store index-name]
+(defn get-index
+  ^Index [^FDBRecordStore store index-name]
   (let [record-meta (.getRecordMetaData store)]
     (.getIndex record-meta (name index-name))))
 
@@ -34,8 +34,8 @@
                               (Key$Evaluated/scalar param)
                               IsolationLevel/SERIALIZABLE))
 
-(defn ^IndexAggregateFunction index-aggregate-function
-  [store function-name index-name]
+(defn index-aggregate-function
+  ^IndexAggregateFunction  [store function-name index-name]
   (let [index (get-index store index-name)]
     (IndexAggregateFunction. (str (if (string? function-name)
                                     function-name
