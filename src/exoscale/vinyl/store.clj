@@ -345,11 +345,12 @@
       (all-of-range txn-context record-type fixed))))
 
 (defn ^TupleRange continuation-range
-  "Given a prefix and an optional continuation, return a TupleRange catching all
-   elements with the given prefix, starting from continuation if present."
+  "Given a prefix and an optional continuation, both being a collection of
+   keys, return a TupleRange catching all elements with the given prefix, starting
+   from continuation if present."
   [txn-context record-type items continuation]
-  (if continuation
-    (let [tuple-start (key-for* txn-context record-type (conj (vec (butlast items)) continuation))
+  (if (seq continuation)
+    (let [tuple-start (key-for* txn-context record-type (vec (concat (butlast items) continuation)))
           tuple-end   (key-for* txn-context record-type (vec items))]
       (TupleRange.
         tuple-start

@@ -37,6 +37,34 @@
           reversed (conj s (-> c int inc char))]
       (reduce str "" (reverse reversed)))))
 
+(deftest large-range-scan-static-data
+  (testing "we get back expected values"
+    (is (= [{:id 1, :location {:name "Lausanne", :zip-code 1000}}
+            {:id 2, :location {:name "Lausanne", :zip-code 1001}}
+            {:id 3, :location {:name "Lausanne", :zip-code 1002}}
+            {:id 4, :location {:name "Lausanne", :zip-code 1003}}
+            {:id 5, :location {:name "Lausanne", :zip-code 1004}}
+            {:id 6, :location {:name "Neuchatel", :zip-code 2000}}]
+           @(store/long-range-transduce *db* (map p/parse-record) (completing conj) [] :City [""] {})))
+
+    (is (= [{:id 1, :location {:name "Lausanne", :zip-code 1000}}
+            {:id 2, :location {:name "Lausanne", :zip-code 1001}}
+            {:id 3, :location {:name "Lausanne", :zip-code 1002}}
+            {:id 4, :location {:name "Lausanne", :zip-code 1003}}
+            {:id 5, :location {:name "Lausanne", :zip-code 1004}}]
+           @(store/long-range-transduce *db* (map p/parse-record) (completing conj) [] :City ["Lausanne" nil] {})))
+
+    (is (= [{:id 3, :location {:name "Lausanne", :zip-code 1002}}
+            {:id 4, :location {:name "Lausanne", :zip-code 1003}}
+            {:id 5, :location {:name "Lausanne", :zip-code 1004}}]
+           @(store/long-range-transduce *db* (map p/parse-record) (completing conj) [] :City ["Lausanne" nil] {::store/continuation [1002]})))
+
+    (is (= [{:id 3, :location {:name "Lausanne", :zip-code 1002}}
+            {:id 4, :location {:name "Lausanne", :zip-code 1003}}
+            {:id 5, :location {:name "Lausanne", :zip-code 1004}}
+            {:id 6, :location {:name "Neuchatel", :zip-code 2000}}]
+           @(store/long-range-transduce *db* (map p/parse-record) (completing conj) [] :City [""] {::store/continuation ["Lausanne" 1002]})))))
+
 (deftest large-range-scan-test-on-small-data
 
   (install-records *db* (record-generator "small-bucket" 100))
@@ -78,10 +106,10 @@
            @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" "files/"])))
 
     (is (= 90
-           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" "files/"] {::store/continuation "files/00000010.txt"})))
+           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" "files/"] {::store/continuation ["files/00000010.txt"]})))
 
     (is (= 90
-           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" ""] {::store/continuation "files/00000010.txt"})))
+           @(store/long-range-reduce *db* incrementor 0 :Object ["small-bucket" ""] {::store/continuation ["files/00000010.txt"]})))
 
     (testing "returning a `reduced` value stops iteration"
       (is (= 10
@@ -113,10 +141,20 @@
   (install-records *db* (record-generator "bucket-666" 20))
 
   (testing "we get back expected values"
+
+    ;; This is an example of what to NOT do, listing an object without a final
+    ;; marker would include all elements with the same prefix
     (is (= 40
            @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-66"])))
     (is (= 20
            @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-666"])))
+
+    ; Using the multi-elements continuation, we can safely iterate over a
+    ; "table" when the primary-key is a concatenation of multiple fields
+    (is (= 40
+           @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-"])))
+    (is (= 30
+           @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-"] {::store/continuation ["bucket-66" "files/00000010.txt"]})))
 
     (doseq [bucket ["bucket-66" "bucket-666"]]
       (is (= 20
@@ -126,10 +164,10 @@
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil])))
 
       (is (= 15
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil] {::store/continuation "files/00000005.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil] {::store/continuation ["files/00000005.txt"]})))
 
       (is (= 0
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil] {::store/continuation "files/66666666.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket nil] {::store/continuation ["files/66666666.txt"]})))
 
       (is (= 10
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"])))
@@ -138,16 +176,16 @@
              @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"])))
 
       (is (= 5
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/continuation "files/00000005.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/continuation ["files/00000005.txt"]})))
 
       (is (= 5
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/continuation "files/00000015.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/continuation ["files/00000015.txt"]})))
 
       (is (thrown? java.util.concurrent.ExecutionException
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/continuation "files/00000015.txt"})))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000000"] {::store/continuation ["files/00000015.txt"]})))
 
       (is (thrown? java.util.concurrent.ExecutionException
-             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/continuation "files/00000005.txt"}))))))
+             @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/continuation ["files/00000005.txt"]}))))))
 
 (comment
 
