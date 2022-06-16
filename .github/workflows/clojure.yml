@@ -8,13 +8,40 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: clojure:openjdk-17-tools-deps-slim-bullseye
+      image: clojure:openjdk-17-tools-deps
 
     steps:
-    - uses: actions/checkout@v3.0.2
+    - name: Checkout
+      uses: actions/checkout@v3.0.2
+
+    ## This is optional but will speed up clojure steps
+    - name: Cache mvn/git deps
+      uses: actions/cache@v3
+      id: cache-deps
+      with:
+        path: |
+          /root/.gitlibs
+          /root/.m2
+        key: ${{ runner.os }}-${{ hashFiles('**/deps.edn') }}
+
+    ## The clojure tools-deps image has very little installed software,
+    ## install minimum requirements for the foundationdb one
+    - name: Install curl
+      run: |
+        apt-get update
+        apt-get -qyy install curl sudo
+
+    - name: Install foundationdb
+      uses: pyr/foundationdb-actions-install@master
+
     - name: Check
-      run: clojure -X:project check
+      run: clojure -T:project check
+
+    - name: Test
+      run: clojure -T:project test
+
     - name: Lint
-      run: clojure -X:project lint
+      run: clojure -T:project lint
+
     - name: Format
-      run: clojure -X:project format-check
+      run: clojure -T:project format-check
