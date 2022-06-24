@@ -60,8 +60,37 @@
    :City   {:primary-key [:concat :type-key [:nested "location" "name"]
                           [:nested "location" "zip_code"]]}})
 
+(def next-schema
+  {:Account {:primary-key [:concat :type-key "id"]
+             :indices     [{:name "account_state" :on "state"}
+                           {:name "account_payment_count"
+                            :on [:group-by "payment"]
+                            :type :count-not-null}]}
+   :User    {:primary-key [:concat :type-key "account_id" "id"]
+             :indices     [{:name "username" :on "name"}
+                           {:name "account_id" :on "account_id"}
+                           {:name "usercnt"
+                            :on   [:group-by "name" "account_id"]
+                            :type :count-not-null}]}
+   :Invoice {:primary-key [:concat :type-key "account_id" "id"]
+             :indices     [{:name "total_invoiced"
+                            :on   [:group-by "total" "account_id"]
+                            :type :sum}]}
+   :Object  {:primary-key [:concat :type-key "bucket" "path"]
+             :indices     [{:name "path_count"
+                            :on [:group-by "path" "bucket"]
+                            :type :count-not-null}
+                           {:name "bucket_paths"
+                            :on [:concat "bucket" "path"]}]}
+   :City   {:primary-key [:concat :type-key [:nested "location" "name"]
+                          [:nested "location" "zip_code"]]}})
+
 (def demostore
   (store/initialize :demostore (Demostore/getDescriptor) schema))
+
+(defn create+start [schema opts]
+  (let [demostore (store/initialize :demostore (Demostore/getDescriptor) schema opts)]
+    (store/start demostore)))
 
 (defn all-records
   []

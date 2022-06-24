@@ -118,19 +118,26 @@
   ^Tuple [^FDBRecord r]
   (.getPrimaryKey r))
 
-(defn async-store-from-builder
-  ^CompletableFuture [^FDBRecordStore$Builder builder ^FDBRecordContext context]
-  (-> (.copyBuilder builder)
-      (.setContext context)
-      (.createOrOpenAsync)))
+(defn- store-from-builder
+  ^FDBRecordStore
+  [^FDBRecordStore$Builder builder ^FDBRecordContext context open-mode async?]
+  (let [builder   (.setContext (.copyBuilder builder) context)
+        open-mode (or open-mode :create-or-open)
+        async?    (boolean async?)]
+    (case [open-mode async?]
+      ;; sync mode
+      [:create-or-open false] (.createOrOpen builder)
+      [:open false]           (.open builder)
+      [:unchecked-open false] (.uncheckedOpen builder)
+      [:build false]          (.build builder)
+      ;; async mode
+      [:create-or-open true]  (.createOrOpenAsync builder)
+      [:open true]            (.openAsync builder)
+      [:unchecked-open true]  (.uncheckedOpenAsync builder)
+      ;; buildAsync doesn't exist, defaulting to uncheckedOpenAsync
+      [:build true]           (.uncheckedOpenAsync builder))))
 
-(defn store-from-builder
-  ^FDBRecordStore [^FDBRecordStore$Builder builder ^FDBRecordContext context]
-  (-> (.copyBuilder builder)
-      (.setContext context)
-      (.createOrOpen)))
-
-(defrecord RecordStore [cluster-file schema-name schema descriptor env]
+(defrecord RecordStore [cluster-file schema-name schema descriptor env open-mode]
   component/Lifecycle
   (start [this]
     (let [env      (name (or env (gensym "testing")))
@@ -158,13 +165,19 @@
      ^FDBDatabase (::db this)
      (reify Function
        (apply [_ context]
-         (.thenCompose (async-store-from-builder (::builder this) context)
+         (.thenCompose (store-from-builder (::builder this)
+                                           context
+                                           open-mode
+                                           true)
                        (fn/make-fun f))))))
   (run-in-context [this f]
     (.run ^FDBDatabase (::db this)
           (reify Function
             (apply [_ context]
-              (f (store-from-builder (::builder this) context)))))))
+              (f (store-from-builder (::builder this)
+                                     context
+                                     open-mode
+                                     false)))))))
 
 (defn wrapped-runner
   [db opts]
@@ -178,14 +191,22 @@
          runner
          (reify Function
            (apply [_ context]
-             (.thenCompose (async-store-from-builder (::builder db) context)
+             (.thenCompose (store-from-builder
+                            (::builder db)
+                            context
+                            :create-or-open
+                            true)
                            (fn/make-fun f))))))
       (run-in-context [_ f]
         (.run
          runner
          (reify Function
            (apply [_ context]
-             (f (store-from-builder (::builder db) context))))))
+             (f (store-from-builder
+                 (::builder db)
+                 context
+                 :create-or-open
+                 true))))))
       AutoCloseable
       (close [_] (.close runner)))))
 

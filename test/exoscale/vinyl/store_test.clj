@@ -3,7 +3,8 @@
             [exoscale.vinyl.payload    :as p]
             [exoscale.vinyl.store      :as store]
             [exoscale.vinyl.aggregates :as agg]
-            [exoscale.vinyl.demostore  :as ds :refer [*db*]]))
+            [exoscale.vinyl.demostore  :as ds :refer [*db*]])
+  (:import [java.util.concurrent ExecutionException]))
 
 (test/use-fixtures :once ds/with-open-fdb)
 
@@ -112,3 +113,40 @@
         p/prepaid 1
         p/postpaid 1
         p/wired 2))))
+
+(deftest open-mode-test
+  (testing "create-or-open : writing to new schema and reading from the old one"
+    (let [env           (gensym "create-or-open")
+          old-ds-reader (ds/create+start ds/schema {:env env :open-mode :create-or-open})
+          new-ds-writer (ds/create+start ds/next-schema {:env env :open-mode :create-or-open})]
+      (store/save-record-batch new-ds-writer (ds/all-records))
+      (is (thrown-with-msg? ExecutionException #"Local meta-data has stale version"
+                            @(store/list-query old-ds-reader [:User [:starts-with? :name "a1"]])))))
+
+  (testing "open : writing to new schema and reading from the old one"
+    (let [env           (gensym "open")
+          ds-creator    (ds/create+start ds/schema {:env env :open-mode :create-or-open})
+          old-ds-reader (ds/create+start ds/schema {:env env :open-mode :open})
+          new-ds-writer (ds/create+start ds/next-schema {:env env :open-mode :open})]
+      (store/save-record-batch ds-creator (ds/all-records))
+      (store/save-record-batch new-ds-writer (ds/all-records))
+      (is (thrown-with-msg? ExecutionException #"Local meta-data has stale version"
+                            @(store/list-query old-ds-reader [:User [:starts-with? :name "a1"]])))))
+
+  (testing "unchecked-open : writing to new schema and reading from the old one"
+    (let [env           (gensym "unchecked-open")
+          ds-creator    (ds/create+start ds/schema {:env env :open-mode :create-or-open})
+          old-ds-reader (ds/create+start ds/schema {:env env :open-mode :unchecked-open})
+          new-ds-writer (ds/create+start ds/next-schema {:env env :open-mode :unchecked-open})]
+      (store/save-record-batch ds-creator (ds/all-records))
+      (store/save-record-batch new-ds-writer (ds/all-records))
+      (is @(store/list-query old-ds-reader [:User [:starts-with? :name "a1"]]))))
+
+  (testing "build : writing to new schema and reading from the old one"
+    (let [env           (gensym "build")
+          ds-creator    (ds/create+start ds/schema {:env env :open-mode :create-or-open})
+          old-ds-reader (ds/create+start ds/schema {:env env :open-mode :build})
+          new-ds-writer (ds/create+start ds/next-schema {:env env :open-mode :build})]
+      (store/save-record-batch ds-creator (ds/all-records))
+      (store/save-record-batch new-ds-writer (ds/all-records))
+      (is @(store/list-query old-ds-reader [:User [:starts-with? :name "a1"]])))))
