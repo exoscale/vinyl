@@ -3,7 +3,7 @@
          org.clojure/tools.logging                  {:mvn/version "1.2.4"}
          org.foundationdb/fdb-java                  {:mvn/version "6.3.24"}
          org.foundationdb/fdb-record-layer-core-pb3 {:mvn/version "2.8.110.0"}
-         com.google.protobuf/protobuf-java          {:mvn/version "3.21.1"}
+         com.google.protobuf/protobuf-java          {:mvn/version "3.21.2"}
          com.stuartsierra/component                 {:mvn/version "1.1.0"}
          exoscale/ex                                {:mvn/version "0.4.0"}
          instaparse/instaparse                      {:mvn/version "1.4.12"}}
@@ -21,7 +21,7 @@
 
  :aliases
  {:test
-  {:extra-deps  {lambdaisland/kaocha    {:mvn/version "1.66.1034"}
+  {:extra-deps  {lambdaisland/kaocha    {:mvn/version "1.68.1059"}
                  org.slf4j/slf4j-api    {:mvn/version "2.0.0-alpha7"}
                  org.slf4j/slf4j-simple {:mvn/version "2.0.0-alpha7"}
                  org.clojure/test.check {:mvn/version "1.1.1"}}
@@ -36,5 +36,5 @@
 
   :project
   {:deps       {io.github.exoscale/tools.project
-                {:git/sha "39c80f58ee8c74ce64e981e4f8b9b70aeea648be"}}
+                {:git/sha "b183fa74febb3f5f4daeb0c732a3817bf09e0f33"}}
    :ns-default exoscale.tools.project}}}
