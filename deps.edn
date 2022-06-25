@@ -10,6 +10,7 @@
 
  :exoscale.project/lib          com.exoscale/vinyl
  :exoscale.project/version-file "VERSION"
+ :exoscale.project/deploy?      true
 
  :deps/prep-lib
  {:ensure "target/classes"
