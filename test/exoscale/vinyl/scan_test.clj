@@ -148,8 +148,8 @@
     (is (= 20
            @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-666"])))
 
-    ; Using the multi-elements continuation, we can safely iterate over a
-    ; "table" when the primary-key is a concatenation of multiple fields
+    ;; Using the multi-elements continuation, we can safely iterate over a
+    ;; "table" when the primary-key is a concatenation of multiple fields
     (is (= 40
            @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-"])))
     (is (= 30
@@ -185,6 +185,31 @@
 
       (is (thrown? java.util.concurrent.ExecutionException
                    @(store/long-range-reduce *db* incrementor 0 :Object [bucket "files/0000001"] {::store/continuation ["files/00000005.txt"]}))))))
+
+(deftest delete-by-prefix-scan-test
+  @(store/delete-by-prefix-scan *db* :Object ["bucket-66"])
+  (install-records *db* (record-generator "bucket-66"  20))
+  (install-records *db* (record-generator "bucket-666" 20))
+
+  (testing "we delete all the objects on all buckets starting with a prefix"
+    (is (= 20 @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-66" nil])))
+    (is (= 20 @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-666" nil])))
+    @(store/delete-by-prefix-scan *db* :Object ["bucket-66"])
+    (is (= 0 @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-66" nil])))
+    (is (= 0 @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-666" nil])))))
+
+(deftest delete-by-tuple-prefix-scan-test
+  @(store/delete-by-prefix-scan *db* :Object ["bucket-66"])
+  (install-records *db* (record-generator "bucket-66"  20))
+  (install-records *db* (record-generator "bucket-666" 20))
+
+  (testing "we delete only the objects on starting with a specific tuple prefix"
+    (is (= 20 @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-66" nil])))
+    (is (= 20 @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-666" nil])))
+    @(store/delete-by-tuple-prefix-scan *db* :Object ["bucket-66"])
+    (is (= 0 @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-66" nil])))
+    (is (= 20 @(store/long-range-reduce *db* incrementor 0 :Object ["bucket-666" nil])))
+    @(store/delete-by-tuple-prefix-scan *db* :Object ["bucket-666"])))
 
 (comment
 
