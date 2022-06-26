@@ -461,9 +461,26 @@
     (run-async txn-context #(scan-range % range {::foreach (callback %)}))))
 
 (defn delete-by-prefix-scan
-  "Delete all records surfaced by a prefix scan"
+  "Delete all records surfaced by a prefix scan. Beware that prefixes are
+   open-ended and may delete under contiguous keys, since no exact prefix
+   is assumed.
+
+   This means that for `(delete-by-prefix-scan db :Object [\"prefix\"])`
+   the following tuples are eligible for deletion:
+
+   - [\"prefix\" 0]
+   - [\"prefix\" 1]
+   - [\"prefix2\" 0]
+   - [\"prefix2\" 1]
+
+   To delete only keys with an exact tuple prefix, use `delete-by-tuple-prefix-scan`."
   [txn-context record-type items]
   (delete-by-range txn-context (prefix-range txn-context record-type items)))
+
+(defn delete-by-tuple-prefix-scan
+  "A variant of `delete-by-prefix-scan` which only considers exact tuple prefixes."
+  [txn-context record-type items]
+  (delete-by-prefix-scan txn-context record-type (conj (vec items) nil)))
 
 (defn delete-by-key-component
   "In cases where composite keys are used, this can be used to clear
