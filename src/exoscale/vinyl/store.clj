@@ -39,7 +39,7 @@
    com.apple.foundationdb.record.provider.foundationdb.FDBDatabaseRunner
    com.apple.foundationdb.tuple.Tuple
    java.lang.AutoCloseable
-   java.util.concurrent.CompletableFuture
+   java.util.concurrent.Executor
    java.util.concurrent.TimeUnit
    java.util.function.Function))
 
@@ -84,9 +84,11 @@
   "Build a valid FDB database from configuration. Use the standard
    cluster-file location or a specific one if instructed to do so."
   (^FDBDatabase []
-   (db-from-instance nil))
-  (^FDBDatabase [^String cluster-file]
+   (db-from-instance nil nil))
+  (^FDBDatabase [^String cluster-file ^Executor executor]
    (let [^FDBDatabaseFactory factory (FDBDatabaseFactory/instance)]
+     (when (some? executor)
+       (.setExecutor factory executor))
      (if (some? cluster-file)
        (.getDatabase factory cluster-file)
        (.getDatabase factory)))))
@@ -137,7 +139,7 @@
       ;; buildAsync doesn't exist, defaulting to uncheckedOpenAsync
       [:build true]           (.uncheckedOpenAsync builder))))
 
-(defrecord RecordStore [cluster-file schema-name schema descriptor env open-mode]
+(defrecord RecordStore [cluster-file schema-name schema descriptor env open-mode executor]
   component/Lifecycle
   (start [this]
     (let [env      (name (or env (gensym "testing")))
@@ -145,7 +147,7 @@
                        (.path "environment" env)
                        (.add "schema" (name schema-name)))
           metadata (schema/create-record-meta descriptor schema)
-          db       (db-from-instance cluster-file)
+          db       (db-from-instance cluster-file executor)
           builder  (doto (record-store-builder)
                      (.setMetaDataProvider ^RecordMetaDataProvider metadata)
                      (.setKeySpacePath kspath))]
