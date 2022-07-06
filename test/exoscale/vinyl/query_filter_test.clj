@@ -14,9 +14,9 @@
     (is (s/valid? ::query/filter [:nil? :a]))
     (is (s/valid? ::query/filter [:some? :a]))
     (is (s/valid? ::query/filter [:and [:= :a 1]
-                                       [:= :b 2]]))
+                                  [:= :b 2]]))
     (is (s/valid? ::query/filter [:or [:= :a 1]
-                                      [:= :b 2]]))
+                                  [:= :b 2]]))
     (is (s/valid? ::query/filter [:not [:= :a 1]]))
     (is (s/valid? ::query/filter [:starts-with? :a "1"]))
     (is (s/valid? ::query/filter [:> :a 1]))
