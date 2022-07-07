@@ -14,6 +14,7 @@
             [exoscale.vinyl.cursor      :as cursor]
             [exoscale.vinyl.fn          :as fn])
   (:import
+   (java.util.concurrent CompletableFuture)
    (com.apple.foundationdb.record.provider.foundationdb.keyspace
     DirectoryLayerDirectory
     KeySpaceDirectory
@@ -457,10 +458,20 @@
        (-> (.scanIndex store index scan-type range continuation props)
            (cursor/apply-transforms opts))))))
 
+(defn- to-range [store ^TupleRange range]
+  (let [subspace (.recordsSubspace store)]
+    (.toRange range subspace)))
+
+(defn- clear-range [store ^TupleRange tuple-range]
+  (let [context     (.getContext store)
+        transaction (.ensureActive context)
+        range       (to-range store tuple-range)]
+    (.clear transaction range)
+    (CompletableFuture/completedFuture nil)))
+
 (defn delete-by-range
   [txn-context ^TupleRange range]
-  (let [callback (fn [store] #(delete-record store (record-primary-key %)))]
-    (run-async txn-context #(scan-range % range {::foreach (callback %)}))))
+  (run-async txn-context #(clear-range % range)))
 
 (defn delete-by-prefix-scan
   "Delete all records surfaced by a prefix scan. Beware that prefixes are
