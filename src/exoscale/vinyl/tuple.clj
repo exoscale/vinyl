@@ -9,6 +9,10 @@
   ^Tuple [objs]
   (Tuple/from (into-array Object objs)))
 
+(defn from-bytes
+  ^Tuple [^bytes bytes]
+  (Tuple/fromBytes bytes))
+
 (defn from
   ^Tuple [& objs]
   (from-seq objs))

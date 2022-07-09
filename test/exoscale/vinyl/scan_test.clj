@@ -3,7 +3,8 @@
             [exoscale.vinyl.aggregates :as agg]
             [exoscale.vinyl.payload    :as p :refer [object->record]]
             [exoscale.vinyl.store      :as store]
-            [exoscale.vinyl.demostore  :as ds :refer [*db*]]))
+            [exoscale.vinyl.demostore  :as ds :refer [*db*]]
+            [exoscale.vinyl.tuple :as tuple]))
 
 (test/use-fixtures :once ds/with-open-fdb)
 
@@ -63,6 +64,31 @@
             {:id 5, :location {:name "Lausanne", :zip-code 1004}}
             {:id 6, :location {:name "Neuchatel", :zip-code 2000}}]
            @(store/long-range-transduce *db* (map p/parse-record) (completing conj) [] :City [""] {::store/continuation ["Lausanne" 1002]})))))
+
+(deftest large-range-scan-over-raw-key-values
+  (let [city-key-xf (comp (map #(.getKey %))
+                          (map tuple/from-bytes)
+                          (map (juxt #(tuple/get-string % 4) #(tuple/get-long % 5))))
+        city-key-reducer (fn [acc [name zip-code]]
+                           (conj acc {:name name :zip-code zip-code}))]
+    (testing "we get back expected values"
+      (is (= [{:name "Lausanne", :zip-code 1000}
+              {:name "Lausanne", :zip-code 1001}
+              {:name "Lausanne", :zip-code 1002}
+              {:name "Lausanne", :zip-code 1003}
+              {:name "Lausanne", :zip-code 1004}
+              {:name "Neuchatel", :zip-code 2000}]
+             @(store/long-range-transduce *db* city-key-xf (completing city-key-reducer) [] :City [""] {::store/raw? true}))))
+    (testing "we get back expected values with a limit"
+      (is (= [{:name "Lausanne", :zip-code 1000}
+              {:name "Lausanne", :zip-code 1001}]
+             @(store/long-range-transduce *db* city-key-xf (completing city-key-reducer) [] :City [""] {::store/raw? true
+                                                                                                        ::store/limit 2}))))
+    (testing "we get back expected values with a marker"
+      (is (= [{:name "Neuchatel", :zip-code 2000}]
+             @(store/long-range-transduce *db* city-key-xf (completing city-key-reducer) [] :City [""] {::store/raw? true
+                                                                                                        ::store/limit 2
+                                                                                                        ::store/continuation ["Lausannf"]}))))))
 
 (deftest large-range-scan-test-on-small-data
 
@@ -221,7 +247,14 @@
   (install-records db (record-generator "small-bucket" 100000))
 
   ;; Run this if you want 4M records
-  #_(install-records db (record-generator "big-test-bucket" 4000000))
+  (install-records db (record-generator "big-test-bucket" 4000000))
+
+  (time @(store/long-range-transduce db identity (completing incrementor) 0
+                                     :Object ["big-test-bucket"]))
+
+  (time @(store/long-range-transduce db identity (completing incrementor) 0
+                                     :Object ["big-test-bucket"]
+                                     {::store/raw? true}))
 
   (agg/compute db :count-not-null :Object :path_count "big-test-bucket")
 
