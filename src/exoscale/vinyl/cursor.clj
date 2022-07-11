@@ -2,10 +2,14 @@
   "Utilities to work with `RecordCursor`"
   (:require [exoscale.vinyl.fn          :as fn])
   (:import com.apple.foundationdb.async.AsyncUtil
+           com.apple.foundationdb.async.AsyncIterable
            com.apple.foundationdb.record.RecordCursor
            com.apple.foundationdb.record.RecordCursorResult
+           com.apple.foundationdb.KeyValue
            java.util.concurrent.CompletableFuture
            java.util.function.Supplier))
+
+(set! *warn-on-reflection* true)
 
 (defprotocol CursorHolder
   (as-list     [this] "Transform a cursor or cursor future to a list")
@@ -48,6 +52,32 @@
    (apply-transduce cursor nil f init cont-fn))
   ([cursor f init]
    (apply-transduce cursor nil f init nil)))
+
+(defn apply-iterable-transduce
+  ([^AsyncIterable async-iterable xform f init cont-fn]
+   (let [reducer (if (some? xform) (xform f) f)
+         acc     (if (instance? clojure.lang.Atom init)
+                   init
+                   (atom (or init (f))))
+         iterator (.iterator async-iterable)]
+
+     ;; Using the blocking API is actually faster than using the non-blocking
+     ;; one (2 times faster according to naive benchmarks)
+     (while (.hasNext iterator)
+       (let [key-value ^KeyValue (.next iterator)]
+         (when (ifn? cont-fn)
+           (-> key-value .getKey cont-fn))
+         (let [new-acc (swap! acc reducer key-value)]
+           (not (reduced? new-acc)))))
+
+     (CompletableFuture/completedFuture
+      (unreduced (cond-> @acc
+                   (some? xform)
+                   reducer)))))
+  ([async-iterable f init cont-fn]
+   (apply-iterable-transduce async-iterable nil f init cont-fn))
+  ([async-iterable f init]
+   (apply-iterable-transduce async-iterable nil f init nil)))
 
 (defn apply-transforms
   "Apply transformations to a record cursor."

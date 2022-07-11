@@ -367,6 +367,10 @@
       ;; case.
       (all-of-range txn-context record-type fixed))))
 
+(defn- to-range [store ^TupleRange tuple-range]
+  (let [subspace (.recordsSubspace store)]
+    (.toRange tuple-range subspace)))
+
 (defn continuation-range
   "Given a prefix and an optional continuation, both being a collection of
    keys, return a TupleRange catching all elements with the given prefix, starting
@@ -515,12 +519,12 @@
   ;; To that effect, a runner is created with specific parameters (a large
   ;; `max-attempts` value, as well as minimum viable delays.
   ;;
-  ;; We then call `apply-transduce` on the returned cursor from our query with a
+  ;; We then call `transduce-fn` on the returned cursor/iterator from our query with a
   ;; twist: every visited element will get its continuation stored in an atom.
   ;; When interrupted, the function will be retried, which pops the last seen
   ;; continuation.
   ;;
-  [db xform f val continuing-fn]
+  [db xform f val continuing-fn transduce-fn]
   (let [cont    (atom nil)
         result  (atom val)
         runner  (wrapped-runner db runner-params)]
@@ -528,8 +532,49 @@
          runner
          (fn [^FDBRecordStore store]
            (-> (continuing-fn store @cont)
-               (cursor/apply-transduce xform f result #(reset! cont %)))))
+               (transduce-fn xform f result #(reset! cont %)))))
         (fn/close-on-complete runner))))
+
+(defn- get-range-fn [^TupleRange tuple-range {::keys [limit]}]
+  (fn [^FDBRecordStore store ^bytes cont]
+    (let [subspace (.recordsSubspace store)
+          tuple-range (if (some? cont)
+                        (TupleRange. (.unpack subspace cont)
+                                     (.getHigh tuple-range)
+                                     EndpointType/CONTINUATION
+                                     EndpointType/PREFIX_STRING)
+                        tuple-range)
+          context (.getContext store)
+          transaction (.ensureActive context)]
+      (if (some? limit)
+        (.getRange transaction (to-range store tuple-range) limit)
+        (.getRange transaction (to-range store tuple-range))))))
+
+(defn- scan-records-transduce [db xform f val record-type items {::keys [continuation] :as opts}]
+  (let [range (continuation-range db record-type items continuation)
+        props (scan-properties opts)]
+    (continuation-traversing-transduce
+     db xform f val
+     (fn [^FDBRecordStore store ^bytes cont]
+       (.scanRecords store range cont props))
+     cursor/apply-transduce)))
+
+(defn- get-range-transduce [db xform f val record-type items {::keys [continuation] :as opts}]
+  (let [range (continuation-range db record-type items continuation)
+        continuing-fn (get-range-fn range opts)]
+    (continuation-traversing-transduce
+     db xform f val continuing-fn
+     cursor/apply-iterable-transduce)))
+
+(defn long-range-transduce
+  "A transducer over large ranges. Except for the addition of `xform`
+   behaves like `long-range-reduce`."
+  ([db xform f val record-type items]
+   (long-range-transduce db xform f val record-type items {}))
+  ([db xform f val record-type items {::keys [raw?] :as opts}]
+   (if raw?
+     (get-range-transduce db xform f val record-type items opts)
+     (scan-records-transduce db xform f val record-type items opts))))
 
 (defn long-range-reduce
   "A reducer over large ranges.
@@ -544,26 +589,8 @@
    taken with the accumulator."
   ([db f val record-type items]
    (long-range-reduce db f val record-type items {}))
-  ([db f val record-type items {::keys [continuation] :as opts}]
-   (let [range (continuation-range db record-type items continuation)
-         props (scan-properties opts)]
-     (continuation-traversing-transduce
-      db nil f val
-      (fn [^FDBRecordStore store ^bytes cont]
-        (.scanRecords store range cont props))))))
-
-(defn long-range-transduce
-  "A transducer over large ranges. Except for the addition of `xform`
-   behaves like `long-range-reducer`."
-  ([db xform f val record-type items]
-   (long-range-transduce db xform f val record-type items {}))
-  ([db xform f val record-type items {::keys [continuation] :as opts}]
-   (let [range (continuation-range db record-type items continuation)
-         props (scan-properties opts)]
-     (continuation-traversing-transduce
-      db xform f val
-      (fn [^FDBRecordStore store ^bytes cont]
-        (.scanRecords store range cont props))))))
+  ([db f val record-type items opts]
+   (long-range-transduce db nil f val record-type items opts)))
 
 (defn long-query-reduce
   "A reducer over large queries. Accepts queries as per `execute-query`. Results
@@ -586,4 +613,5 @@
      (continuation-traversing-transduce
       db nil f val
       (fn [^FDBRecordStore store ^bytes cont]
-        (.execute (.planQuery store q) store ctx cont props))))))
+        (.execute (.planQuery store q) store ctx cont props))
+      cursor/apply-transduce))))
