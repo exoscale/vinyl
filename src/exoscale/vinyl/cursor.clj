@@ -63,12 +63,11 @@
 
      ;; Using the blocking API is actually faster than using the non-blocking
      ;; one (2 times faster according to naive benchmarks)
-     (while (.hasNext iterator)
+     (while (and (not (reduced? @acc)) (.hasNext iterator))
        (let [key-value ^KeyValue (.next iterator)]
          (when (ifn? cont-fn)
            (-> key-value .getKey cont-fn))
-         (let [new-acc (swap! acc reducer key-value)]
-           (not (reduced? new-acc)))))
+         (swap! acc reducer key-value)))
 
      (CompletableFuture/completedFuture
       (unreduced (cond-> @acc
