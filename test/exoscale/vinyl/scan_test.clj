@@ -66,11 +66,15 @@
            @(store/long-range-transduce *db* (map p/parse-record) (completing conj) [] :City [""] {::store/continuation ["Lausanne" 1002]})))))
 
 (deftest large-range-scan-over-raw-key-values
-  (let [city-key-xf (comp (map #(.getKey %))
-                          (map tuple/from-bytes)
-                          (map (juxt #(tuple/get-string % 4) #(tuple/get-long % 5))))
-        city-key-reducer (fn [acc [name zip-code]]
-                           (conj acc {:name name :zip-code zip-code}))]
+  (let [city-key-xf              (comp (map #(.getKey %))
+                                       (map tuple/from-bytes)
+                                       (map (juxt #(tuple/get-string % 4) #(tuple/get-long % 5))))
+        city-key-reducer         (fn [acc [name zip-code]]
+                                   (conj acc {:name name :zip-code zip-code}))
+        city-key-reduced-reducer (fn [acc [name zip-code]]
+                                   (cond-> (conj acc {:name name :zip-code zip-code})
+                                     (= 1003 zip-code) (reduced)))]
+
     (testing "we get back expected values"
       (is (= [{:name "Lausanne", :zip-code 1000}
               {:name "Lausanne", :zip-code 1001}
@@ -88,7 +92,13 @@
       (is (= [{:name "Neuchatel", :zip-code 2000}]
              @(store/long-range-transduce *db* city-key-xf (completing city-key-reducer) [] :City [""] {::store/raw? true
                                                                                                         ::store/limit 2
-                                                                                                        ::store/continuation ["Lausannf"]}))))))
+                                                                                                        ::store/continuation ["Lausannf"]}))))
+    (testing "we get back expected values with an early reduced reducer"
+      (is (= [{:name "Lausanne", :zip-code 1000}
+              {:name "Lausanne", :zip-code 1001}
+              {:name "Lausanne", :zip-code 1002}
+              {:name "Lausanne", :zip-code 1003}]
+             @(store/long-range-transduce *db* city-key-xf (completing city-key-reduced-reducer) [] :City [""] {::store/raw? true}))))))
 
 (deftest large-range-scan-test-on-small-data
 
