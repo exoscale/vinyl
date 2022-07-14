@@ -93,7 +93,7 @@
              @(store/long-range-transduce *db* city-key-xf (completing city-key-reducer) [] :City [""] {::store/raw? true
                                                                                                         ::store/limit 2
                                                                                                         ::store/continuation ["Lausannf"]}))))
-    (testing "we get back expected values with a early reduced reducer"
+    (testing "we get back expected values with an early reduced reducer"
       (is (= [{:name "Lausanne", :zip-code 1000}
               {:name "Lausanne", :zip-code 1001}
               {:name "Lausanne", :zip-code 1002}
