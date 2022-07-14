@@ -94,11 +94,11 @@
                                                                                                         ::store/limit 2
                                                                                                         ::store/continuation ["Lausannf"]}))))
     (testing "we get back expected values with a early reduced reducer"
-     (is (= [{:name "Lausanne", :zip-code 1000}
-             {:name "Lausanne", :zip-code 1001}
-             {:name "Lausanne", :zip-code 1002}
-             {:name "Lausanne", :zip-code 1003}]
-            @(store/long-range-transduce *db* city-key-xf (completing city-key-reduced-reducer) [] :City [""] {::store/raw? true}))))))
+      (is (= [{:name "Lausanne", :zip-code 1000}
+              {:name "Lausanne", :zip-code 1001}
+              {:name "Lausanne", :zip-code 1002}
+              {:name "Lausanne", :zip-code 1003}]
+             @(store/long-range-transduce *db* city-key-xf (completing city-key-reduced-reducer) [] :City [""] {::store/raw? true}))))))
 
 (deftest large-range-scan-test-on-small-data
 
