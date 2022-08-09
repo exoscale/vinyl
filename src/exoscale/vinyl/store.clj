@@ -14,6 +14,8 @@
             [exoscale.vinyl.cursor      :as cursor]
             [exoscale.vinyl.fn          :as fn])
   (:import
+   com.apple.foundationdb.KeyValue
+   com.apple.foundationdb.Range
    (com.apple.foundationdb.record.provider.foundationdb.keyspace
     DirectoryLayerDirectory
     KeySpaceDirectory
@@ -25,6 +27,7 @@
    com.apple.foundationdb.record.provider.foundationdb.FDBRecordStore$Builder
    com.apple.foundationdb.record.provider.foundationdb.FDBRecordContext
    com.apple.foundationdb.record.provider.foundationdb.FDBRecordStore
+   com.apple.foundationdb.record.provider.foundationdb.FDBRecordStore$Builder
    com.apple.foundationdb.record.provider.foundationdb.FDBRecord
    com.apple.foundationdb.record.IndexScanType
    com.apple.foundationdb.record.metadata.Index
@@ -36,9 +39,11 @@
    com.apple.foundationdb.record.query.plan.plans.QueryPlan
    com.apple.foundationdb.record.RecordMetaDataProvider
    com.apple.foundationdb.record.RecordMetaData
+   com.apple.foundationdb.record.provider.foundationdb.FDBStoredRecord
    com.apple.foundationdb.record.provider.foundationdb.FDBDatabaseRunner
    com.apple.foundationdb.tuple.Tuple
    java.lang.AutoCloseable
+   java.util.concurrent.CompletableFuture
    java.util.concurrent.Executor
    java.util.concurrent.TimeUnit
    java.util.function.Function))
@@ -167,10 +172,11 @@
      ^FDBDatabase (::db this)
      (reify Function
        (apply [_ context]
-         (.thenCompose (store-from-builder (::builder this)
-                                           context
-                                           open-mode
-                                           true)
+         (.thenCompose ^CompletableFuture
+          (store-from-builder (::builder this)
+                              context
+                              open-mode
+                              true)
                        (fn/make-fun f))))))
   (run-in-context [this f]
     (.run ^FDBDatabase (::db this)
@@ -193,11 +199,12 @@
          runner
          (reify Function
            (apply [_ context]
-             (.thenCompose (store-from-builder
-                            (::builder db)
-                            context
-                            :create-or-open
-                            true)
+             (.thenCompose ^CompletableFuture
+              (store-from-builder
+               (::builder db)
+               context
+               :create-or-open
+               true)
                            (fn/make-fun f))))))
       (run-in-context [_ f]
         (.run
@@ -367,7 +374,7 @@
       ;; case.
       (all-of-range txn-context record-type fixed))))
 
-(defn- to-range [store ^TupleRange tuple-range]
+(defn- to-range ^Range [^FDBRecordStore store ^TupleRange tuple-range]
   (let [subspace (.recordsSubspace store)]
     (.toRange tuple-range subspace)))
 
@@ -494,6 +501,21 @@
   [txn-context record-type items]
   (delete-by-range txn-context (all-of-range txn-context record-type items)))
 
+(defn deserialize
+  "Deserialize a `com.apple.foundationdb.KeyValue` into a
+  `com.google.protobuf.DynamicMessage`."
+  [{::keys [metadata builder]} ^KeyValue key-value]
+  (let [serializer   (.getSerializer ^FDBRecordStore$Builder builder)
+        primary-key  (-> key-value .getKey tuple/from-bytes)
+        serialized   (.getValue key-value)
+        proto-record (.deserialize serializer metadata primary-key serialized nil)
+        record-type  (.getRecordTypeForDescriptor ^RecordMetaData metadata (.getDescriptorForType proto-record))
+        record-builder (-> (FDBStoredRecord/newBuilder proto-record)
+                           (.setPrimaryKey primary-key)
+                           (.setRecordType record-type)
+                           (.setRecord proto-record))]
+    (.build record-builder)))
+
 (def ^:private ^:no-doc runner-params
   {::max-attempts        Integer/MAX_VALUE
    ::max-delay           2
@@ -547,7 +569,7 @@
           context (.getContext store)
           transaction (.ensureActive context)]
       (if (some? limit)
-        (.getRange transaction (to-range store tuple-range) limit)
+        (.getRange transaction (to-range store tuple-range) ^int limit)
         (.getRange transaction (to-range store tuple-range))))))
 
 (defn- scan-records-transduce [db xform f val record-type items {::keys [continuation] :as opts}]

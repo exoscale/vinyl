@@ -100,6 +100,14 @@
               {:name "Lausanne", :zip-code 1003}]
              @(store/long-range-transduce *db* city-key-xf (completing city-key-reduced-reducer) [] :City [""] {::store/raw? true}))))))
 
+(deftest deserialize-test
+  (is (= [{:id 1, :location {:name "Lausanne", :zip-code 1000}}
+          {:id 2, :location {:name "Lausanne", :zip-code 1001}}
+          {:id 3, :location {:name "Lausanne", :zip-code 1002}}
+          {:id 4, :location {:name "Lausanne", :zip-code 1003}}
+          {:id 5, :location {:name "Lausanne", :zip-code 1004}}]
+         @(store/long-range-transduce *db* (map (comp p/parse-record (partial store/deserialize *db*))) (completing conj) [] :City ["Lausanne"] {::store/raw? true}))))
+
 (deftest large-range-scan-test-on-small-data
 
   (install-records *db* (record-generator "small-bucket" 100))
