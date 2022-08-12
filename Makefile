@@ -22,6 +22,9 @@ check: ## Compile all namespaces to check for issues
 merge-deps: ## Merge dependencies on all modules from :managed-deps
 	$(CLJ) -T:project merge-deps
 
+merge-aliases: ## Merge aliases on all modules from :managed-aliases
+	$(CLJ) -T:project merge-aliases
+
 ##@ Misc.
 
 lint: ## runs linting on all modules
