@@ -67,7 +67,11 @@
           @(store/list-query *db* [:City [:nested :location [:= :name "Lausanne"]]] opts)))
       (is
        (= [{:id 6 :location {:name "Neuchatel" :zip-code 2000}}]
-          @(store/list-query *db* [:City [:nested :location [:= :name "Neuchatel"]]] opts))))))
+          @(store/list-query *db* [:City [:nested :location [:= :name "Neuchatel"]]] opts))))
+    (testing "list-query with :one-of-them"
+      (is
+       (= [{:id 2 :account-id 1 :total 30 :lines [{:product "p1" :quantity 8}]}]
+          @(store/list-query *db* [:Invoice [:one-of-them :lines [:= :quantity 8]]] opts))))))
 
 (defn- ensure-plan [query plan-str]
   (let [plan (atom nil)]
