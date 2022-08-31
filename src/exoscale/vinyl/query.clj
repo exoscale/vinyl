@@ -148,6 +148,12 @@
   [{:keys [field filter]}]
   (NestedField. (name field) (multi-build-filter filter)))
 
+(defmethod multi-build-filter :one-of-them
+  [{:keys [field filter]}]
+  (-> (build-field field)
+    (.oneOfThem)
+    (.matches (multi-build-filter filter))))
+
 (defmethod multi-build-filter :>
   [{:keys [field comparand]}]
   (-> (build-field field)
