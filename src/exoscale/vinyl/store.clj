@@ -471,7 +471,7 @@
 (defn delete-by-range
   [txn-context ^TupleRange range]
   (let [callback (fn [store] #(delete-record store (record-primary-key %)))]
-    (run-async txn-context #(scan-range % range {::foreach (callback %)}))))
+    (scan-range txn-context range {::foreach (callback txn-context)})))
 
 (defn delete-by-prefix-scan
   "Delete all records surfaced by a prefix scan. Beware that prefixes are
