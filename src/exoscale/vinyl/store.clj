@@ -7,6 +7,7 @@
    exposed in `exoscale.vinyl.schema`"
   (:refer-clojure :exclude [contains?])
   (:require [clojure.tools.logging      :as log]
+            [clojure.string             :as str]
             [com.stuartsierra.component :as component]
             [exoscale.vinyl.schema      :as schema]
             [exoscale.vinyl.query       :as query]
@@ -29,6 +30,7 @@
    com.apple.foundationdb.record.provider.foundationdb.FDBRecordStore
    com.apple.foundationdb.record.provider.foundationdb.FDBRecordStore$Builder
    com.apple.foundationdb.record.provider.foundationdb.FDBRecord
+   com.apple.foundationdb.record.provider.foundationdb.BlockingInAsyncDetection
    com.apple.foundationdb.record.IndexScanType
    com.apple.foundationdb.record.metadata.Index
    com.apple.foundationdb.record.TupleRange
@@ -85,13 +87,45 @@
              (.addSubdirectory (KeySpaceDirectory. "schema" kt)))]
     (KeySpace. (into-array KeySpaceDirectory [ds]))))
 
+(def ^:private -blocking-in-async-detection-modes
+  {:disabled BlockingInAsyncDetection/DISABLED
+   :ignore-complete-exception-blocking BlockingInAsyncDetection/IGNORE_COMPLETE_EXCEPTION_BLOCKING
+   :warn-complete-exception-blocking BlockingInAsyncDetection/WARN_COMPLETE_EXCEPTION_BLOCKING
+   :ignore-complete-warn-blocking BlockingInAsyncDetection/IGNORE_COMPLETE_WARN_BLOCKING
+   :warn-complete-warn-blocking BlockingInAsyncDetection/WARN_COMPLETE_WARN_BLOCKING})
+
+(defn- blocking-in-async-detection-mode [kw]
+  (get -blocking-in-async-detection-modes kw BlockingInAsyncDetection/DISABLED))
+
+(defn- default-blocking-detection
+  "Try retrieving BlockingInAsyncDetection mode from environment 
+   variable `FDB_BLOCKING_DETECTION`"
+  []
+  (some-> (System/getenv "FDB_BLOCKING_DETECTION")
+          (str/lower-case)
+          (str/replace #"_" "-")
+          (keyword)))
+
 (defn db-from-instance
   "Build a valid FDB database from configuration. Use the standard
-   cluster-file location or a specific one if instructed to do so."
+   cluster-file location or a specific one if instructed to do so.
+   
+   Set BlockingInAsyncDetection when blocking-in-async-detection variable 
+   is defined.
+   It is of the form: `:<COMPLETE>-complete-<BLOCKING>-blocking`
+   * COMPLETE indicates how to report that `asyncToSync` was called from a future that is completed. 
+     It can be `ignore` or `warn`
+   
+   * BLOCKING indicates how to report that the CompletableFuture that was to be waited was not complete. 
+     It can be `exception` or `warn`"
   (^FDBDatabase []
    (db-from-instance nil nil))
-  (^FDBDatabase [^String cluster-file ^Executor executor]
+  (^FDBDatabase [cluster-file executor]
+   (db-from-instance cluster-file executor (default-blocking-detection)))
+  (^FDBDatabase [^String cluster-file ^Executor executor blocking-in-async-detection]
    (let [^FDBDatabaseFactory factory (FDBDatabaseFactory/instance)]
+     (when blocking-in-async-detection
+       (.setBlockingInAsyncDetection (blocking-in-async-detection-mode blocking-in-async-detection)))
      (when (some? executor)
        (.setExecutor factory executor))
      (if (some? cluster-file)
