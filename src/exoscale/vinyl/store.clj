@@ -97,7 +97,7 @@
 (defn- blocking-in-async-detection-mode [kw]
   (get -blocking-in-async-detection-modes kw BlockingInAsyncDetection/DISABLED))
 
-(defn- default-blocking-detection
+(defn- system-blocking-detection-config
   "Try retrieving BlockingInAsyncDetection mode from environment 
    variable `FDB_BLOCKING_DETECTION`"
   []
@@ -121,7 +121,7 @@
   (^FDBDatabase []
    (db-from-instance nil nil))
   (^FDBDatabase [cluster-file executor]
-   (db-from-instance cluster-file executor (default-blocking-detection)))
+   (db-from-instance cluster-file executor (system-blocking-detection-config)))
   (^FDBDatabase [^String cluster-file ^Executor executor blocking-in-async-detection]
    (let [^FDBDatabaseFactory factory (FDBDatabaseFactory/instance)]
      (when blocking-in-async-detection
