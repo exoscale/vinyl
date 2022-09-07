@@ -125,7 +125,7 @@
   (^FDBDatabase [^String cluster-file ^Executor executor blocking-in-async-detection]
    (let [^FDBDatabaseFactory factory (FDBDatabaseFactory/instance)]
      (when blocking-in-async-detection
-       (.setBlockingInAsyncDetection (blocking-in-async-detection-mode blocking-in-async-detection)))
+       (.setBlockingInAsyncDetection factory (blocking-in-async-detection-mode blocking-in-async-detection)))
      (when (some? executor)
        (.setExecutor factory executor))
      (if (some? cluster-file)
