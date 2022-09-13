@@ -18,7 +18,9 @@
   :fn     compile-java}
 
  :slipset.deps-deploy/exec-args
- {:installer :remote :sign-releases? false :repository "clojars"}
+ {:installer :remote
+  :sign-releases? false
+  :repository "clojars"}
 
  :aliases
  {:test
@@ -37,5 +39,5 @@
 
   :project
   {:deps       {io.github.exoscale/tools.project
-                {:git/sha "b183fa74febb3f5f4daeb0c732a3817bf09e0f33"}}
+                {:git/sha "5f24196ebea4dc6e601d201d97b463ea26923c7e"}}
    :ns-default exoscale.tools.project}}}
