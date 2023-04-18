@@ -1,5 +1,7 @@
 (ns exoscale.vinyl.tuple
-  (:import com.apple.foundationdb.tuple.Tuple))
+  (:import com.apple.foundationdb.tuple.Tuple
+           com.apple.foundationdb.record.TupleRange)
+  (:require [exoscale.vinyl.tuple :as tuple]))
 
 (defprotocol Tuplable
   :extend-via-metadata true
@@ -38,6 +40,12 @@
 (defn decode
   ^Tuple [^bytes b]
   (Tuple/fromBytes b))
+
+(def all (TupleRange/ALL))
+
+(defn all-of [items]
+  (TupleRange/allOf (tuple/from-seq items)))
+
 
 (def decode-and-expand
   (comp expand decode))

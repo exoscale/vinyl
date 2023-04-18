@@ -3,8 +3,10 @@
             [exoscale.vinyl.payload    :as p]
             [exoscale.vinyl.store      :as store]
             [exoscale.vinyl.aggregates :as agg]
-            [exoscale.vinyl.demostore  :as ds :refer [*db*]])
-  (:import [java.util.concurrent ExecutionException]))
+            [exoscale.vinyl.demostore  :as ds :refer [*db*]]
+            [exoscale.vinyl.tuple :as tuple])
+  (:import [java.util.concurrent ExecutionException]
+           com.apple.foundationdb.tuple.ByteArrayUtil))
 
 (test/use-fixtures :once ds/with-open-fdb)
 
@@ -154,3 +156,23 @@
       (store/save-record-batch ds-creator (ds/all-records))
       (store/save-record-batch new-ds-writer (ds/all-records))
       (is @(store/list-query old-ds-reader [:User [:starts-with? :name "a1"]])))))
+
+(deftest scan-index-test
+  (prn@(store/scan-index *db* "refcount_index#0" ::store/by-group tuple/all nil {::store/list? true}))
+  (is
+   (= (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (:Invoice ds/fixtures)))
+      (into {} (map (juxt #(second (.getKey %)) #(tuple/get-long (.getValue %))) @(store/scan-index *db* "refcount_index#0" ::store/by-group tuple/all nil {::store/list? true}))))
+   #_
+   (= (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (:Invoice ds/fixtures)))
+      (into {} (map (juxt #(second (.getKey %)) #(tuple/get-long (.getValue %))) @(store/scan-index *db* "refcount_index#1" ::store/by-group tuple/all nil {::store/list? true})))))
+  (store/reindex *db* "refcount_index#0")
+  (store/reindex *db* "refcount_index#1")
+  (is
+   (= (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (:Invoice ds/fixtures)))
+      (into {} (map (juxt #(second (.getKey %)) #(tuple/get-long (.getValue %))) @(store/scan-index *db* "refcount_index#0" ::store/by-group tuple/all nil {::store/list? true})))))
+  (prn "deleted!")
+  (store/delete-record *db* :Invoice [1 1])
+  (prn @(store/scan-index *db* "refcount_index#0" ::store/by-group tuple/all nil {::store/list? true}))
+  (is
+   (= (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (:Invoice ds/fixtures)))
+      (into {} (map (juxt #(second (.getKey %)) #(tuple/get-long (.getValue %))) @(store/scan-index *db* "refcount_index#0" ::store/by-group tuple/all nil {::store/list? true}))))))

@@ -276,6 +276,7 @@
 
   (agg/compute db :count-not-null :Object :path_count "big-test-bucket")
 
+
   ;; This should yield 4000000
   (time
    @(store/long-query-reduce db incrementor 0

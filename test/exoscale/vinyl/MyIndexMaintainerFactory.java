@@ -1,0 +1,1 @@
+../../../protobuf/exoscale/vinyl/MyIndexMaintainerFactory.java

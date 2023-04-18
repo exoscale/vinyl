@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 
-@AutoService(MyIndexMaintainerFactory.class)
+@AutoService(IndexMaintainerFactory.class)
 public class MyIndexMaintainerFactory implements IndexMaintainerFactory {
 
     @Nonnull
@@ -26,7 +26,7 @@ public class MyIndexMaintainerFactory implements IndexMaintainerFactory {
     @Nonnull
     @Override
     public IndexValidator getIndexValidator(Index index) {
-        return null;
+        return new IndexValidator(index);
     }
 
     @Nonnull
