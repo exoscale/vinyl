@@ -8,7 +8,6 @@
            com.apple.foundationdb.record.metadata.RecordTypeBuilder
            (com.apple.foundationdb.record.metadata.expressions
             KeyExpression
-            KeyExpression$FanType
             FieldKeyExpression
             NestingKeyExpression)
            com.google.protobuf.Descriptors$FileDescriptor))
