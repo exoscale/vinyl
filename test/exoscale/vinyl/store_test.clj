@@ -7,7 +7,7 @@
             [exoscale.vinyl.tuple      :as tuple])
   (:import [java.util.concurrent ExecutionException]))
 
-(test/use-fixtures :once ds/with-open-fdb)
+(test/use-fixtures :each ds/with-open-fdb)
 
 (deftest liveness-test
   (testing "Things are set up correctly"
