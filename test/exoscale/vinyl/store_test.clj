@@ -4,7 +4,7 @@
             [exoscale.vinyl.store      :as store]
             [exoscale.vinyl.aggregates :as agg]
             [exoscale.vinyl.demostore  :as ds :refer [*db*]]
-            [exoscale.vinyl.tuple :as tuple])
+            [exoscale.vinyl.tuple      :as tuple])
   (:import [java.util.concurrent ExecutionException]))
 
 (test/use-fixtures :once ds/with-open-fdb)

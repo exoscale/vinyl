@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
-public class MyIndexMaintainer extends StandardIndexMaintainer {
+public class RefcountIndexMaintainer extends StandardIndexMaintainer {
 
     public static byte[] EMPTY_VALUE = new byte[]{};
     public static byte[] LITTLE_ENDIAN_INT64_ONE = new byte[]{1, 0, 0, 0, 0, 0, 0, 0};
@@ -31,7 +31,7 @@ public class MyIndexMaintainer extends StandardIndexMaintainer {
     private final Subspace refCountSubspace;
     private final Subspace zeroSubspace;
 
-    protected MyIndexMaintainer(IndexMaintainerState state) {
+    protected RefcountIndexMaintainer(IndexMaintainerState state) {
         super(state);
         refCountSubspace = getIndexSubspace().subspace(Tuple.from("refcount"));
         zeroSubspace = getIndexSubspace().subspace(Tuple.from("zero"));
@@ -49,7 +49,6 @@ public class MyIndexMaintainer extends StandardIndexMaintainer {
     @Nonnull
     @Override
     public <M extends Message> CompletableFuture<Void> update(FDBIndexableRecord<M> oldRecord, FDBIndexableRecord<M> newRecord) {
-        // https://github.com/FoundationDB/fdb-record-layer/blob/e5ba9cd0027b300b346e543cf013e410675d25a4/fdb-record-layer-core/src/main/java/com/apple/foundationdb/record/provider/foundationdb/IndexingBase.java#L885
         Transaction transaction = state.transaction;
         if (newRecord != null && oldRecord == null) {
             Object record = toRecord(newRecord);

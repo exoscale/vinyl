@@ -1,1 +1,0 @@
-../../../protobuf/exoscale/vinyl/Demostore.java

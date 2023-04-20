@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 @AutoService(IndexMaintainerFactory.class)
-public class MyIndexMaintainerFactory implements IndexMaintainerFactory {
+public class RefcountIndexMaintainerFactory implements IndexMaintainerFactory {
 
     @Nonnull
     private static final List<String> TYPES = Collections.singletonList("refcount");
@@ -32,6 +32,6 @@ public class MyIndexMaintainerFactory implements IndexMaintainerFactory {
     @Nonnull
     @Override
     public IndexMaintainer getIndexMaintainer(IndexMaintainerState state) {
-        return new MyIndexMaintainer(state);
+        return new RefcountIndexMaintainer(state);
     }
 }
