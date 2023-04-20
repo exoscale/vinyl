@@ -43,6 +43,7 @@
    com.apple.foundationdb.record.RecordMetaData
    com.apple.foundationdb.record.provider.foundationdb.FDBStoredRecord
    com.apple.foundationdb.record.provider.foundationdb.FDBDatabaseRunner
+   com.apple.foundationdb.record.provider.foundationdb.OnlineIndexer
    com.apple.foundationdb.tuple.Tuple
    java.lang.AutoCloseable
    java.util.concurrent.CompletableFuture
@@ -207,10 +208,10 @@
      (reify Function
        (apply [_ context]
          (.thenCompose ^CompletableFuture
-          (store-from-builder (::builder this)
-                              context
-                              open-mode
-                              true)
+                        (store-from-builder (::builder this)
+                                            context
+                                            open-mode
+                                            true)
                        (fn/make-fun f))))))
   (run-in-context [this f]
     (.run ^FDBDatabase (::db this)
@@ -239,7 +240,7 @@
                context
                :create-or-open
                true)
-                           (fn/make-fun f))))))
+              (fn/make-fun f))))))
       (run-in-context [_ f]
         (.run
          runner
@@ -671,3 +672,10 @@
       (fn [^FDBRecordStore store ^bytes cont]
         (.execute (.planQuery store q) store ctx cont props))
       cursor/apply-transduce))))
+
+(defn reindex [db index-name]
+  (run-in-context
+   db
+   (fn [^FDBRecordStore store]
+     (with-open [index-builder (OnlineIndexer/forRecordStoreAndIndex store index-name)]
+       (.buildIndex index-builder)))))

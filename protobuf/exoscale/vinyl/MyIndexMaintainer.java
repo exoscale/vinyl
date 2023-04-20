@@ -63,12 +63,11 @@ public class MyIndexMaintainer extends StandardIndexMaintainer {
                     byte[] key = refCountSubspace.pack(e.getProduct());
                     byte[] value = transaction.get(key).get();
                     long newRefcount = ByteArrayUtil.decodeInt(value) - 1;
-                    transaction.set(key, Tuple.from(newRefcount).pack());
                     if (newRefcount == 0) {
                         transaction.clear(refCountSubspace.pack(e.getProduct()));
                         transaction.set(zeroSubspace.pack(e.getProduct()), EMPTY_VALUE);
                     } else {
-                        transaction.set(key, Tuple.from(newRefcount).pack());
+                        transaction.set(key, ByteArrayUtil.encodeInt(newRefcount));
                     }
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
@@ -107,13 +106,17 @@ public class MyIndexMaintainer extends StandardIndexMaintainer {
 
     @Nonnull
     @Override
+    protected IndexEntry unpackKeyValue(@Nonnull Subspace subspace, @Nonnull KeyValue kv) {
+        return unpackKeyValue(kv);
+    }
+
+    @Nonnull
+    @Override
     protected IndexEntry unpackKeyValue(@Nonnull KeyValue kv) {
-        System.out.println("length?" + kv.getValue().length);
-        System.out.println(Arrays.equals(kv.getValue(), EMPTY_VALUE));
-        if(kv.getValue().length!=8) {
-            return new IndexEntry(this.state.index, SplitHelper.unpackKey(indexSubspace, kv), Tuple.from(ByteArrayUtil.decodeInt(kv.getValue())));
+        if(Arrays.equals(kv.getValue(), EMPTY_VALUE)) {
+            return new IndexEntry(this.state.index, SplitHelper.unpackKey(indexSubspace, kv), Tuple.from(0));
         } else {
-            return new IndexEntry(this.state.index, Tuple.fromBytes("toto".getBytes()), Tuple.fromBytes("aaaa".getBytes()));
+            return new IndexEntry(this.state.index, SplitHelper.unpackKey(indexSubspace, kv), Tuple.from(ByteArrayUtil.decodeInt(kv.getValue())));
         }
     }
 }
