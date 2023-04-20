@@ -21,25 +21,20 @@ import com.google.protobuf.Message;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class MyIndexMaintainer extends StandardIndexMaintainer {
 
     public static byte[] EMPTY_VALUE = new byte[]{};
     public static byte[] LITTLE_ENDIAN_INT64_ONE = new byte[]{1, 0, 0, 0, 0, 0, 0, 0};
 
-    private final Subspace indexSubspace;
     private final Subspace refCountSubspace;
     private final Subspace zeroSubspace;
 
     protected MyIndexMaintainer(IndexMaintainerState state) {
         super(state);
-        this.indexSubspace = indexSubspace(state.indexSubspace);
-        refCountSubspace = indexSubspace.subspace(Tuple.from("refcount"));
-        zeroSubspace = indexSubspace.subspace(Tuple.from("zero"));
+        refCountSubspace = getIndexSubspace().subspace(Tuple.from("refcount"));
+        zeroSubspace = getIndexSubspace().subspace(Tuple.from("zero"));
     }
 
     @Nonnull
@@ -81,7 +76,7 @@ public class MyIndexMaintainer extends StandardIndexMaintainer {
 
     @Nonnull
     public RecordCursor<IndexEntry> scan(@Nonnull IndexScanType indexScanType, @Nonnull TupleRange tupleRange, byte[] continuation, @Nonnull ScanProperties scanProperties) {
-        RecordCursor<KeyValue> keyValues = KeyValueCursor.Builder.withSubspace(indexSubspace).setContext(this.state.context).setRange(tupleRange).setContinuation(continuation).setScanProperties(scanProperties).build();
+        RecordCursor<KeyValue> keyValues = KeyValueCursor.Builder.withSubspace(getIndexSubspace()).setContext(this.state.context).setRange(tupleRange).setContinuation(continuation).setScanProperties(scanProperties).build();
         return keyValues.map((kv) -> {
             this.state.store.countKeyValue(FDBStoreTimer.Counts.LOAD_INDEX_KEY, FDBStoreTimer.Counts.LOAD_INDEX_KEY_BYTES, FDBStoreTimer.Counts.LOAD_INDEX_VALUE_BYTES, kv);
             return this.unpackKeyValue(kv);
@@ -93,32 +88,13 @@ public class MyIndexMaintainer extends StandardIndexMaintainer {
         return false;
     }
 
-    private Subspace indexSubspace(Subspace subspace) {
-        Tuple tupleSubspace = Tuple.fromBytes(subspace.getKey());
-        List<Object> subSubspace = tupleSubspace.getItems().stream().limit(tupleSubspace.getItems().size() - 1).collect(Collectors.toUnmodifiableList());
-        String base = tupleSubspace.getString(tupleSubspace.getItems().size()-1).split("#")[0];
-        return new Subspace(Tuple.from(Stream.concat(subSubspace.stream(), Stream.of(base)).toArray()));
-    }
-
-    @Nonnull
-    @Override
-    public Subspace getIndexSubspace() {
-        return indexSubspace;
-    }
-
-    @Nonnull
-    @Override
-    protected IndexEntry unpackKeyValue(@Nonnull Subspace subspace, @Nonnull KeyValue kv) {
-        return unpackKeyValue(kv);
-    }
-
     @Nonnull
     @Override
     protected IndexEntry unpackKeyValue(@Nonnull KeyValue kv) {
         if(Arrays.equals(kv.getValue(), EMPTY_VALUE)) {
-            return new IndexEntry(this.state.index, SplitHelper.unpackKey(indexSubspace, kv), Tuple.from(0));
+            return new IndexEntry(this.state.index, SplitHelper.unpackKey(getIndexSubspace(), kv), Tuple.from(0));
         } else {
-            return new IndexEntry(this.state.index, SplitHelper.unpackKey(indexSubspace, kv), Tuple.from(ByteArrayUtil.decodeInt(kv.getValue())));
+            return new IndexEntry(this.state.index, SplitHelper.unpackKey(getIndexSubspace(), kv), Tuple.from(ByteArrayUtil.decodeInt(kv.getValue())));
         }
     }
 }

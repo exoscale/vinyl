@@ -104,7 +104,6 @@
           (doseq [{:keys [name on type]} indices]
             (.addIndex builder rt (make-index name (build-field on) type))))))
     (doseq [{:keys [name on type]} (:indices schema)]
-      (prn (get index-types type))
       (.addMultiTypeIndex builder (map #(.getRecordType builder %) on) (Index. (str name) (build-field :type-key) (make-index-type type))))
     (.build builder)))
 
