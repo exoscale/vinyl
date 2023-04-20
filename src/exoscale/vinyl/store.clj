@@ -209,10 +209,10 @@
      (reify Function
        (apply [_ context]
          (.thenCompose ^CompletableFuture
-                        (store-from-builder (::builder this)
-                                            context
-                                            open-mode
-                                            true)
+          (store-from-builder (::builder this)
+                              context
+                              open-mode
+                              true)
                        (fn/make-fun f))))))
   (run-in-context [this f]
     (.run ^FDBDatabase (::db this)
@@ -241,7 +241,7 @@
                context
                :create-or-open
                true)
-              (fn/make-fun f))))))
+                           (fn/make-fun f))))))
       (run-in-context [_ f]
         (.run
          runner
@@ -682,5 +682,5 @@
                                (.setRecordStore store)
                                (.setIndex index-name)
                                (.setIndexStatePrecondition OnlineIndexer$IndexStatePrecondition/FORCE_BUILD))]
-      (with-open [indexer (.build indexer-builder)]
-        (.buildIndex indexer))))))
+       (with-open [indexer (.build indexer-builder)]
+         (.buildIndex indexer))))))
