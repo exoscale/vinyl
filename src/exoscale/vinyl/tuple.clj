@@ -41,11 +41,10 @@
   ^Tuple [^bytes b]
   (Tuple/fromBytes b))
 
+(def decode-and-expand
+  (comp expand decode))
+
 (def all (TupleRange/ALL))
 
 (defn all-of [items]
   (TupleRange/allOf (tuple/from-seq items)))
-
-
-(def decode-and-expand
-  (comp expand decode))

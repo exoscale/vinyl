@@ -34,11 +34,6 @@
   (group [field expr]
     (.groupBy field ^KeyExpression expr (into-array KeyExpression []))))
 
-(defn- ->fan-type [type]
-  (case type
-    :fan-out     KeyExpression$FanType/FanOut
-    :concatenate KeyExpression$FanType/Concatenate))
-
 (defn build-field
   ^KeyExpression [field-def]
   (ex/assert-spec-valid ::field field-def)
@@ -48,8 +43,6 @@
       :type-key (Key$Expressions/recordType)
       :kw       (Key$Expressions/field (name field))
       :cat      (multi-build-field field)
-      :fan      (Key$Expressions/field (:field field) (->fan-type (:fan-type field)))
-      :fan-str  (Key$Expressions/field (first field) (->fan-type (second field)))
       :field    field)))
 
 (defmethod multi-build-field :concat
@@ -112,8 +105,6 @@
                            :str string?
                            :kw keyword?
                            :cat (s/cat :type keyword? :args (s/* any?))
-                           :fan (s/cat :field string? :fan-type keyword?)
-                           :fan-str (s/cat :type (s/spec (s/cat :field-def (s/cat :field string? :fan-type keyword?))) :args (s/* any?))
                            :field (partial instance? KeyExpression)))
 
 (s/def ::record-types (s/or :str (s/coll-of string?)

@@ -50,10 +50,7 @@
    :Invoice {:primary-key [:concat :type-key "account_id" "id"]
              :indices     [{:name "total_invoiced"
                             :on   [:group-by "total" "account_id"]
-                            :type :sum}
-                           {:name "invoices_sum"
-                            :on   [:group-by [:nested ["lines" :fan-out] "product"]]
-                            :type :count-not-null}]}
+                            :type :sum}]}
    :Object  {:primary-key [:concat :type-key "bucket" "path"]
              :indices     [{:name "path_count"
                             :on [:group-by "path" "bucket"]
@@ -81,13 +78,7 @@
    :Invoice {:primary-key [:concat :type-key "account_id" "id"]
              :indices     [{:name "total_invoiced"
                             :on   [:group-by "total" "account_id"]
-                            :type :sum}
-                           {:name "invoices_sum"
-                            :on   [:group-by [:nested ["lines" :fan-out] "product"]]
-                            :type :count-not-null}
-                           {:name "invoices_sum"
-                            :on   [:group-by [:nested ["lines" :fan-out] "product"]]
-                            :type :count-not-null}]}
+                            :type :sum}]}
    :Object  {:primary-key [:concat :type-key "bucket" "path"]
              :indices     [{:name "path_count"
                             :on [:group-by "path" "bucket"]
