@@ -37,41 +37,69 @@ public class MyIndexMaintainer extends StandardIndexMaintainer {
         zeroSubspace = getIndexSubspace().subspace(Tuple.from("zero"));
     }
 
+    public Object toRecord(FDBIndexableRecord<? extends Message> indexableRecord) {
+        String type = indexableRecord.getRecordType().getName();
+        return switch (type) {
+            case "Invoice" -> Demostore.Invoice.newBuilder().mergeFrom(indexableRecord.getRecord()).build();
+            case "Object" -> Demostore.Object.newBuilder().mergeFrom(indexableRecord.getRecord()).build();
+            default -> throw new IllegalArgumentException("Unsupported record type");
+        };
+    }
+
     @Nonnull
     @Override
     public <M extends Message> CompletableFuture<Void> update(FDBIndexableRecord<M> oldRecord, FDBIndexableRecord<M> newRecord) {
         // https://github.com/FoundationDB/fdb-record-layer/blob/e5ba9cd0027b300b346e543cf013e410675d25a4/fdb-record-layer-core/src/main/java/com/apple/foundationdb/record/provider/foundationdb/IndexingBase.java#L885
-        System.out.println("Udpdating!");
         Transaction transaction = state.transaction;
-        if(newRecord != null && oldRecord == null) {
-            Demostore.Invoice invoice = (Demostore.Invoice)newRecord.getRecord();
-            invoice.getLinesList().forEach(e -> {
-                try {
-                    byte[] key = refCountSubspace.pack(e.getProduct());
-                    transaction.mutate(MutationType.ADD, key, LITTLE_ENDIAN_INT64_ONE);
-                } catch (Exception exception) {
-                    throw new RuntimeException(exception);
+        if (newRecord != null && oldRecord == null) {
+            Object record = toRecord(newRecord);
+            if (record instanceof Demostore.Invoice) {
+                Demostore.Invoice invoice = (Demostore.Invoice) record;
+                invoice.getLinesList().forEach(e -> {
+                    increment(transaction, e.getProduct());
+                });
+            } else {
+                Demostore.Object object = (Demostore.Object) record;
+                increment(transaction, object.getBucket());
+            }
+        } else if (newRecord == null && oldRecord != null) {
+            Object record = toRecord(oldRecord);
+            if (record instanceof Demostore.Invoice) {
+                Demostore.Invoice invoice = (Demostore.Invoice) record;
+                for (Demostore.InvoiceLine e : invoice.getLinesList()) {
+                    decrement(transaction, e.getProduct());
                 }
-            });
-        } else if(newRecord == null && oldRecord != null) {
-            Demostore.Invoice invoice = Demostore.Invoice.newBuilder().mergeFrom(oldRecord.getRecord()).build();
-            for (Demostore.InvoiceLine e : invoice.getLinesList()) {
-                try {
-                    byte[] key = refCountSubspace.pack(e.getProduct());
-                    byte[] value = transaction.get(key).get();
-                    long newRefcount = ByteArrayUtil.decodeInt(value) - 1;
-                    if (newRefcount == 0) {
-                        transaction.clear(refCountSubspace.pack(e.getProduct()));
-                        transaction.set(zeroSubspace.pack(e.getProduct()), EMPTY_VALUE);
-                    } else {
-                        transaction.set(key, ByteArrayUtil.encodeInt(newRefcount));
-                    }
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
+            } else {
+                Demostore.Object object = (Demostore.Object) record;
+                decrement(transaction, object.getBucket());
             }
         }
         return CompletableFuture.completedFuture(null);
+    }
+
+    private void increment(Transaction transaction, Object keyObject) {
+        try {
+            byte[] key = refCountSubspace.pack(keyObject);
+            transaction.mutate(MutationType.ADD, key, LITTLE_ENDIAN_INT64_ONE);
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    private void decrement(Transaction transaction, Object keyObject) {
+        try {
+            byte[] key = refCountSubspace.pack(keyObject);
+            byte[] value = transaction.get(key).get();
+            long newRefcount = ByteArrayUtil.decodeInt(value) - 1;
+            if (newRefcount == 0) {
+                transaction.clear(refCountSubspace.pack(keyObject));
+                transaction.set(zeroSubspace.pack(keyObject), EMPTY_VALUE);
+            } else {
+                transaction.set(key, ByteArrayUtil.encodeInt(newRefcount));
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Nonnull
@@ -91,7 +119,7 @@ public class MyIndexMaintainer extends StandardIndexMaintainer {
     @Nonnull
     @Override
     protected IndexEntry unpackKeyValue(@Nonnull KeyValue kv) {
-        if(Arrays.equals(kv.getValue(), EMPTY_VALUE)) {
+        if (Arrays.equals(kv.getValue(), EMPTY_VALUE)) {
             return new IndexEntry(this.state.index, SplitHelper.unpackKey(getIndexSubspace(), kv), Tuple.from(0));
         } else {
             return new IndexEntry(this.state.index, SplitHelper.unpackKey(getIndexSubspace(), kv), Tuple.from(ByteArrayUtil.decodeInt(kv.getValue())));

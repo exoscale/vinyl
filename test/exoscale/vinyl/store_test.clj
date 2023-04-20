@@ -157,29 +157,38 @@
       (is @(store/list-query old-ds-reader [:User [:starts-with? :name "a1"]])))))
 
 (deftest scan-index-test
+  (store/insert-record *db* (p/object->record {:bucket "bucket" :path "path" :size 2}))
+  (store/reindex *db* "refcount_index")
+  (store/reindex *db* "refcount_index")
   (is
-   (= (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (:Invoice ds/fixtures)))
+   (= (assoc (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (:Invoice ds/fixtures)))
+             "bucket" 1)
       (into {} (map (juxt #(second (.getKey %)) #(tuple/get-long (.getValue %))) @(store/scan-index *db* "refcount_index" ::store/by-group tuple/all nil {::store/list? true})))))
   (is
-   (= (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (:Invoice ds/fixtures)))
+   (= (assoc (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (:Invoice ds/fixtures)))
+             "bucket" 1)
       (into {} (map (juxt #(second (.getKey %)) #(tuple/get-long (.getValue %))) @(store/scan-index *db* "refcount_index" ::store/by-group tuple/all nil {::store/list? true})))))
   (store/delete-record *db* :Invoice [1 1])
   (is
-   (= (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (remove (fn [{:keys [id]}] (= id 1)) (:Invoice ds/fixtures))))
+   (= (assoc (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (remove (fn [{:keys [id]}] (= id 1)) (:Invoice ds/fixtures))))
+             "bucket" 1)
       (into {} (map (juxt #(second (.getKey %)) #(tuple/get-long (.getValue %))) @(store/scan-index *db* "refcount_index" ::store/by-group tuple/all nil {::store/list? true})))))
   (store/delete-record *db* :Invoice [1 2])
   (is
-   (= (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (remove (fn [{:keys [id]}] (#{1 2} id)) (:Invoice ds/fixtures))))
+   (= (assoc (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (remove (fn [{:keys [id]}] (#{1 2} id)) (:Invoice ds/fixtures))))
+             "bucket" 1)
       (into {} (map (juxt #(second (.getKey %)) #(tuple/get-long (.getValue %))) @(store/scan-index *db* "refcount_index" ::store/by-group tuple/all nil {::store/list? true})))))
   (store/delete-record *db* :Invoice [3 3])
   (is
-   (= (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (remove (fn [{:keys [id]}] (#{1 2 3} id)) (:Invoice ds/fixtures))))
+   (= (assoc (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (remove (fn [{:keys [id]}] (#{1 2 3} id)) (:Invoice ds/fixtures))))
+             "bucket" 1)
       (into {} (map (juxt #(second (.getKey %)) #(tuple/get-long (.getValue %))) @(store/scan-index *db* "refcount_index" ::store/by-group tuple/all nil {::store/list? true})))))
   (store/delete-record *db* :Invoice [4 4])
   (is (= #{"p1" "p2"} (into #{} (map #(second (.getKey %)) @(store/scan-index *db* "refcount_index" ::store/by-group (tuple/all-of ["zero"]) nil {::store/list? true})))))
   (is
-   (= (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (remove (fn [{:keys [id]}] (#{1 2 3 4} id)) (:Invoice ds/fixtures))))
+   (= (assoc (frequencies (mapcat #(map (fn [line] (:product line)) (:lines %)) (remove (fn [{:keys [id]}] (#{1 2 3 4} id)) (:Invoice ds/fixtures))))
+             "bucket" 1)
       (into {} (map (juxt #(second (.getKey %)) #(tuple/get-long (.getValue %))) @(store/scan-index *db* "refcount_index" ::store/by-group (tuple/all-of ["refcount"]) nil {::store/list? true})))))
   (store/delete-record *db* :Invoice [4 5])
   (is (= #{"p1" "p2" "p4"} (into #{} (map #(second (.getKey %)) @(store/scan-index *db* "refcount_index" ::store/by-group (tuple/all-of ["zero"]) nil {::store/list? true})))))
-  (is (empty? (into {} (map (juxt #(second (.getKey %)) #(tuple/get-long (.getValue %))) @(store/scan-index *db* "refcount_index" ::store/by-group (tuple/all-of ["refcount"]) nil {::store/list? true}))))))
+  (is (= {"bucket" 1} (into {} (map (juxt #(second (.getKey %)) #(tuple/get-long (.getValue %))) @(store/scan-index *db* "refcount_index" ::store/by-group (tuple/all-of ["refcount"]) nil {::store/list? true}))))))

@@ -44,6 +44,7 @@
    com.apple.foundationdb.record.provider.foundationdb.FDBStoredRecord
    com.apple.foundationdb.record.provider.foundationdb.FDBDatabaseRunner
    com.apple.foundationdb.record.provider.foundationdb.OnlineIndexer
+   com.apple.foundationdb.record.provider.foundationdb.OnlineIndexer$IndexStatePrecondition
    com.apple.foundationdb.tuple.Tuple
    java.lang.AutoCloseable
    java.util.concurrent.CompletableFuture
@@ -673,9 +674,13 @@
         (.execute (.planQuery store q) store ctx cont props))
       cursor/apply-transduce))))
 
-(defn reindex [db index-name]
+(defn reindex [db ^String index-name]
   (run-in-context
    db
    (fn [^FDBRecordStore store]
-     (with-open [index-builder (OnlineIndexer/forRecordStoreAndIndex store index-name)]
-       (.buildIndex index-builder)))))
+     (let [indexer-builder (-> (OnlineIndexer/newBuilder)
+                               (.setRecordStore store)
+                               (.setIndex index-name)
+                               (.setIndexStatePrecondition OnlineIndexer$IndexStatePrecondition/FORCE_BUILD))]
+      (with-open [indexer (.build indexer-builder)]
+        (.buildIndex indexer))))))
