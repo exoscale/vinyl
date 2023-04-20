@@ -87,7 +87,6 @@
                   (.setRecords descriptor)
                   (.setSplitLongRecords false))]
     (doseq [[record-type {:keys [type-key primary-key indices]}] schema]
-      ;; FIXME: Schema definition needs to be improved...
       (when primary-key
         (let [rt   (.getRecordType builder (name record-type))]
           (set-primary-key rt (build-field primary-key))
