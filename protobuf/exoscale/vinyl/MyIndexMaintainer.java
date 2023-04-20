@@ -45,6 +45,8 @@ public class MyIndexMaintainer extends StandardIndexMaintainer {
     @Nonnull
     @Override
     public <M extends Message> CompletableFuture<Void> update(FDBIndexableRecord<M> oldRecord, FDBIndexableRecord<M> newRecord) {
+        // https://github.com/FoundationDB/fdb-record-layer/blob/e5ba9cd0027b300b346e543cf013e410675d25a4/fdb-record-layer-core/src/main/java/com/apple/foundationdb/record/provider/foundationdb/IndexingBase.java#L885
+        System.out.println("Udpdating!");
         Transaction transaction = state.transaction;
         if(newRecord != null && oldRecord == null) {
             Demostore.Invoice invoice = (Demostore.Invoice)newRecord.getRecord();

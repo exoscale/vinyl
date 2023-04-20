@@ -78,13 +78,15 @@
   {:count-not-null IndexTypes/COUNT_NOT_NULL
    :sum            IndexTypes/SUM})
 
+(defn- make-index-type [type]
+  (cond
+    (keyword? type) (get index-types type)
+    (string? type)  type
+    :else           IndexTypes/VALUE))
+
 (defn make-index
   ^Index [index-name ^KeyExpression kx type]
-  (let [it (cond
-             (keyword? type) (get index-types type)
-             (string? type)  type
-             :else           IndexTypes/VALUE)]
-    (Index. (str index-name) kx (str it))))
+  (Index. (str index-name) kx (make-index-type type)))
 
 (defn create-record-meta
   ^RecordMetaData [^Descriptors$FileDescriptor descriptor schema]
@@ -93,12 +95,17 @@
                   (.setRecords descriptor)
                   (.setSplitLongRecords false))]
     (doseq [[record-type {:keys [type-key primary-key indices]}] schema]
-      (let [rt   (.getRecordType builder (name record-type))]
-        (set-primary-key rt (build-field primary-key))
-        (when (some? type-key)
-          (set-record-type-key rt type-key))
-        (doseq [{:keys [name on type]} indices]
-          (.addIndex builder rt (make-index name (build-field on) type)))))
+      ;; FIXME: Schema definition needs to be improved...
+      (when primary-key
+        (let [rt   (.getRecordType builder (name record-type))]
+          (set-primary-key rt (build-field primary-key))
+          (when (some? type-key)
+            (set-record-type-key rt type-key))
+          (doseq [{:keys [name on type]} indices]
+            (.addIndex builder rt (make-index name (build-field on) type))))))
+    (doseq [{:keys [name on type]} (:indices schema)]
+      (prn (get index-types type))
+      (.addMultiTypeIndex builder (map #(.getRecordType builder %) on) (Index. (str name) (build-field :type-key) (make-index-type type))))
     (.build builder)))
 
 ;; Schema spec
@@ -110,14 +117,19 @@
                            :fan-str (s/cat :type (s/spec (s/cat :field-def (s/cat :field string? :fan-type keyword?))) :args (s/* any?))
                            :field (partial instance? KeyExpression)))
 
+(s/def ::record-types (s/or :str (s/coll-of string?)
+                            :kw  (s/coll-of keyword?)))
+
 (s/def ::record-type string?)
 (s/def ::type-key    string?)
 (s/def ::primary-key ::field)
 (s/def ::name         string?)
-(s/def ::on          ::field)
+(s/def ::on          (s/or :field        ::field
+                           :record-types ::record-types))
 (s/def ::type        (s/or :str string? :kw keyword?))
 (s/def ::index       (s/keys :req-un [::name ::on] :opt-un [::type]))
 (s/def ::indices     (s/coll-of ::index))
 (s/def ::entity      (s/keys :req-un [::primary-key]
                              :opt-un [::indices ::type-key]))
-(s/def ::schema      (s/map-of keyword? ::entity))
+(s/def ::schema      (s/map-of keyword? (s/or :entity ::entity
+                                              :indices ::indices)))

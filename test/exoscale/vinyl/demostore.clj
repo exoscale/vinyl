@@ -53,21 +53,18 @@
                             :type :sum}
                            {:name "invoices_sum"
                             :on   [:group-by [:nested ["lines" :fan-out] "product"]]
-                            :type :count-not-null}
-                           {:name "refcount_index#0"
-                            :on   :type-key
-                            :type "refcount"}]}
+                            :type :count-not-null}]}
    :Object  {:primary-key [:concat :type-key "bucket" "path"]
              :indices     [{:name "path_count"
                             :on [:group-by "path" "bucket"]
                             :type :count-not-null}
                            {:name "bucket_paths"
-                            :on [:concat "bucket" "path"]}
-                           {:name "refcount_index#1"
-                            :on :type-key
-                            :type "refcount"}]}
+                            :on [:concat "bucket" "path"]}]}
    :City   {:primary-key [:concat :type-key [:nested "location" "name"]
-                          [:nested "location" "zip_code"]]}})
+                          [:nested "location" "zip_code"]]}
+   :indices [{:name "refcount_index"
+              :on ["Invoice" "Object"]
+              :type "refcount"}]})
 
 (def next-schema
   {:Account {:primary-key [:concat :type-key "id"]
