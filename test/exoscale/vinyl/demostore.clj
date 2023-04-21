@@ -86,7 +86,7 @@
                           [:nested "location" "zip_code"]]}})
 
 (def demostore
-  (store/initialize :demostore (Demostore/getDescriptor) schema))
+  (store/initialize :demostore (Demostore/getDescriptor) schema {:open-mode :build}))
 
 (defn create+start [schema opts]
   (let [demostore (store/initialize :demostore (Demostore/getDescriptor) schema opts)]

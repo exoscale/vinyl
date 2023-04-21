@@ -223,7 +223,8 @@
 
 (defn wrapped-runner
   [db opts]
-  (let [runner (-> (new-runner db) (runner-opts opts))]
+  (let [runner (-> (new-runner db) (runner-opts opts))
+        open-mode (or (:open-mode db) :create-or-open)]
     (reify
       DatabaseContext
       (get-metadata [_] (get-metadata db))
@@ -237,7 +238,7 @@
               (store-from-builder
                (::builder db)
                context
-               :create-or-open
+               open-mode
                true)
                            (fn/make-fun f))))))
       (run-in-context [_ f]
@@ -248,7 +249,7 @@
              (f (store-from-builder
                  (::builder db)
                  context
-                 :create-or-open
+                 open-mode
                  true))))))
       AutoCloseable
       (close [_] (.close runner)))))
