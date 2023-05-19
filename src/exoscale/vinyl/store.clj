@@ -674,7 +674,37 @@
         (.execute (.planQuery store q) store ctx cont props))
       cursor/apply-transduce))))
 
-(defn reindex [db ^String index-name]
+(defn reindex
+  "The purpose of the `reindex` function is to force the recalculation of the
+  `index-name`, regardless of the current state of the index (whether it is
+  disabled, readable, or writeable). Even if the index is in a readable state,
+  invoking this function will change its state to writeable,
+  making it inaccessible for any operations that require read access.
+
+  The `reindex` function is particularly useful when a new index is introduced but
+  is not being accessed by any processes at the moment.
+  By calling `reindex`, you ensure that the index is populated with the latest
+  data. When introducing an index on EXISTING records, it is important to follow
+  these steps:
+
+  - 1. Declare the new index in the metadata definition of the record store.
+       This step ensures that the necessary information about the index is
+       included and any record store operations will start populating it.
+  - 2. Utilize the `reindex` function to populate the index (from scratch) with
+       existing records. It is important to note that during this process, the index
+       remains writeable. As a result, it is crucial to exercise caution with
+       non-idempotent operations that might lead to unintended actions
+      (e.g: when this reaches that state, do this...).
+  - 3. Validate the state of the index through ad-hocs queries to guarantee what
+       has been computed corresponds to what you expect. Ideally from a database
+       dump.
+  - 4. Begin reading from it and rely on it to take decisions. At this point,
+       the index is in a readable state, allowing you to access the data it
+       contains.
+
+  Following those steps are really important to ensure your index has been
+  correctly populated."
+  [db ^String index-name]
   (run-in-context
    db
    (fn [^FDBRecordStore store]
