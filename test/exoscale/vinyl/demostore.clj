@@ -58,7 +58,10 @@
                            {:name "bucket_paths"
                             :on [:concat "bucket" "path"]}]}
    :City   {:primary-key [:concat :type-key [:nested "location" "name"]
-                          [:nested "location" "zip_code"]]}})
+                          [:nested "location" "zip_code"]]}
+   :indices [{:name "refcount_index"
+              :on ["Invoice" "Object"]
+              :type "refcount"}]})
 
 (def next-schema
   {:Account {:primary-key [:concat :type-key "id"]
@@ -83,7 +86,10 @@
                            {:name "bucket_paths"
                             :on [:concat "bucket" "path"]}]}
    :City   {:primary-key [:concat :type-key [:nested "location" "name"]
-                          [:nested "location" "zip_code"]]}})
+                          [:nested "location" "zip_code"]]}
+   :indices [{:name "refcount_index"
+              :on ["Invoice" "Object"]
+              :type "refcount"}]})
 
 (def demostore
   (store/initialize :demostore (Demostore/getDescriptor) schema {:open-mode :build}))
