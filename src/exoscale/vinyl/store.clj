@@ -708,7 +708,7 @@
 
   Param key                 | Description
   | ---                     | ---
-  | `limit`                 | Default number of records to attempt to run in a single transaction. Defaults to 100
+  | `limit`                 | Default number of records to attempt to process in a single transaction. Defaults to 100
   | `records-per-second`    | Default limit to the number of records to attempt in a single second. Defaults to 10'000
   | `max-retries`           | Default number of times to retry a single range rebuild. Defaults to 100
   | `progress-log-interval` | Default interval to be logging successful progress in millis when building across transactions (-1 will not log). Defaults to 10'000 milliseconds
