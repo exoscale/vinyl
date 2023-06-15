@@ -6,7 +6,7 @@
             [exoscale.vinyl.demostore  :as ds :refer [*db*]]
             [exoscale.vinyl.tuple :as tuple]))
 
-(test/use-fixtures :once ds/with-open-fdb)
+(test/use-fixtures :once ds/with-build-fdb)
 
 (defn install-records
   [db paths]

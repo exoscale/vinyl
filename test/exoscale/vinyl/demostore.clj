@@ -3,7 +3,8 @@
             [exoscale.vinyl.payload   :as p]
             [exoscale.vinyl.store     :as store]
             [exoscale.vinyl.demostore :as ds])
-  (:import exoscale.vinyl.Demostore))
+  (:import exoscale.vinyl.Demostore
+           com.apple.foundationdb.Range))
 
 (def fixtures
   {:Account
@@ -94,6 +95,9 @@
 (def demostore
   (store/initialize :demostore (Demostore/getDescriptor) schema {:open-mode :build}))
 
+(defn make-demostore [opts]
+  (store/initialize :demostore (Demostore/getDescriptor) schema opts))
+
 (defn create+start [schema opts]
   (let [demostore (store/initialize :demostore (Demostore/getDescriptor) schema opts)]
     (store/start demostore)))
@@ -106,15 +110,30 @@
 
 (def ^:dynamic *db*)
 
-(defn with-open-fdb
-  [f]
-  (let [db      (store/start demostore)
+(defn clear-all
+  "Clear all keys from the database"
+  [db]
+  (.run (.ensureActive (.getContext db))
+        (reify
+          java.util.function.Function
+          (apply [_ tr]
+            (let [begin (byte-array [])
+                  end   (byte-array [0xFF])]
+              (.clear tr (Range. begin end)))))))
+
+(defn with-fdb
+  [demostore-fn f]
+  (let [db      (store/start (demostore-fn))
         records (all-records)]
     (log/info "installing test data:" (count records) "records")
     (store/run-in-context
      db
      (fn [store]
-       (store/delete-all-records store)
+       (clear-all store)))
+
+    (store/run-in-context
+     db
+     (fn [store]
        (store/save-record-batch store records)))
 
     (Thread/sleep 200)
@@ -123,8 +142,19 @@
       (binding [*db* db] (f))
       (finally
         (Thread/sleep 200)
-        (log/info "cleaning fdb store")
-        (store/delete-all-records db)))))
+        (log/info "cleaning fdb store"
+                  (store/run-in-context
+                   db
+                   (fn [store]
+                     (clear-all store))))))))
+
+(defn with-create-fdb
+  [f]
+  (with-fdb (partial make-demostore {:open-mode :create-or-open}) f))
+
+(defn with-build-fdb
+  [f]
+  (with-fdb (constantly demostore) f))
 
 (defn with-paths
   [f]

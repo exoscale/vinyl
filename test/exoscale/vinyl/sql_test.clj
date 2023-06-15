@@ -4,7 +4,7 @@
             [exoscale.vinyl.sql        :refer [list-query]]
             [exoscale.vinyl.demostore  :as ds :refer [*db*]]))
 
-(test/use-fixtures :once ds/with-open-fdb)
+(test/use-fixtures :once ds/with-build-fdb)
 
 (deftest query-test
   (let [opts {:exoscale.vinyl.store/transform p/parse-record}]

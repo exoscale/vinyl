@@ -704,14 +704,33 @@
        contains.
 
   Following those steps are really important to ensure your index has been
-  correctly populated."
-  [db ^String index-name]
-  (run-in-context
-   db
-   (fn [^FDBRecordStore store]
-     (let [indexer-builder (-> (OnlineIndexer/newBuilder)
-                               (.setRecordStore store)
-                               (.setIndex index-name)
-                               (.setIndexStatePrecondition OnlineIndexer$IndexStatePrecondition/FORCE_BUILD))]
-       (with-open [indexer (.build indexer-builder)]
-         (.buildIndex indexer))))))
+  correctly populated.
+
+  Param key                 | Description
+  | ---                     | ---
+  | `limit`                 | Default number of records to attempt to run in a single transaction. Defaults to 100
+  | `records-per-second`    | Default limit to the number of records to attempt in a single second. Defaults to 10'000
+  | `max-retries`           | Default number of times to retry a single range rebuild. Defaults to 100
+  | `progress-log-interval` | Default interval to be logging successful progress in millis when building across transactions (-1 will not log). Defaults to 10'000 milliseconds
+  "
+  ([db ^String index-name]
+   (reindex db index-name {}))
+  ([db ^String index-name {::keys [limit records-per-second max-retries
+                                   progress-log-interval]
+                           :or {limit 100
+                                records-per-second 10000
+                                max-retries 100
+                                progress-log-interval 10000}}]
+   (run-in-context
+    db
+    (fn [^FDBRecordStore store]
+      (let [indexer-builder (-> (OnlineIndexer/newBuilder)
+                                (.setRecordStore store)
+                                (.setIndex index-name)
+                                (.setIndexStatePrecondition OnlineIndexer$IndexStatePrecondition/FORCE_BUILD)
+                                (.setLimit limit)
+                                (.setRecordsPerSecond records-per-second)
+                                (.setMaxRetries max-retries)
+                                (.setProgressLogIntervalMillis progress-log-interval))]
+        (with-open [indexer (.build indexer-builder)]
+          (.buildIndex indexer)))))))
