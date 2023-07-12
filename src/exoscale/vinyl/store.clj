@@ -651,6 +651,26 @@
   ([db f val record-type items opts]
    (long-range-transduce db nil f val record-type items opts)))
 
+(defn long-index-transduce
+  "A transducer over large indices. Results
+   are reduced into an accumulator with the help of the reducing function `f`.
+   The accumulator is initiated to `init`. `clojure.core.reduced` is honored.
+
+   Obviously, this approach does away with any consistency guarantees usually
+   offered by FDB.
+
+   Results being accumulated in memory, this also means that care must be
+   taken with the accumulator."
+  [db xform f val index-name scan-type ^TupleRange range opts]
+  (let [props     (scan-properties opts)
+        scan-type (as-scan-type scan-type)
+        index     (-> db get-metadata (metadata-index index-name))]
+    (continuation-traversing-transduce
+     db xform f val
+     (fn [^FDBRecordStore store ^bytes cont]
+       (.scanIndex store index scan-type range cont props))
+     cursor/apply-transduce)))
+
 (defn long-query-reduce
   "A reducer over large queries. Accepts queries as per `execute-query`. Results
    are reduced into an accumulator with the help of the reducing function `f`.
