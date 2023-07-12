@@ -27,8 +27,8 @@
    (long-scan-refcounting-index tuple/all))
   ([range]
    (let [entries @(store/long-index-transduce *db* identity conj [] "refcount_index" ::store/by-group range {})]
-    (into {}
-          (map (juxt #(second (.getKey %)) #(tuple/get-long (.getValue %))) entries)))))
+     (into {}
+           (map (juxt #(second (.getKey %)) #(tuple/get-long (.getValue %))) entries)))))
 
 (deftest reindex-test
   (is (= (refcounting-frequencies)

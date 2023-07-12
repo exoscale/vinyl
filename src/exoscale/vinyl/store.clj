@@ -652,9 +652,9 @@
    (long-range-transduce db nil f val record-type items opts)))
 
 (defn long-index-transduce
-  "A transducer over large indices. Results
-   are reduced into an accumulator with the help of the reducing function `f`.
-   The accumulator is initiated to `init`. `clojure.core.reduced` is honored.
+  "A transducer over large indices.
+   Results are reduced into an accumulator with the help of the reducing function
+  `f`. The accumulator is initiated to `init`. `clojure.core.reduced` is honored.
 
    Obviously, this approach does away with any consistency guarantees usually
    offered by FDB.
