@@ -661,12 +661,12 @@
 
    Results being accumulated in memory, this also means that care must be
    taken with the accumulator."
-  [db xform f val index-name scan-type ^TupleRange range opts]
+  [db xform f init index-name scan-type ^TupleRange range opts]
   (let [props     (scan-properties opts)
         scan-type (as-scan-type scan-type)
         index     (-> db get-metadata (metadata-index index-name))]
     (continuation-traversing-transduce
-     db xform f val
+     db xform f init
      (fn [^FDBRecordStore store ^bytes cont]
        (.scanIndex store index scan-type range cont props))
      cursor/apply-transduce)))
