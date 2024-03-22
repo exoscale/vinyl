@@ -31,8 +31,8 @@ jobs:
         apt-get update
         apt-get -qyy install curl sudo
 
-    - name: Install foundationdb
-      uses: pyr/foundationdb-actions-install@master
+      - name: Install foundationdb
+      uses: Clikengo/foundationdb-actions-install@v1.0.1
 
     - name: Check
       run: clojure -T:project check
