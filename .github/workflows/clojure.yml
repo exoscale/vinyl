@@ -32,7 +32,9 @@ jobs:
         apt-get -qyy install curl sudo
 
     - name: Install foundationdb
-      uses: Clikengo/foundationdb-actions-install@v1.0.2
+      uses: foundationdb-rs/foundationdb-actions-install
+      with:
+        version: 6.2.20
 
     - name: Check
       run: clojure -T:project check
