@@ -31,7 +31,7 @@ jobs:
         apt-get update
         apt-get -qyy install curl sudo
 
-      - name: Install foundationdb
+    - name: Install foundationdb
       uses: Clikengo/foundationdb-actions-install@v1.0.1
 
     - name: Check
