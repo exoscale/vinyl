@@ -32,7 +32,7 @@ jobs:
         apt-get -qyy install curl sudo
 
     - name: Install foundationdb
-      uses: foundationdb-rs/foundationdb-actions-install
+      uses: foundationdb-rs/foundationdb-actions-install@2.1.0
       with:
         version: 6.2.20
 
