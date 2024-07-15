@@ -180,14 +180,14 @@
       ;; buildAsync doesn't exist, defaulting to uncheckedOpenAsync
       [:build true]           (.uncheckedOpenAsync builder))))
 
-(defrecord RecordStore [cluster-file schema-name schema descriptor env open-mode executor]
+(defrecord RecordStore [cluster-file schema-name schema descriptor env open-mode executor split-long-records]
   component/Lifecycle
   (start [this]
     (let [env      (name (or env (gensym "testing")))
           kspath   (-> top-level-keyspace
                        (.path "environment" env)
                        (.add "schema" (name schema-name)))
-          metadata (schema/create-record-meta descriptor schema)
+          metadata (schema/create-record-meta descriptor schema {:split-long-records split-long-records})
           db       (db-from-instance cluster-file executor)
           builder  (doto (record-store-builder)
                      (.setMetaDataProvider ^RecordMetaDataProvider metadata)
@@ -213,7 +213,7 @@
                               context
                               open-mode
                               true)
-                       (fn/make-fun f))))))
+          (fn/make-fun f))))))
   (run-in-context [this f]
     (.run ^FDBDatabase (::db this)
           (reify Function
@@ -242,7 +242,7 @@
                context
                open-mode
                true)
-                           (fn/make-fun f))))))
+              (fn/make-fun f))))))
       (run-in-context [_ f]
         (.run
          runner

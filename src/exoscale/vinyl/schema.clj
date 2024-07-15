@@ -81,22 +81,26 @@
   (Index. (str index-name) kx (make-index-type type)))
 
 (defn create-record-meta
-  ^RecordMetaData [^Descriptors$FileDescriptor descriptor schema]
-  (ex/assert-spec-valid ::schema schema)
-  (let [builder (doto (RecordMetaData/newBuilder)
-                  (.setRecords descriptor)
-                  (.setSplitLongRecords false))]
-    (doseq [[record-type {:keys [type-key primary-key indices]}] schema]
-      (when primary-key
-        (let [rt   (.getRecordType builder (name record-type))]
-          (set-primary-key rt (build-field primary-key))
-          (when (some? type-key)
-            (set-record-type-key rt type-key))
-          (doseq [{:keys [name on type]} indices]
-            (.addIndex builder rt (make-index name (build-field on) type))))))
-    (doseq [{:keys [name on type]} (:indices schema)]
-      (.addMultiTypeIndex builder (map #(.getRecordType builder %) on) (Index. (str name) (build-field :type-key) (make-index-type type))))
-    (.build builder)))
+  (^RecordMetaData [^Descriptors$FileDescriptor descriptor schema]
+   (create-record-meta descriptor schema {:split-long-records false}))
+  (^RecordMetaData [^Descriptors$FileDescriptor descriptor schema {:keys [split-long-records]}]
+   (ex/assert-spec-valid ::schema schema)
+   (let [split?  (boolean (or split-long-records false))
+         builder (doto (RecordMetaData/newBuilder)
+                   (.setRecords descriptor)
+                   (.setSplitLongRecords split?))]
+     (doseq [[record-type {:keys [type-key primary-key indices]}] schema]
+       (when primary-key
+         (let [rt (.getRecordType builder (name record-type))]
+           (set-primary-key rt (build-field primary-key))
+           (when (some? type-key)
+             (set-record-type-key rt type-key))
+           (doseq [{:keys [name on type]} indices]
+             (.addIndex builder rt (make-index name (build-field on) type))))))
+     (doseq [{:keys [name on type]} (:indices schema)]
+       (.addMultiTypeIndex builder (map #(.getRecordType builder %) on) (Index. (str name) (build-field :type-key) (make-index-type type))))
+
+     (.build builder))))
 
 ;; Schema spec
 (s/def ::field       (s/or :type-key #{:type-key}
@@ -119,5 +123,6 @@
 (s/def ::indices     (s/coll-of ::index))
 (s/def ::entity      (s/keys :req-un [::primary-key]
                              :opt-un [::indices ::type-key]))
+
 (s/def ::schema      (s/map-of keyword? (s/or :entity ::entity
                                               :indices ::indices)))
