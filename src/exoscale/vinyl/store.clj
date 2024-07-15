@@ -213,7 +213,7 @@
                               context
                               open-mode
                               true)
-          (fn/make-fun f))))))
+                       (fn/make-fun f))))))
   (run-in-context [this f]
     (.run ^FDBDatabase (::db this)
           (reify Function
@@ -242,7 +242,7 @@
                context
                open-mode
                true)
-              (fn/make-fun f))))))
+                           (fn/make-fun f))))))
       (run-in-context [_ f]
         (.run
          runner
