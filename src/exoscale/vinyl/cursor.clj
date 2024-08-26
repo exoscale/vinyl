@@ -32,16 +32,21 @@
       (AsyncUtil/whileTrue
        (reify Supplier
          (get [_]
-           (-> cursor
-               .onNext
-               (.thenApply
-                (fn/make-fun
-                 (fn [^RecordCursorResult result]
-                   (when (ifn? cont-fn)
-                     (-> result .getContinuation .toBytes cont-fn))
-                   (let [next?   (.hasNext result)
-                         new-acc (when next? (swap! acc reducer (.get result)))]
-                     (and (not (reduced? new-acc)) next?))))))))
+           (try
+             (-> cursor
+                 .onNext
+                 (.thenApply
+                  (fn/make-fun
+                   (fn [^RecordCursorResult result]
+                     (when (ifn? cont-fn)
+                       (-> result .getContinuation .toBytes cont-fn))
+                     (let [next?   (.hasNext result)
+                           new-acc (when next? (swap! acc reducer (.get result)))]
+                       (and (not (reduced? new-acc)) next?))))))
+             (catch Exception e
+               (when (some? xform)
+                 (reducer @acc))
+               (throw e)))))
        (.getExecutor cursor))
       (fn/make-fun (fn [_]
                      (unreduced
