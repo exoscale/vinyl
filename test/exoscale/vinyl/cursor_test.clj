@@ -62,8 +62,8 @@
            (ds/with-build-fdb
              (fn [] (let [cursor (from-iterator (make-faulty-iterator [1 2 3 4 5 6 7 8 9] 5))]
                       @(store/run-async *db* (fn [_store] (apply-transforms
-                                                            cursor
-                                                            {::store/reducer     (completing (fn [_acc items] (swap! processed conj items)))
-                                                             ::store/reduce-init []
-                                                             ::store/transducer  (partition-all 3)})))
+                                                           cursor
+                                                           {::store/reducer     (completing (fn [_acc items] (swap! processed conj items)))
+                                                            ::store/reduce-init []
+                                                            ::store/transducer  (partition-all 3)})))
                       @processed)))))))
