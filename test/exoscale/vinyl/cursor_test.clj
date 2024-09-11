@@ -65,8 +65,8 @@
                         reducer (transducer reducer-fn)
                         acc (atom [])]
                     @(store/run-async *db* (fn [_store] (apply-transduce-with-reducer
-                                                          cursor
-                                                          transducer
-                                                          nil
-                                                          reducer
-                                                          acc)))))))))
+                                                         cursor
+                                                         transducer
+                                                         nil
+                                                         reducer
+                                                         acc)))))))))
