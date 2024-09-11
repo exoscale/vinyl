@@ -15,6 +15,31 @@
   (as-list     [this] "Transform a cursor or cursor future to a list")
   (as-iterator [this] "Transform a cursor or cursor future to an iterator"))
 
+(defn apply-transduce-with-reducer
+  "Apply reducer (transducer) over cursor. Set completion? to true if final
+   transducing call needs to be done (stateful transducer)."
+  [^RecordCursor cursor completion? cont-fn reducer acc]
+  (.thenApply
+    (AsyncUtil/whileTrue
+      (reify Supplier
+        (get [_]
+          (-> cursor
+              .onNext
+              (.thenApply
+                (fn/make-fun
+                  (fn [^RecordCursorResult result]
+                    (when (ifn? cont-fn)
+                      (-> result .getContinuation .toBytes cont-fn))
+                    (let [next? (.hasNext result)
+                          new-acc (when next? (swap! acc reducer (.get result)))]
+                      (and (not (reduced? new-acc)) next?))))))))
+      (.getExecutor cursor))
+    (fn/make-fun (fn [_]
+                   (unreduced
+                     (cond-> @acc
+                             completion?
+                             reducer))))))
+
 (defn apply-transduce
   "A variant of `RecordCursor::reduce` that honors `reduced?` and supports
    transducers.
@@ -23,36 +48,12 @@
 
    When `cont-fn` is given, it will be called on the last seen continuation
    byte array for every new element."
-  ([^RecordCursor cursor xform f init cont-fn]
+  ([cursor xform f init cont-fn]
    (let [reducer (if (some? xform) (xform f) f)
          acc     (if (instance? clojure.lang.Atom init)
                    init
                    (atom (or init (f))))]
-     (.thenApply
-      (AsyncUtil/whileTrue
-       (reify Supplier
-         (get [_]
-           (try
-             (-> cursor
-                 .onNext
-                 (.thenApply
-                  (fn/make-fun
-                   (fn [^RecordCursorResult result]
-                     (when (ifn? cont-fn)
-                       (-> result .getContinuation .toBytes cont-fn))
-                     (let [next?   (.hasNext result)
-                           new-acc (when next? (swap! acc reducer (.get result)))]
-                       (and (not (reduced? new-acc)) next?))))))
-             (catch Exception e
-               (when (some? xform)
-                 (reducer @acc))
-               (throw e)))))
-       (.getExecutor cursor))
-      (fn/make-fun (fn [_]
-                     (unreduced
-                      (cond-> @acc
-                        (some? xform)
-                        reducer)))))))
+     (apply-transduce-with-reducer cursor (some? xform) cont-fn reducer acc)))
   ([cursor f init cont-fn]
    (apply-transduce cursor nil f init cont-fn))
   ([cursor f init]

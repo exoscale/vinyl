@@ -1,6 +1,6 @@
 (ns exoscale.vinyl.cursor-test
   (:require [clojure.test :refer [deftest are is]]
-            [exoscale.vinyl.cursor :refer [apply-transforms]]
+            [exoscale.vinyl.cursor :refer [apply-transforms apply-transduce-with-reducer]]
             [exoscale.vinyl.demostore :as ds :refer [*db*]]
             [exoscale.vinyl.store :as store])
   (:import [com.apple.foundationdb.record RecordCursor]
@@ -57,13 +57,16 @@
     [0 1 2 3 4 5 6] (completing reduce-plus) 0 15))
 
 (deftest stateful-transducer-test
-  (let [processed (atom [])]
-    (is (= [[1 2 3] [4 5] [6 7 8] [9]]
-           (ds/with-build-fdb
-             (fn [] (let [cursor (from-iterator (make-faulty-iterator [1 2 3 4 5 6 7 8 9] 5))]
-                      @(store/run-async *db* (fn [_store] (apply-transforms
-                                                           cursor
-                                                           {::store/reducer     (completing (fn [_acc items] (swap! processed conj items)))
-                                                            ::store/reduce-init []
-                                                            ::store/transducer  (partition-all 3)})))
-                      @processed)))))))
+  (is (= [[1 2 3] [4 5 6] [7 8 9] [10]]
+         (ds/with-build-fdb
+           (fn [] (let [cursor (from-iterator (make-faulty-iterator [1 2 3 4 5 6 7 8 9 10] 5))
+                        transducer (partition-all 3)
+                        reducer-fn (completing (fn [acc items] (conj acc items)))
+                        reducer (transducer reducer-fn)
+                        acc (atom [])]
+                    @(store/run-async *db* (fn [_store] (apply-transduce-with-reducer
+                                                          cursor
+                                                          transducer
+                                                          nil
+                                                          reducer
+                                                          acc)))))))))
