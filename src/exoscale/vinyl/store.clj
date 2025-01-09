@@ -599,12 +599,12 @@
          result (atom val)
          runner (wrapped-runner db runner-params)]
      (-> (run-async
-           runner
-           (fn [^FDBRecordStore store]
-             (when (some? transaction-fn)
-               (transaction-fn (wrapped-record-store store)))
-             (-> (continuing-fn store @cont)
-                 (transduce-fn xform f result #(reset! cont %)))))
+          runner
+          (fn [^FDBRecordStore store]
+            (when (some? transaction-fn)
+              (transaction-fn (wrapped-record-store store)))
+            (-> (continuing-fn store @cont)
+                (transduce-fn xform f result #(reset! cont %)))))
          (fn/close-on-complete runner)))))
 
 (defn- get-range-fn [^TupleRange tuple-range {::keys [limit]}]
