@@ -595,17 +595,17 @@
   ([db xform f val continuing-fn transduce-fn]
    (continuation-traversing-transduce db xform f val nil continuing-fn transduce-fn))
   ([db xform f val transaction-fn continuing-fn transduce-fn]
-  (let [cont    (atom nil)
-        result  (atom val)
-        runner  (wrapped-runner db runner-params)]
-    (-> (run-async
-         runner
-         (fn [^FDBRecordStore store]
-           (when (some? transaction-fn)
-             (transaction-fn (wrapped-record-store store)))
-           (-> (continuing-fn store @cont)
-               (transduce-fn xform f result #(reset! cont %)))))
-        (fn/close-on-complete runner)))))
+   (let [cont (atom nil)
+         result (atom val)
+         runner (wrapped-runner db runner-params)]
+     (-> (run-async
+           runner
+           (fn [^FDBRecordStore store]
+             (when (some? transaction-fn)
+               (transaction-fn (wrapped-record-store store)))
+             (-> (continuing-fn store @cont)
+                 (transduce-fn xform f result #(reset! cont %)))))
+         (fn/close-on-complete runner)))))
 
 (defn- get-range-fn [^TupleRange tuple-range {::keys [limit]}]
   (fn [^FDBRecordStore store ^bytes cont]
