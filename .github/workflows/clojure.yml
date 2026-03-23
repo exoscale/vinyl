@@ -12,11 +12,11 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3.0.2
+      uses: actions/checkout@v6.0.2
 
     ## This is optional but will speed up clojure steps
     - name: Cache mvn/git deps
-      uses: actions/cache@v3
+      uses: actions/cache@v5.0.4
       id: cache-deps
       with:
         path: |
@@ -32,9 +32,9 @@ jobs:
         apt-get -qyy install curl sudo
 
     - name: Install foundationdb
-      uses: foundationdb-rs/foundationdb-actions-install@v2.1.0
+      uses: foundationdb-rs/foundationdb-actions-install@v2.3.0
       with:
-        version: 6.3.23
+        version: 7.3.57
 
     - name: Check
       run: clojure -T:project check
