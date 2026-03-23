@@ -12,11 +12,11 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3.0.2
+      uses: actions/checkout@v6.0.2
 
     ## This is optional but will speed up clojure steps
     - name: Cache mvn/git deps
-      uses: actions/cache@v3
+      uses: actions/cache@v5.0.4
       id: cache-deps
       with:
         path: |
