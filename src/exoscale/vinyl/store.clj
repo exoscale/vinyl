@@ -252,7 +252,7 @@
                  (::builder db)
                  context
                  open-mode
-                 true))))))
+                 false))))))
       AutoCloseable
       (close [_] (.close runner)))))
 
