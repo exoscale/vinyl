@@ -82,16 +82,16 @@
 
 (deftest query-plan-test
   (testing "Planned queries"
-    (ensure-plan [:User [:starts-with? :name "a1"]] "ISCAN(username {[a1],[a1]})")
-    (ensure-plan [:User [:= :name "a1"]] "ISCAN(username [[a1],[a1]])")
-    (ensure-plan [:User [:= :email "a1@exoscale.ch"]] "SCAN([IS User]) | QCFILTER email EQUALS a1@exoscale.ch")
-    (ensure-plan [:Account [:= :state "terminated"]] "ISCAN(account_state [[terminated],[terminated]])")
-    (ensure-plan [:Account [:not= :state "terminated"]] "SCAN(<,>) | TFILTER Account | QCFILTER state NOT_EQUALS terminated")
-    (ensure-plan [:Invoice [:= :id 3]] "SCAN([IS Invoice]) | QCFILTER id EQUALS 3")
-    (ensure-plan [:Invoice [:>= :id 3]] "SCAN([IS Invoice]) | QCFILTER id GREATER_THAN_OR_EQUALS 3")
-    (ensure-plan [:Invoice [:<= :id 3]] "SCAN([IS Invoice]) | QCFILTER id LESS_THAN_OR_EQUALS 3")
-    (ensure-plan [:City] "SCAN([IS City])")
-    (ensure-plan [:City [:nested :location [:= :name "Lausanne"]]] "SCAN(<,>) | TFILTER City | QCFILTER location/{name EQUALS Lausanne}")))
+    (ensure-plan [:User [:starts-with? :name "a1"]] "Index(username {[a1],[a1]})")
+    (ensure-plan [:User [:= :name "a1"]] "Index(username [[a1],[a1]])")
+    (ensure-plan [:User [:= :email "a1@exoscale.ch"]] "Scan([IS User]) | email EQUALS a1@exoscale.ch")
+    (ensure-plan [:Account [:= :state "terminated"]] "Index(account_state [[terminated],[terminated]])")
+    (ensure-plan [:Account [:not= :state "terminated"]] "Scan(<,>) | [Account] | state NOT_EQUALS terminated")
+    (ensure-plan [:Invoice [:= :id 3]] "Scan([IS Invoice]) | id EQUALS 3")
+    (ensure-plan [:Invoice [:>= :id 3]] "Scan([IS Invoice]) | id GREATER_THAN_OR_EQUALS 3")
+    (ensure-plan [:Invoice [:<= :id 3]] "Scan([IS Invoice]) | id LESS_THAN_OR_EQUALS 3")
+    (ensure-plan [:City] "Scan([IS City])")
+    (ensure-plan [:City [:nested :location [:= :name "Lausanne"]]] "Scan(<,>) | [City] | location/{name EQUALS Lausanne}")))
 
 (deftest aggregation-test
   (testing "Aggregation queries"
