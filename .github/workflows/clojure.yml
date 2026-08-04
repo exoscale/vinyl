@@ -12,11 +12,11 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
     ## This is optional but will speed up clojure steps
     - name: Cache mvn/git deps
-      uses: actions/cache@v5.0.4
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       id: cache-deps
       with:
         path: |
@@ -32,7 +32,7 @@ jobs:
         apt-get -qyy install curl sudo
 
     - name: Install foundationdb
-      uses: foundationdb-rs/foundationdb-actions-install@v2.3.0
+      uses: foundationdb-rs/foundationdb-actions-install@94c35a52d4a5fa82d8a5403850247e15b65e5066 # v2.3.0
       with:
         version: 7.3.57
 
