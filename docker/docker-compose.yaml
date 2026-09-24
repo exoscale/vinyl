@@ -1,0 +1,12 @@
+
+services:
+  foundation:
+    image: "${EXOSCALE_DOCKER_REGISTRY}/docker.io/foundationdb/foundationdb:${FDB_VERSION:-7.3.57}"
+    environment:
+      FDB_NETWORKING_MODE: host
+    entrypoint: ["/usr/bin/tini", "-g", "--", "sh", "/fdb-init.bash"]
+    volumes:
+      - ./foundationdb/fdb-init.bash:/fdb-init.bash
+      - ./run:/var/fdb/run:rw
+    ports:
+      - "4500:4500"

@@ -16,3 +16,5 @@ pom.xml.asc
 .lsp
 /resources/git-version
 *.iml
+docker/foundationdb/fdb.cluster
+docker/run/fdb.ci.cluster

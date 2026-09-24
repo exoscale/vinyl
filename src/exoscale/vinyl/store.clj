@@ -359,9 +359,11 @@
   ([txn-context ^Tuple k]
    (run-in-context txn-context
                    (fn [^FDBRecordStore store]
-                     (.loadRecord store k))))
+                     (.recordExists store k))))
   ([txn-context record-type items]
-   (load-record txn-context (key-for* txn-context record-type items))))
+   (run-in-context txn-context
+                   (fn [^FDBRecordStore store]
+                     (.recordExists store (key-for* store record-type items))))))
 
 (defn execute-query
   ([txn-context query]
