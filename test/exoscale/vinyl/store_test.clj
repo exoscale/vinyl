@@ -13,6 +13,14 @@
     (is (= {:id 1 :name "a1" :state :active :payment :wired}
            (p/parse-record (store/load-record *db* :Account [1]))))))
 
+(deftest exists-test
+  (testing "record-type + items"
+    (is (true?  (store/exists? *db* :Account [1])))
+    (is (false? (store/exists? *db* :Account [999]))))
+  (testing "explicit tuple key"
+    (is (true?  (store/exists? *db* (store/key-for *db* :Account 1))))
+    (is (false? (store/exists? *db* (store/key-for *db* :Account 999))))))
+
 (deftest query-test
   (let [all-data ds/fixtures
         opts     {::store/transform p/parse-record}]
