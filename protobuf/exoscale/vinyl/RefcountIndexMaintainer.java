@@ -19,7 +19,6 @@ import com.apple.foundationdb.tuple.ByteArrayUtil;
 import com.apple.foundationdb.tuple.Tuple;
 import com.google.protobuf.Message;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
@@ -46,7 +45,6 @@ public class RefcountIndexMaintainer extends StandardIndexMaintainer {
         };
     }
 
-    @Nonnull
     @Override
     public <M extends Message> CompletableFuture<Void> update(FDBIndexableRecord<M> oldRecord, FDBIndexableRecord<M> newRecord) {
         Transaction transaction = state.transaction;
@@ -101,8 +99,7 @@ public class RefcountIndexMaintainer extends StandardIndexMaintainer {
         }
     }
 
-    @Nonnull
-    public RecordCursor<IndexEntry> scan(@Nonnull IndexScanType indexScanType, @Nonnull TupleRange tupleRange, byte[] continuation, @Nonnull ScanProperties scanProperties) {
+    public RecordCursor<IndexEntry> scan(IndexScanType indexScanType, TupleRange tupleRange, byte[] continuation, ScanProperties scanProperties) {
         RecordCursor<KeyValue> keyValues = KeyValueCursor.Builder.withSubspace(getIndexSubspace()).setContext(this.state.context).setRange(tupleRange).setContinuation(continuation).setScanProperties(scanProperties).build();
         return keyValues.map((kv) -> {
             this.state.store.countKeyValue(FDBStoreTimer.Counts.LOAD_INDEX_KEY, FDBStoreTimer.Counts.LOAD_INDEX_KEY_BYTES, FDBStoreTimer.Counts.LOAD_INDEX_VALUE_BYTES, kv);
@@ -115,9 +112,8 @@ public class RefcountIndexMaintainer extends StandardIndexMaintainer {
         return false;
     }
 
-    @Nonnull
     @Override
-    protected IndexEntry unpackKeyValue(@Nonnull KeyValue kv) {
+    protected IndexEntry unpackKeyValue(KeyValue kv) {
         if (Arrays.equals(kv.getValue(), EMPTY_VALUE)) {
             return new IndexEntry(this.state.index, SplitHelper.unpackKey(getIndexSubspace(), kv), Tuple.from(0));
         } else {

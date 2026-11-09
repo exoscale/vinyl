@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: clojure:openjdk-17-tools-deps
+      image: clojure:temurin-17-tools-deps-bookworm
 
     steps:
     - name: Checkout
@@ -29,12 +29,29 @@ jobs:
     - name: Install curl
       run: |
         apt-get update
-        apt-get -qyy install curl sudo
+        apt-get -qyy install curl
 
+    ## Installs the official client + server packages from the apple/foundationdb
+    ## release (same as foundationdb-rs/foundationdb-actions-install, which is not
+    ## allowed in this org). The server package starts a local single-node cluster.
+    ## Checksums are the .sha256 files published alongside the release assets.
     - name: Install foundationdb
-      uses: foundationdb-rs/foundationdb-actions-install@94c35a52d4a5fa82d8a5403850247e15b65e5066 # v2.3.0
-      with:
-        version: 7.3.57
+      env:
+        FDB_VERSION: 7.3.57
+        FDB_CLIENTS_SHA256: bf5b2c2db31bff4276825df37d291aed80431776ba333f8530a0f7c5aeec011d
+        FDB_SERVER_SHA256: caced69c939dab08c9b4dc7637f36ba6522f3dfa535071655bbb85902cf945ad
+      run: |
+        set -eu
+        base_url="https://github.com/apple/foundationdb/releases/download/${FDB_VERSION}"
+        clients="foundationdb-clients_${FDB_VERSION}-1_amd64.deb"
+        server="foundationdb-server_${FDB_VERSION}-1_amd64.deb"
+        curl -fsSL -o "/tmp/${clients}" "${base_url}/${clients}"
+        curl -fsSL -o "/tmp/${server}" "${base_url}/${server}"
+        printf '%s  %s\n' \
+          "${FDB_CLIENTS_SHA256}" "/tmp/${clients}" \
+          "${FDB_SERVER_SHA256}" "/tmp/${server}" | sha256sum -c -
+        dpkg -i "/tmp/${clients}"
+        dpkg -i "/tmp/${server}"
 
     - name: Check
       run: clojure -T:project check
