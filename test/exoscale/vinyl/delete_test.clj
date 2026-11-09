@@ -10,7 +10,7 @@
 
 (deftest delete
   (testing "delete-all-records"
-    @(store/delete-all-records *db*)
+    (store/delete-all-records *db*)
     (let [opts {::store/transform p/parse-record}]
       (is (= []
              @(store/list-query *db* [:User [:starts-with? :name "a1"]] opts))))))

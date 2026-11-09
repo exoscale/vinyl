@@ -389,7 +389,13 @@
   [txn-context]
   (run-in-context
    txn-context
-   (fn [^FDBRecordStore store] (.deleteAllRecords store))))
+   (fn [^FDBRecordStore store]
+     ;; Since record-layer 3.x, deleteAllRecords requires the store state
+     ;; to be loaded (it throws "checkVersion must be called before calling
+     ;; deleteAllRecords" otherwise). Stores opened with `:build` skip that
+     ;; step, so force a lazy load of the state first.
+     (.getRecordStoreState store)
+     (.deleteAllRecords store))))
 
 (defn delete-by-query
   "Delete all records surfaced by a query"
