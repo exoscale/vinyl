@@ -1,7 +1,5 @@
 (ns exoscale.vinyl.delete-test
-  (:require [clojure.test :as test]
-            [clojure.test :refer [deftest testing is]]
-            [exoscale.vinyl.demostore :as ds]
+  (:require [clojure.test :as test :refer [deftest testing is]]
             [exoscale.vinyl.demostore :as ds :refer [*db*]]
             [exoscale.vinyl.payload :as p]
             [exoscale.vinyl.store :as store]))
